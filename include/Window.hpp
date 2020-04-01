@@ -10,12 +10,13 @@ struct GLFWwindow;
 
 namespace magmatic
 {
-	static const char* const DEFAULT_NAME{"Magmatic"};
-	static const int DEFAULT_WIDTH{640};
-	static const int DEFAULT_HEIGHT{480};
-
 	class Window
 	{
+	private:
+		static constexpr const char* DEFAULT_NAME{"Magmatic"};
+		static constexpr int DEFAULT_WIDTH{640};
+		static constexpr int DEFAULT_HEIGHT{480};
+
 	public:
 		explicit Window(
 				int width=DEFAULT_WIDTH,
@@ -36,12 +37,14 @@ namespace magmatic
 		void restore() noexcept;
 		void focus() noexcept;
 
-		struct GLFWwindowDeleter
+		struct GLFWWindowDeleter
 		{
 			void operator()(GLFWwindow* pointer) noexcept;
 		};
+
 	private:
-		std::unique_ptr<GLFWwindow, GLFWwindowDeleter> window;
+
+		std::unique_ptr<GLFWwindow, GLFWWindowDeleter> window;
 	};
 }
 

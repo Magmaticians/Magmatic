@@ -12,7 +12,7 @@ magmatic::Window::Window(int width, int height, const std::string& name)
 		throw std::runtime_error("Magmatic: Failed to create window");
 	}
 
-	window = std::unique_ptr<GLFWwindow, GLFWwindowDeleter> (temp_handler, GLFWwindowDeleter());
+	window = std::unique_ptr<GLFWwindow, GLFWWindowDeleter> (temp_handler, GLFWWindowDeleter());
 }
 
 void magmatic::Window::setName(const std::string& new_name) noexcept
@@ -60,7 +60,7 @@ void magmatic::Window::focus() noexcept
 	glfwFocusWindow(window.get());
 }
 
-void magmatic::Window::GLFWwindowDeleter::operator()(GLFWwindow* pointer) noexcept
+void magmatic::Window::GLFWWindowDeleter::operator()(GLFWwindow* pointer) noexcept
 {
 	glfwDestroyWindow(pointer);
 }

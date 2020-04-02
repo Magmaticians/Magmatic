@@ -12,6 +12,8 @@ namespace {
 
 magmatic::Window::Window(int width, int height, const std::string& name)
 {
+	glfwSetErrorCallback(errorCallback);
+
 	if(glfwInit() == GLFW_FALSE) {
 		throw std::runtime_error("GLFW: Failed to initialize");
 	}

@@ -1,7 +1,40 @@
 #include "Instance.hpp"
 #include <string>
 #include <GLFW/glfw3.h>
+#include <spdlog/spdlog.h>
+#include <vulkan/vulkan.h>
+#include <fmt/format.h>
 
+
+namespace
+{
+	VKAPI_ATTR VkBool32 VKAPI_CALL debugUtilsMessengerCallback
+			(
+					VkDebugUtilsMessageSeverityFlagBitsEXT msg_severity,
+					VkDebugUtilsMessageTypeFlagsEXT msg_types,
+					VkDebugUtilsMessengerCallbackDataEXT const * callback_data,
+					void * user_data
+			)
+	{
+		const auto severity = vk::to_string(static_cast<vk::DebugUtilsMessageSeverityFlagBitsEXT>(msg_severity));
+		const auto type = vk::to_string(static_cast<vk::DebugUtilsMessageTypeFlagsEXT>(msg_types));
+		const auto message = fmt::format(
+				"{} : {} \n"
+				"\t{}\n",
+				severity, type, callback_data->pMessage
+				);
+
+		if(msg_severity & VK_DEBUG_REPORT_WARNING_BIT_EXT)
+		{
+			spdlog::warn(message);
+		}
+		else
+		{
+			spdlog::error(message);
+		}
+		return VK_TRUE;
+	}
+}
 
 Instance::Instance(
 		const std::string& app_name,
@@ -16,23 +49,6 @@ Instance::Instance(
 		const std::vector<vk::LayerProperties> available_layers = vk::enumerateInstanceLayerProperties();
 	#endif
 
-	std::vector<char const*> enabled_extensions;
-	enabled_extensions.reserve(required_extensions.size());
-
-
-	for(auto const& extension : required_extensions)
-	{
-		assert(
-				std::find_if(available_extensions.begin(), available_extensions.end(),
-				             [extension](const vk::ExtensionProperties& ext)
-				             {
-					             return extension == ext.extensionName;
-				             }
-				) != available_extensions.end()
-		);
-		enabled_extensions.push_back(extension.c_str());
-	}
-
 	std::vector<char const*> enabled_layers;
 	enabled_layers.reserve(layers.size());
 
@@ -46,18 +62,104 @@ Instance::Instance(
 				             }
 				) != available_layers.end()
 		);
-		enabled_layers.push_back(layer.c_str());
+		enabled_layers.emplace_back(layer.c_str());
 	}
 
-	vk::InstanceCreateInfo instance_create_info
-	(
-			{},
-			&app_info,
-			static_cast<uint32_t>(enabled_layers.size()),
-			enabled_layers.data(),
-			static_cast<uint32_t>(enabled_extensions.size()),
-			enabled_extensions.data()
-			);
+	#if !defined(NDEBUG)
+		for(auto const& layer: DEBUG_LAYERS)
+		{
+			if(
+					std::find(enabled_layers.begin(), enabled_layers.end(), layer) == enabled_layers.end()
+					&& std::find_if(available_layers.begin(), available_layers.end(),
+					                [layer](const vk::LayerProperties& prop)
+					                {
+						                return layer == prop.layerName;
+					                }
+					) != available_layers.end()
+					)
+			{
+				enabled_layers.emplace_back(layer);
+			}
+		}
+	#endif
 
-	instance = vk::createInstanceUnique(instance_create_info);
+	std::vector<char const*> enabled_extensions;
+	enabled_extensions.reserve(required_extensions.size());
+
+
+	for(auto const& extension : required_extensions)
+	{
+		assert(
+				std::find_if(
+						available_extensions.begin(), available_extensions.end(),
+						[extension](const vk::ExtensionProperties& ext)
+						{
+							return extension == ext.extensionName;
+						}
+				) != available_extensions.end()
+		);
+		enabled_extensions.emplace_back(extension.c_str());
+	}
+
+	#if !defined(NDEBUG)
+		if(
+				std::find(
+								enabled_extensions.begin(),
+								enabled_extensions.end(),
+								VK_EXT_DEBUG_UTILS_EXTENSION_NAME
+						) == enabled_extensions.end()
+				&& std::find_if(
+								   available_extensions.begin(),
+								   available_extensions.end(),
+								   [](vk::ExtensionProperties const& ep)
+								   {
+									   return (strcmp(VK_EXT_DEBUG_UTILS_EXTENSION_NAME, ep.extensionName) == 0);
+								   }
+						   ) != available_extensions.end())
+		{
+			enabled_extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+		}
+	#endif
+
+	#if defined(NDEBUG)
+		vk::StructureChain<vk::InstanceCreateInfo> instance_create_info
+				({
+						 {},
+						 &app_info,
+						 static_cast<uint32_t>(enabled_layers.size()),
+						 enabled_layers.data(),
+						 static_cast<uint32_t>(enabled_extensions.size()),
+						 enabled_extensions.data()
+				});
+	#else
+		vk::DebugUtilsMessageSeverityFlagsEXT severity_flags(
+				vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning
+				| vk::DebugUtilsMessageSeverityFlagBitsEXT::eError
+				);
+		vk::DebugUtilsMessageTypeFlagsEXT message_type_flags(
+				vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral
+				| vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance
+				| vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation
+				);
+
+		vk::StructureChain<vk::InstanceCreateInfo, vk::DebugUtilsMessengerCreateInfoEXT> instance_create_info
+			(
+					{
+						{},
+						&app_info,
+						static_cast<uint32_t>(enabled_layers.size()),
+						enabled_layers.data(),
+						static_cast<uint32_t>(enabled_extensions.size()),
+						enabled_extensions.data()
+					},
+					{
+						{},
+						severity_flags,
+						message_type_flags,
+						&debugUtilsMessengerCallback
+					}
+			);
+	#endif
+
+	instance = vk::createInstanceUnique(instance_create_info.get<vk::InstanceCreateInfo>());
 }

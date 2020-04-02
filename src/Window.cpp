@@ -30,7 +30,7 @@ magmatic::Window::Window(int width, int height, const std::string& name)
 
 void magmatic::Window::setName(const std::string& new_name) noexcept
 {
-	windowName = new_name;
+	window_name = new_name;
 	glfwSetWindowTitle(window.get(), new_name.c_str());
 }
 
@@ -84,7 +84,7 @@ std::pair<int, int> magmatic::Window::getSize() const
 
 std::string magmatic::Window::getName() const noexcept
 {
-	return windowName;
+	return window_name;
 }
 
 magmatic::Window::~Window()
@@ -93,15 +93,15 @@ magmatic::Window::~Window()
 	glfwTerminate();
 }
 
-std::vector<const char*> magmatic::Window::getRequiredExtensions() const
+std::vector<std::string> magmatic::Window::getRequiredExtensions() const
 {
-	uint32_t glfwExtensionCount = 0;
-	const char ** glfwExtensions;
+	uint32_t glfw_extension_count = 0;
+	const char ** glfw_extensions;
 
-	glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
+	glfw_extensions = glfwGetRequiredInstanceExtensions(&glfw_extension_count);
 
-	std::vector<const char*> extensions(glfwExtensionCount);
-	std::copy_n(glfwExtensions, glfwExtensionCount, std::back_inserter(extensions));
+	std::vector<std::string> extensions(glfw_extension_count);
+	std::copy_n(glfw_extensions, glfw_extension_count, std::back_inserter(extensions));
 
 	return extensions;
 }

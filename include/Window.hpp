@@ -1,9 +1,9 @@
 #ifndef MAGMATIC_WINDOW_HPP
 #define MAGMATIC_WINDOW_HPP
 
-
 #include <string>
 #include <memory>
+#include <vector>
 
 struct GLFWwindow;
 
@@ -17,6 +17,8 @@ namespace magmatic
 		static constexpr int DEFAULT_WIDTH{640};
 		static constexpr int DEFAULT_HEIGHT{480};
 
+		std::string windowName;
+
 	public:
 		explicit Window(
 				int width=DEFAULT_WIDTH,
@@ -24,11 +26,19 @@ namespace magmatic
 				const std::string& name=DEFAULT_NAME
 		);
 
+		~Window();
+
 		Window(const Window& rhs) = delete;
 		Window& operator=(const Window& rhs) = delete;
 
+		Window(Window&& rhs) = default;
+		Window& operator=(Window&& rhs) = default;
+
 		void setName(const std::string& new_name) noexcept;
+		std::string getName() const noexcept;
+
 		void setSize(int width, int height);
+		std::pair<int, int> getSize() const;
 
 		void hide() noexcept;
 		void minimize() noexcept;
@@ -36,6 +46,8 @@ namespace magmatic
 		void maximize() noexcept;
 		void restore() noexcept;
 		void focus() noexcept;
+
+		std::vector<const char*> getRequiredExtensions() const;
 
 		struct GLFWWindowDeleter
 		{

@@ -1,15 +1,28 @@
-#include "../include/Window.hpp"
+#include "Window.hpp"
+#include <spdlog/spdlog.h>
 #include <GLFW/glfw3.h>
 #include <stdexcept>
 
+namespace {
+	void errorCallback(int error, const char* description) {
+		spdlog::error("GLFW error: {} Error code: {}", description, error);
+	}
+
+}
+
 magmatic::Window::Window(int width, int height, const std::string& name)
 {
+	if(glfwInit() == GLFW_FALSE) {
+		throw std::runtime_error("GLFW: Failed to initialize");
+	}
+
 	glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
 	const auto temp_handler = glfwCreateWindow(width, height, name.c_str(), nullptr, nullptr);
 
 	if(temp_handler == nullptr)
 	{
-		throw std::runtime_error("Magmatic: Failed to create window");
+		glfwTerminate();
+		throw std::runtime_error("GLFW: Failed to create window");
 	}
 
 	window = std::unique_ptr<GLFWwindow, GLFWWindowDeleter> (temp_handler, GLFWWindowDeleter());
@@ -17,6 +30,7 @@ magmatic::Window::Window(int width, int height, const std::string& name)
 
 void magmatic::Window::setName(const std::string& new_name) noexcept
 {
+	windowName = new_name;
 	glfwSetWindowTitle(window.get(), new_name.c_str());
 }
 
@@ -58,6 +72,38 @@ void magmatic::Window::restore() noexcept
 void magmatic::Window::focus() noexcept
 {
 	glfwFocusWindow(window.get());
+}
+
+std::pair<int, int> magmatic::Window::getSize() const
+{
+	int width, height;
+	glfwGetWindowSize(window.get(), &width, &height);
+
+	return std::make_pair(width, height);
+}
+
+std::string magmatic::Window::getName() const noexcept
+{
+	return windowName;
+}
+
+magmatic::Window::~Window()
+{
+	window.reset();
+	glfwTerminate();
+}
+
+std::vector<const char*> magmatic::Window::getRequiredExtensions() const
+{
+	uint32_t glfwExtensionCount = 0;
+	const char ** glfwExtensions;
+
+	glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
+
+	std::vector<const char*> extensions(glfwExtensionCount);
+	std::copy_n(glfwExtensions, glfwExtensionCount, std::back_inserter(extensions));
+
+	return extensions;
 }
 
 void magmatic::Window::GLFWWindowDeleter::operator()(GLFWwindow* pointer) noexcept

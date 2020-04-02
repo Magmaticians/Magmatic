@@ -17,7 +17,7 @@ namespace magmatic
 		static constexpr int DEFAULT_WIDTH{640};
 		static constexpr int DEFAULT_HEIGHT{480};
 
-		std::string windowName;
+		std::string window_name;
 
 	public:
 		explicit Window(
@@ -47,7 +47,7 @@ namespace magmatic
 		void restore() noexcept;
 		void focus() noexcept;
 
-		std::vector<const char*> getRequiredExtensions() const;
+		std::vector<std::string> getRequiredExtensions() const;
 
 		struct GLFWWindowDeleter
 		{

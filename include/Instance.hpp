@@ -3,23 +3,29 @@
 
 #include <vulkan/vulkan.hpp>
 #include <vector>
+#include "PhysicalDevice.hpp"
 
-
-class Instance
+namespace magmatic
 {
-private:
-	vk::UniqueInstance instance;
+	class Instance
+	{
+	private:
+		vk::UniqueInstance instance;
 
-	static constexpr const char* ENGINE_NAME{"Magmatic"};
-	static constexpr const char* DEBUG_LAYERS[] = {"VK_LAYER_KHRONOS_validation", "VK_LAYER_LUNARG_assistant_layer"};
+		static constexpr const char* ENGINE_NAME{"Magmatic"};
+		static constexpr const char* DEBUG_LAYERS[] = {"VK_LAYER_KHRONOS_validation",
+		                                               "VK_LAYER_LUNARG_assistant_layer"};
 
-public:
-	explicit Instance(
-			const std::string& app_name,
-			const std::vector<std::string>& required_extensions = {},
-			const std::vector<std::string>& layers = {}
-	);
-};
+	public:
+		explicit Instance(
+				const std::string& app_name,
+				const std::vector<std::string>& required_extensions = {},
+				const std::vector<std::string>& layers = {}
+		);
+
+		std::vector<PhysicalDevice> enumeratePhysicalDevices() const;
+	};
+}
 
 
 #endif //MAGMATIC_INSTANCE_HPP

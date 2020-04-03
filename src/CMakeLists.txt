@@ -3,4 +3,5 @@ target_sources(
 		PRIVATE
 		Window.cpp
 		Instance.cpp
+		PhysicalDevice.cpp
 )

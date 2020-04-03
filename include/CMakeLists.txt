@@ -3,4 +3,5 @@ target_sources(magmatic-render
 		Window.hpp
 		Instance.hpp
 		PhysicalDevice.hpp
+		LogicalDevice.hpp
 		)

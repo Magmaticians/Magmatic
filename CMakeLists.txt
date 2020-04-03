@@ -13,6 +13,8 @@ find_package(Vulkan REQUIRED)
 find_package(spdlog REQUIRED)
 find_package(fmt REQUIRED)
 
+#Utils
+find_package(range-v3 REQUIRED)
 
 include_directories("include")
 

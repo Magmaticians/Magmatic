@@ -4,4 +4,5 @@ target_sources(
 		Window.cpp
 		Instance.cpp
 		PhysicalDevice.cpp
+		LogicalDevice.cpp
 )

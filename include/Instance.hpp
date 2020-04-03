@@ -1,9 +1,11 @@
 #ifndef MAGMATIC_INSTANCE_HPP
 #define MAGMATIC_INSTANCE_HPP
 
+#include "PhysicalDevice.hpp"
 #include <vulkan/vulkan.hpp>
 #include <vector>
-#include "PhysicalDevice.hpp"
+#include <string>
+
 
 namespace magmatic
 {
@@ -19,7 +21,7 @@ namespace magmatic
 	public:
 		explicit Instance(
 				const std::string& app_name,
-				const std::vector<std::string>& required_extensions = {},
+				const std::vector<std::string>& extensions = {},
 				const std::vector<std::string>& layers = {}
 		);
 

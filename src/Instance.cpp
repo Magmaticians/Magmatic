@@ -39,15 +39,15 @@ namespace
 
 magmatic::Instance::Instance(
 		const std::string& app_name,
-		const std::vector<std::string>& required_extensions,
+		const std::vector<std::string>& extensions,
 		const std::vector<std::string>& layers
 		)
 {
-	vk::ApplicationInfo app_info(app_name.c_str(), 1, ENGINE_NAME, 1, VK_API_VERSION_1_2);
+	const vk::ApplicationInfo app_info(app_name.c_str(), 1, ENGINE_NAME, 1, VK_API_VERSION_1_2);
 
 	#if !defined(NDEBUG)
-		const std::vector<vk::ExtensionProperties> available_extensions = vk::enumerateInstanceExtensionProperties();
-		const std::vector<vk::LayerProperties> available_layers = vk::enumerateInstanceLayerProperties();
+	const std::vector<vk::ExtensionProperties> available_extensions = vk::enumerateInstanceExtensionProperties();
+	const std::vector<vk::LayerProperties> available_layers = vk::enumerateInstanceLayerProperties();
 	#endif
 
 	std::vector<char const*> enabled_layers;
@@ -67,28 +67,28 @@ magmatic::Instance::Instance(
 	}
 
 	#if !defined(NDEBUG)
-		for(auto const& layer: DEBUG_LAYERS)
+	for(auto const& layer: DEBUG_LAYERS)
+	{
+		if(
+				std::find(enabled_layers.begin(), enabled_layers.end(), layer) == enabled_layers.end()
+				&& std::find_if(available_layers.begin(), available_layers.end(),
+				                [layer](const vk::LayerProperties& prop)
+				                {
+					                return layer == prop.layerName;
+				                }
+				) != available_layers.end()
+				)
 		{
-			if(
-					std::find(enabled_layers.begin(), enabled_layers.end(), layer) == enabled_layers.end()
-					&& std::find_if(available_layers.begin(), available_layers.end(),
-					                [layer](const vk::LayerProperties& prop)
-					                {
-						                return layer == prop.layerName;
-					                }
-					) != available_layers.end()
-					)
-			{
-				enabled_layers.emplace_back(layer);
-			}
+			enabled_layers.emplace_back(layer);
 		}
+	}
 	#endif
 
 	std::vector<char const*> enabled_extensions;
-	enabled_extensions.reserve(required_extensions.size());
+	enabled_extensions.reserve(extensions.size());
 
 
-	for(auto const& extension : required_extensions)
+	for(auto const& extension : extensions)
 	{
 		assert(
 				std::find_if(
@@ -103,63 +103,62 @@ magmatic::Instance::Instance(
 	}
 
 	#if !defined(NDEBUG)
-		if(
-				std::find(
-								enabled_extensions.begin(),
-								enabled_extensions.end(),
-								VK_EXT_DEBUG_UTILS_EXTENSION_NAME
-						) == enabled_extensions.end()
-				&& std::find_if(
-								   available_extensions.begin(),
-								   available_extensions.end(),
-								   [](vk::ExtensionProperties const& ep)
-								   {
-									   return (strcmp(VK_EXT_DEBUG_UTILS_EXTENSION_NAME, ep.extensionName) == 0);
-								   }
-						   ) != available_extensions.end())
-		{
-			enabled_extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
-		}
+	if(
+			std::find(
+							enabled_extensions.begin(),
+							enabled_extensions.end(),
+							VK_EXT_DEBUG_UTILS_EXTENSION_NAME
+					) == enabled_extensions.end()
+			&& std::find_if(
+							   available_extensions.begin(),
+							   available_extensions.end(),
+							   [](vk::ExtensionProperties const& ep)
+							   {
+								   return (strcmp(VK_EXT_DEBUG_UTILS_EXTENSION_NAME, ep.extensionName) == 0);
+							   }
+					   ) != available_extensions.end())
+	{
+		enabled_extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+	}
 	#endif
 
 	#if defined(NDEBUG)
-		vk::StructureChain<vk::InstanceCreateInfo> instance_create_info
-				({
-						 {},
-						 &app_info,
-						 static_cast<uint32_t>(enabled_layers.size()),
-						 enabled_layers.data(),
-						 static_cast<uint32_t>(enabled_extensions.size()),
-						 enabled_extensions.data()
-				});
+	vk::StructureChain<vk::InstanceCreateInfo> instance_create_info
+			({
+					 {},
+					 &app_info,
+					 static_cast<uint32_t>(enabled_layers.size()),
+					 enabled_layers.data(),
+					 static_cast<uint32_t>(enabled_extensions.size()),
+					 enabled_extensions.data()
+			});
 	#else
-		vk::DebugUtilsMessageSeverityFlagsEXT severity_flags(
-				vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning
-				| vk::DebugUtilsMessageSeverityFlagBitsEXT::eError
-				);
-		vk::DebugUtilsMessageTypeFlagsEXT message_type_flags(
-				vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral
-				| vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance
-				| vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation
-				);
-
-		vk::StructureChain<vk::InstanceCreateInfo, vk::DebugUtilsMessengerCreateInfoEXT> instance_create_info
-			(
-					{
-						{},
-						&app_info,
-						static_cast<uint32_t>(enabled_layers.size()),
-						enabled_layers.data(),
-						static_cast<uint32_t>(enabled_extensions.size()),
-						enabled_extensions.data()
-					},
-					{
-						{},
-						severity_flags,
-						message_type_flags,
-						&debugUtilsMessengerCallback
-					}
+	const vk::DebugUtilsMessageSeverityFlagsEXT severity_flags(
+			vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning
+			| vk::DebugUtilsMessageSeverityFlagBitsEXT::eError
 			);
+	const vk::DebugUtilsMessageTypeFlagsEXT message_type_flags(
+			vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral
+			| vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance
+			| vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation
+			);
+
+	vk::StructureChain<vk::InstanceCreateInfo, vk::DebugUtilsMessengerCreateInfoEXT> instance_create_info(
+			{
+					{},
+					&app_info,
+					static_cast<uint32_t>(enabled_layers.size()),
+					enabled_layers.data(),
+					static_cast<uint32_t>(enabled_extensions.size()),
+					enabled_extensions.data()
+			},
+			{
+					{},
+					severity_flags,
+					message_type_flags,
+					&debugUtilsMessengerCallback
+			}
+	);
 	#endif
 
 	instance = vk::createInstanceUnique(instance_create_info.get<vk::InstanceCreateInfo>());

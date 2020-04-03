@@ -5,4 +5,5 @@ target_sources(
 		Instance.cpp
 		PhysicalDevice.cpp
 		LogicalDevice.cpp
+		Surface.cpp
 )

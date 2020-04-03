@@ -2,6 +2,8 @@
 #define MAGMATIC_INSTANCE_HPP
 
 #include "PhysicalDevice.hpp"
+#include "Surface.hpp"
+#include "Window.hpp"
 #include <vulkan/vulkan.hpp>
 #include <vector>
 #include <string>
@@ -26,6 +28,7 @@ namespace magmatic
 		);
 
 		std::vector<PhysicalDevice> enumeratePhysicalDevices() const;
+		Surface createSurface(const Window& window) const;
 	};
 }
 

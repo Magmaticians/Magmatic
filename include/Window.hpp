@@ -13,6 +13,8 @@ namespace magmatic
 	class Window
 	{
 	private:
+		friend class Instance;
+
 		static constexpr const char* DEFAULT_NAME{"Magmatic"};
 		static constexpr int DEFAULT_WIDTH{640};
 		static constexpr int DEFAULT_HEIGHT{480};

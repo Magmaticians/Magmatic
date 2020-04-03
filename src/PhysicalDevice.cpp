@@ -1,4 +1,6 @@
 #include "PhysicalDevice.hpp"
+#include <range/v3/all.hpp> // todo: import only necessary
+
 
 magmatic::PhysicalDevice::PhysicalDevice(vk::PhysicalDevice physical_device)
 :   device(physical_device),
@@ -23,4 +25,19 @@ uint32_t magmatic::PhysicalDevice::calculateScore() const noexcept
 	score += device_properties.limits.maxImageDimension2D;
 
 	return score;
+}
+
+std::vector<size_t> magmatic::PhysicalDevice::getGraphicQueue() const noexcept
+{
+	std::vector<size_t> queues;
+
+	for(const auto& [index, family] : queue_family_properties | ranges::views::enumerate)
+	{
+		if(family.queueFlags & vk::QueueFlagBits::eGraphics)
+		{
+			queues.emplace_back(index);
+		}
+	}
+
+	return queues;
 }

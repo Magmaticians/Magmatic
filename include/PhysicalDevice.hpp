@@ -20,6 +20,8 @@ namespace magmatic
 		const vk::PhysicalDeviceProperties device_properties;
 		const vk::PhysicalDeviceFeatures device_features;
 		const std::vector<vk::QueueFamilyProperties> queue_family_properties;
+
+		std::vector<size_t> getGraphicQueue() const noexcept;
 	};
 }
 

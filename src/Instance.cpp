@@ -3,6 +3,7 @@
 #include <GLFW/glfw3.h>
 #include <spdlog/spdlog.h>
 #include <vulkan/vulkan.h>
+#include <vector>
 #include <fmt/format.h>
 
 
@@ -36,7 +37,7 @@ namespace
 	}
 }
 
-Instance::Instance(
+magmatic::Instance::Instance(
 		const std::string& app_name,
 		const std::vector<std::string>& required_extensions,
 		const std::vector<std::string>& layers
@@ -162,4 +163,20 @@ Instance::Instance(
 	#endif
 
 	instance = vk::createInstanceUnique(instance_create_info.get<vk::InstanceCreateInfo>());
+}
+
+std::vector<magmatic::PhysicalDevice> magmatic::Instance::enumeratePhysicalDevices() const
+{
+	auto to_physical_device = [](auto device)
+	{
+		return PhysicalDevice(device);
+	};
+	const auto devices = instance->enumeratePhysicalDevices();
+
+	std::vector<PhysicalDevice> retval;
+	retval.reserve(devices.size());
+
+	std::transform(devices.begin(), devices.end(), std::back_inserter(retval), to_physical_device);
+
+	return retval;
 }

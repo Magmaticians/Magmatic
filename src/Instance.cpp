@@ -179,3 +179,17 @@ std::vector<magmatic::PhysicalDevice> magmatic::Instance::enumeratePhysicalDevic
 
 	return retval;
 }
+
+magmatic::Surface magmatic::Instance::createSurface(const magmatic::Window& window) const
+{
+	VkSurfaceKHR surface;
+	if(glfwCreateWindowSurface(*instance, window.window.get(), nullptr, &surface) != VK_SUCCESS)
+	{
+		spdlog::error("Failed to create surface");
+		throw std::runtime_error("Magmatic: Failed to create surface");
+	}
+
+	vk::ObjectDestroy<vk::Instance, VULKAN_HPP_DEFAULT_DISPATCHER_TYPE> deleter(instance.get());
+
+	return Surface(vk::UniqueSurfaceKHR(vk::SurfaceKHR(surface), deleter));
+}

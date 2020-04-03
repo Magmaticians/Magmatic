@@ -3,6 +3,7 @@
 
 #include <vulkan/vulkan.hpp>
 #include <vector>
+#include <fmt/format.h>
 
 
 namespace magmatic
@@ -22,7 +23,36 @@ namespace magmatic
 		const std::vector<vk::QueueFamilyProperties> queue_family_properties;
 
 		std::vector<size_t> getGraphicQueue() const noexcept;
+
 	};
 }
+
+template <>
+struct fmt::formatter<magmatic::PhysicalDevice>
+{
+	constexpr auto parse(format_parse_context& ctx)
+	{
+		return ctx.begin();
+	}
+	template <typename FormatContext>
+	auto format(const magmatic::PhysicalDevice& dev, FormatContext& ctx)
+	{
+		const auto& name = dev.device_properties.deviceName;
+		const auto& api_version = dev.device_properties.apiVersion;
+		const auto device_type = vk::to_string(dev.device_properties.deviceType);
+
+		return format_to(
+				ctx.out(),
+				FMT_STRING(
+						"Graphic card: {}\n"
+						"\tAPI version: {}\n"
+						"\tDevice type: {}"
+				),
+				name,
+				api_version,
+				device_type
+		);
+	}
+};
 
 #endif //MAGMATIC_PHYSICALDEVICE_HPP

@@ -57,3 +57,17 @@ std::vector<size_t> magmatic::PhysicalDevice::getPresentQueue(const magmatic::Su
 
 	return queues;
 }
+
+magmatic::SwapChainSupportDetails
+magmatic::PhysicalDevice::getSwapChainSupportDetails(const magmatic::Surface& surface) const
+{
+	const auto surface_capabilities = device.getSurfaceCapabilitiesKHR(surface.surface.get());
+
+	const auto surface_format = device.getSurfaceFormatsKHR(surface.surface.get());
+
+	const auto surface_present_modes = device.getSurfacePresentModesKHR(surface.surface.get());
+
+	return SwapChainSupportDetails{surface_capabilities, surface_format, surface_present_modes};
+
+
+}

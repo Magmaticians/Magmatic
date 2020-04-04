@@ -18,8 +18,14 @@ namespace magmatic
 				};
 
 		vk::UniqueDevice device;
+
 		vk::Queue graphics_queue;
+		uint32_t graphic_queue_index;
 		vk::Queue present_queue;
+		uint32_t present_queue_index;
+		bool same_queue_family;
+
+		const PhysicalDevice physical_dev;
 
 	public:
 		explicit LogicalDevice(
@@ -28,7 +34,10 @@ namespace magmatic
 				const Surface& surface
 				);
 
-		SwapChain createSwapchain(const vk::Extent2D& extent) const;
+		SwapChain createSwapchain(
+				const Surface& surface,
+				uint32_t window_width, uint32_t window_height
+				) const;
 
 	private:
 		static std::optional<std::pair<size_t, size_t>> chooseGraphicPresentQueue(

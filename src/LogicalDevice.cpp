@@ -8,6 +8,7 @@ magmatic::LogicalDevice::LogicalDevice(
 		const std::vector<std::string>& extensions,
 		const Surface& surface
 		)
+		:physical_dev(physical_device)
 {
 	#if !defined(NDEBUG)
 	const auto available_extensions = physical_device.device.enumerateDeviceExtensionProperties();
@@ -92,9 +93,13 @@ magmatic::LogicalDevice::LogicalDevice(
 
 	device = physical_device.device.createDeviceUnique(device_create_info);
 
-	graphics_queue = device->getQueue(chosen_queues.value().first, 0);
-	present_queue = device->getQueue(chosen_queues.value().second, 0);
+	graphic_queue_index = chosen_queues.value().first;
+	present_queue_index = chosen_queues.value().second;
 
+	graphics_queue = device->getQueue(graphic_queue_index, 0);
+	present_queue = device->getQueue(present_queue_index, 0);
+
+	same_queue_family = (graphic_queue_index == present_queue_index);
 }
 
 std::optional<std::pair<size_t, size_t>> magmatic::LogicalDevice::chooseGraphicPresentQueue(
@@ -117,8 +122,54 @@ std::optional<std::pair<size_t, size_t>> magmatic::LogicalDevice::chooseGraphicP
 	return std::make_pair(graphics[0], presents[0]);
 }
 
-magmatic::SwapChain magmatic::LogicalDevice::createSwapchain(const vk::Extent2D& extent) const
+magmatic::SwapChain magmatic::LogicalDevice::createSwapchain(
+		const Surface& surface,
+		uint32_t window_width, uint32_t window_height
+		) const
 {
-	// todo: implement creating swapchain
-	return SwapChain();
+	const auto& support_details = physical_dev.getSwapChainSupportDetails(surface);
+	const auto& capabilities = support_details.capabilities;
+
+	const auto surface_format = SwapChain::chooseSwapSurfaceFormat(support_details.formats);
+	const auto extent = SwapChain::chooseSwapExtent(capabilities, window_width, window_height);
+	const auto present_mode = SwapChain::chooseSwapPresentMode(support_details.present_modes);
+
+	uint32_t image_count = support_details.capabilities.minImageCount + 1;
+
+	if(capabilities.maxImageCount > 0 && image_count > capabilities.maxImageCount)
+	{
+		image_count = capabilities.maxImageCount;
+	}
+
+	vk::SwapchainCreateInfoKHR swapchain_create_info(
+			vk::SwapchainCreateFlagsKHR(),
+			surface.surface.get(),
+			image_count,
+			surface_format.format,
+			surface_format.colorSpace,
+			extent,
+			1,
+			vk::ImageUsageFlagBits::eColorAttachment,
+			vk::SharingMode::eExclusive,
+			0,
+			nullptr,
+			capabilities.currentTransform,
+			vk::CompositeAlphaFlagBitsKHR::eOpaque,
+			present_mode,
+			true,
+			nullptr
+			);
+
+	if(!same_queue_family)
+	{
+		uint32_t family_indices[2] = {graphic_queue_index, present_queue_index};
+
+		swapchain_create_info.imageSharingMode = vk::SharingMode::eConcurrent;
+		swapchain_create_info.queueFamilyIndexCount = 2;
+		swapchain_create_info.pQueueFamilyIndices = family_indices;
+	}
+
+	vk::UniqueSwapchainKHR swapchain = device->createSwapchainKHRUnique(swapchain_create_info);
+
+	return SwapChain(std::move(swapchain), device, surface_format.format);
 }

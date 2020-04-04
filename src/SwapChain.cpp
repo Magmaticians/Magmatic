@@ -60,3 +60,34 @@ vk::Extent2D magmatic::SwapChain::chooseSwapExtent(
 
 	return actual_extent;
 }
+
+magmatic::SwapChain::SwapChain(
+		vk::UniqueSwapchainKHR swapchain,
+		const vk::UniqueDevice& device,
+		const vk::Format& format
+		)
+:swapchain_(std::move(swapchain))
+{
+	images_ = device->getSwapchainImagesKHR(swapchain_.get());
+	image_views_.reserve(images_.size());
+
+	vk::ComponentMapping component_mapping(
+			vk::ComponentSwizzle::eR,
+			vk::ComponentSwizzle::eG,
+			vk::ComponentSwizzle::eB,
+			vk::ComponentSwizzle::eA);
+	vk::ImageSubresourceRange subresource_range(vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1);
+
+	for(const auto& image : images_)
+	{
+		vk::ImageViewCreateInfo image_view_create_info(
+				vk::ImageViewCreateFlags(),
+				image,
+				vk::ImageViewType::e2D,
+				format,
+				component_mapping,
+				subresource_range
+				);
+		image_views_.emplace_back(device->createImageViewUnique(image_view_create_info));
+	}
+}

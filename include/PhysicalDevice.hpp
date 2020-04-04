@@ -8,6 +8,9 @@
 
 namespace magmatic
 {
+	//Forward declaration
+	class Surface;
+
 	class PhysicalDevice
 	{
 		friend class Instance;
@@ -23,6 +26,7 @@ namespace magmatic
 		const std::vector<vk::QueueFamilyProperties> queue_family_properties;
 
 		std::vector<size_t> getGraphicQueue() const noexcept;
+		std::vector<size_t> getPresentQueue(const Surface& surface) const noexcept;
 
 	};
 }

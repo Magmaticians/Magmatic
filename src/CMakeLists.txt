@@ -6,4 +6,5 @@ target_sources(
 		PhysicalDevice.cpp
 		LogicalDevice.cpp
 		Surface.cpp
+		SwapChain.cpp
 )

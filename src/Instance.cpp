@@ -114,7 +114,7 @@ magmatic::Instance::Instance(
 							   available_extensions.end(),
 							   [](vk::ExtensionProperties const& ep)
 							   {
-								   return (strcmp(VK_EXT_DEBUG_UTILS_EXTENSION_NAME, ep.extensionName) == 0);
+								   return strcmp(VK_EXT_DEBUG_UTILS_EXTENSION_NAME, ep.extensionName) == 0;
 							   }
 					   ) != available_extensions.end())
 	{

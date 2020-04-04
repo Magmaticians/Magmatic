@@ -11,6 +11,13 @@ namespace magmatic
 	//Forward declaration
 	class Surface;
 
+	struct SwapChainSupportDetails {
+		vk::SurfaceCapabilitiesKHR capabilities;
+		std::vector<vk::SurfaceFormatKHR> formats;
+		std::vector<vk::PresentModeKHR> present_modes;
+	};
+
+
 	class PhysicalDevice
 	{
 		friend class Instance;
@@ -27,6 +34,8 @@ namespace magmatic
 
 		std::vector<size_t> getGraphicQueue() const noexcept;
 		std::vector<size_t> getPresentQueue(const Surface& surface) const noexcept;
+
+		SwapChainSupportDetails getSwapChainSupportDetails(const Surface& surface) const;
 
 	};
 }

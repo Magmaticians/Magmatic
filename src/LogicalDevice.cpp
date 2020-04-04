@@ -14,7 +14,7 @@ magmatic::LogicalDevice::LogicalDevice(
 	#endif
 
 	std::vector<const char*> enabled_extensions;
-	enabled_extensions.reserve(extensions.size());
+	enabled_extensions.reserve(extensions.size()+sizeof(DEFAULT_EXTENSIONS));
 
 	for(auto const& ext : extensions)
 	{
@@ -31,7 +31,23 @@ magmatic::LogicalDevice::LogicalDevice(
 		enabled_extensions.emplace_back(ext.c_str());
 	}
 
-
+	for(auto const& ext : DEFAULT_EXTENSIONS)
+	{
+		if (
+				std::find(enabled_extensions.begin(), enabled_extensions.end(), ext) == enabled_extensions.end())
+		{
+			assert(
+					std::find_if(
+							available_extensions.begin(),
+							available_extensions.end(),
+							[ext](const vk::ExtensionProperties prop)
+							{
+								return strcmp(ext, prop.extensionName);
+							}
+					) != available_extensions.end());
+			enabled_extensions.emplace_back(ext);
+		}
+	}
 
 	const auto graphic_queue_indexes = physical_device.getGraphicQueue();
 	const auto present_queue_indexes = physical_device.getPresentQueue(surface);
@@ -99,4 +115,10 @@ std::optional<std::pair<size_t, size_t>> magmatic::LogicalDevice::chooseGraphicP
 	}
 
 	return std::make_pair(graphics[0], presents[0]);
+}
+
+magmatic::SwapChain magmatic::LogicalDevice::createSwapchain(const vk::Extent2D& extent) const
+{
+	// todo: implement creating swapchain
+	return SwapChain();
 }

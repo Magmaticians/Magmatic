@@ -5,4 +5,5 @@ target_sources(magmatic-render
 		PhysicalDevice.hpp
 		LogicalDevice.hpp
 		Surface.hpp
+		SwapChain.hpp
 		)

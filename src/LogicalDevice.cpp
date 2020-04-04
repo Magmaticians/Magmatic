@@ -1,22 +1,14 @@
-#include <spdlog/spdlog.h>
 #include "LogicalDevice.hpp"
+#include <spdlog/spdlog.h>
+#include <set>
 
 
 magmatic::LogicalDevice::LogicalDevice(
 		const magmatic::PhysicalDevice& physical_device,
-		const std::vector<std::string>& extensions
+		const std::vector<std::string>& extensions,
+		const Surface& surface
 		)
 {
-	const auto graphic_queue_indexes = physical_device.getGraphicQueue();
-	if(graphic_queue_indexes.empty())
-	{
-		spdlog::error("Magmatic: Graphic queue not found");
-		throw std::runtime_error("Failed to initialize device");
-	}
-
-	const size_t graphic_queue_index = graphic_queue_indexes[0];
-
-
 	#if !defined(NDEBUG)
 	const auto available_extensions = physical_device.device.enumerateDeviceExtensionProperties();
 	#endif
@@ -38,18 +30,44 @@ magmatic::LogicalDevice::LogicalDevice(
 		);
 		enabled_extensions.emplace_back(ext.c_str());
 	}
-	const float queuePriority = 0.0f;
 
-	const vk::DeviceQueueCreateInfo device_queue_create_info(
-			vk::DeviceQueueCreateFlags(),
-			graphic_queue_index,
-			1,
-			&queuePriority
-	);
+
+
+	const auto graphic_queue_indexes = physical_device.getGraphicQueue();
+	const auto present_queue_indexes = physical_device.getPresentQueue(surface);
+
+	const auto chosen_queues = chooseGraphicPresentQueue(graphic_queue_indexes, present_queue_indexes);
+	if(chosen_queues)
+	{
+		spdlog::error("Failed to find queues");
+		throw std::runtime_error("Failed to initialize device");
+	}
+
+	const std::set<uint32_t> unique_queues_family =
+			{
+					static_cast<uint32_t>(chosen_queues.value().first),
+					static_cast<uint32_t>(chosen_queues.value().second)
+			};
+
+	float priority = 0.0f;
+
+	std::vector<vk::DeviceQueueCreateInfo> queue_create_infos;
+
+	for(uint32_t family_index : unique_queues_family)
+	{
+		vk::DeviceQueueCreateInfo info(
+				vk::DeviceQueueCreateFlags(),
+				family_index,
+				1,
+				&priority
+		);
+		queue_create_infos.emplace_back(info);
+	}
+
 	const vk::DeviceCreateInfo device_create_info(
 			vk::DeviceCreateFlags(),
-			1,
-			&device_queue_create_info,
+			static_cast<uint32_t>(queue_create_infos.size()),
+			queue_create_infos.data(),
 			0,
 			nullptr,
 			static_cast<uint32_t>(enabled_extensions.size()),
@@ -58,5 +76,27 @@ magmatic::LogicalDevice::LogicalDevice(
 
 	device = physical_device.device.createDeviceUnique(device_create_info);
 
-	graphics_queue = device->getQueue(graphic_queue_index, 0);
+	graphics_queue = device->getQueue(chosen_queues.value().first, 0);
+	present_queue = device->getQueue(chosen_queues.value().second, 0);
+
+}
+
+std::optional<std::pair<size_t, size_t>> magmatic::LogicalDevice::chooseGraphicPresentQueue(
+		const std::vector<size_t>& graphics,
+		const std::vector<size_t>& presents
+		)
+{
+	if(graphics.empty() || presents.empty())
+	{
+		return std::nullopt;
+	}
+	for(auto i : graphics)
+	{
+		if(std::find(presents.begin(), presents.end(), i) != presents.end())
+		{
+			return std::make_pair(i, i);
+		}
+	}
+
+	return std::make_pair(graphics[0], presents[0]);
 }

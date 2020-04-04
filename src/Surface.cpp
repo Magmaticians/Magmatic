@@ -2,7 +2,9 @@
 
 
 magmatic::Surface::Surface(vk::UniqueSurfaceKHR surface)
-: surface(std::move(surface)) {}
+{
+
+}
 
 std::vector<vk::SurfaceFormatKHR> magmatic::Surface::getFormat(const magmatic::PhysicalDevice& physical_device) const
 {

@@ -16,6 +16,17 @@ namespace magmatic
 				const vk::SurfaceCapabilitiesKHR& capabilities,
 				uint32_t window_width, uint32_t window_height
 				) noexcept;
+
+		SwapChain(
+				vk::UniqueSwapchainKHR swapchain,
+				const vk::UniqueDevice& device,
+				const vk::Format& format
+		);
+
+		vk::UniqueSwapchainKHR swapchain_;
+
+		std::vector<vk::Image> images_;
+		std::vector<vk::UniqueImageView> image_views_;
 	};
 }
 

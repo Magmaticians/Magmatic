@@ -90,4 +90,7 @@ magmatic::SwapChain::SwapChain(
 				);
 		image_views_.emplace_back(device->createImageViewUnique(image_view_create_info));
 	}
+
+	vk::FenceCreateInfo fence_create_info{vk::FenceCreateFlags()};
+	fence = device->createFenceUnique(fence_create_info);
 }

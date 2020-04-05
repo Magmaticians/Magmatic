@@ -27,6 +27,8 @@ namespace magmatic
 
 		std::vector<vk::Image> images_;
 		std::vector<vk::UniqueImageView> image_views_;
+
+		vk::UniqueFence fence;
 	};
 }
 

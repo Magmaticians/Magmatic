@@ -1,6 +1,7 @@
 #include "LogicalDevice.hpp"
 #include <spdlog/spdlog.h>
 #include <set>
+#include <fstream>
 
 
 magmatic::LogicalDevice::LogicalDevice(
@@ -172,4 +173,31 @@ magmatic::SwapChain magmatic::LogicalDevice::createSwapchain(
 	vk::UniqueSwapchainKHR swapchain = device->createSwapchainKHRUnique(swapchain_create_info);
 
 	return SwapChain(std::move(swapchain), device, surface_format.format);
+}
+
+Shader magmatic::LogicalDevice::createShader(const std::filesystem::path& file_path)
+{
+	if(!std::filesystem::exists(file_path))
+	{
+		spdlog::error("Shader file not exist: %s", file_path.string());
+		throw std::runtime_error("Shader file not exist");
+	}
+
+	size_t file_size = std::filesystem::file_size(file_path);
+
+	std::vector<char> spirv(file_size);
+
+	std::ifstream spirv_file(file_path, std::ios::ate | std::ios::binary);
+	spirv_file.read(spirv.data(), file_size);
+	spirv_file.close();
+
+	vk::ShaderModuleCreateInfo shader_module_create_info{
+		vk::ShaderModuleCreateFlags(),
+		spirv.size() * sizeof(decltype(spirv)::value_type),
+		reinterpret_cast<const uint32_t*>(spirv.data())
+	};
+
+	vk::UniqueShaderModule shader_module = device->createShaderModuleUnique(shader_module_create_info);
+
+	return Shader(std::move(shader_module));
 }

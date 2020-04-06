@@ -23,6 +23,9 @@ namespace magmatic
 				const vk::Format& format
 		);
 
+		SwapChain(const SwapChain&) = delete;
+		SwapChain& operator=(const SwapChain&) = delete;
+
 		vk::UniqueSwapchainKHR swapchain_;
 
 		std::vector<vk::Image> images_;

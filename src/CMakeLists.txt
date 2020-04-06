@@ -7,4 +7,5 @@ target_sources(
 		LogicalDevice.cpp
 		Surface.cpp
 		SwapChain.cpp
+		Shader.cpp
 )

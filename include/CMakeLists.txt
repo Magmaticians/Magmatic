@@ -6,4 +6,5 @@ target_sources(magmatic-render
 		LogicalDevice.hpp
 		Surface.hpp
 		SwapChain.hpp
+		Shader.hpp
 		)

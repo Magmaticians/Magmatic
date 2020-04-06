@@ -4,8 +4,9 @@
 #include "PhysicalDevice.hpp"
 #include "Surface.hpp"
 #include "SwapChain.hpp"
+#include "Shader.hpp"
 #include <vulkan/vulkan.hpp>
-
+#include <filesystem>
 
 namespace magmatic
 {
@@ -34,10 +35,18 @@ namespace magmatic
 				const Surface& surface
 				);
 
+		LogicalDevice(const LogicalDevice&) = delete;
+		LogicalDevice& operator=(LogicalDevice&) = delete;
+
 		SwapChain createSwapchain(
 				const Surface& surface,
 				uint32_t window_width, uint32_t window_height
 				) const;
+
+		Shader createShader(
+				const std::filesystem::path& file_path
+				) const;
+
 
 	private:
 		static std::optional<std::pair<size_t, size_t>> chooseGraphicPresentQueue(

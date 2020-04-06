@@ -27,6 +27,9 @@ namespace magmatic
 				const std::vector<std::string>& layers = {}
 		);
 
+		Instance(const Instance&) = delete;
+		Instance& operator=(const Instance&) = delete;
+
 		std::vector<PhysicalDevice> enumeratePhysicalDevices() const;
 		Surface createSurface(const Window& window) const;
 	};

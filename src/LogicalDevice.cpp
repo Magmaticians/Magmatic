@@ -175,7 +175,7 @@ magmatic::SwapChain magmatic::LogicalDevice::createSwapchain(
 	return SwapChain(std::move(swapchain), device, surface_format.format);
 }
 
-Shader magmatic::LogicalDevice::createShader(const std::filesystem::path& file_path)
+Shader magmatic::LogicalDevice::createShader(const std::filesystem::path& file_path) const
 {
 	if(!std::filesystem::exists(file_path))
 	{

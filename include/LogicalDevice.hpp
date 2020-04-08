@@ -7,6 +7,7 @@
 #include "Shader.hpp"
 #include <vulkan/vulkan.hpp>
 #include <filesystem>
+#include <optional>
 
 namespace magmatic
 {

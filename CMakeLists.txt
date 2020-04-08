@@ -13,11 +13,7 @@ find_package(Vulkan REQUIRED)
 find_package(spdlog REQUIRED)
 find_package(fmt REQUIRED)
 
-#Utils
-find_package(range-v3 REQUIRED)
-
 include_directories("include")
-
 
 add_library(magmatic-render SHARED "")
 
@@ -26,7 +22,7 @@ target_compile_definitions(magmatic-render PRIVATE SPDLOG_FMT_EXTERNAL=1)
 
 set_property(TARGET magmatic-render PROPERTY CXX_STANDARD 20)
 target_include_directories(magmatic-render PRIVATE Vulkan::Vulkan)
-target_link_libraries(magmatic-render PRIVATE glfw Vulkan::Vulkan spdlog)
+target_link_libraries(magmatic-render PRIVATE glfw Vulkan::Vulkan spdlog::spdlog_header_only)
 
 add_subdirectory("src")
 add_subdirectory("include")

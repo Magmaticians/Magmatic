@@ -7,7 +7,6 @@ namespace {
 	void errorCallback(int error, const char* description) {
 		spdlog::error("GLFW error: {} Error code: {}", description, error);
 	}
-
 }
 
 magmatic::Window::Window(int width, int height, const std::string& name)

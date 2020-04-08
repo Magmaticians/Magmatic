@@ -1,5 +1,4 @@
 #include "PhysicalDevice.hpp"
-#include <range/v3/all.hpp> // todo: import only necessary
 #include "Surface.hpp"
 
 
@@ -32,12 +31,11 @@ std::vector<size_t> magmatic::PhysicalDevice::getGraphicQueue() const noexcept
 {
 	std::vector<size_t> queues;
 
-	for(const auto& [index, family] : queue_family_properties | ranges::views::enumerate)
-	{
-		if(family.queueFlags & vk::QueueFlagBits::eGraphics)
-		{
-			queues.emplace_back(index);
-		}
+	for(size_t i = 0; i < queue_family_properties.size(); i++) {
+        if(queue_family_properties[i].queueFlags & vk::QueueFlagBits::eGraphics)
+        {
+            queues.emplace_back(i);
+        }
 	}
 
 	return queues;
@@ -47,12 +45,11 @@ std::vector<size_t> magmatic::PhysicalDevice::getPresentQueue(const magmatic::Su
 {
 	std::vector<size_t> queues;
 
-	for(auto i : ranges::views::iota(0, static_cast<int>(queue_family_properties.size())))
-	{
-		if(device.getSurfaceSupportKHR(i, surface.surface.get()))
-		{
-			queues.emplace_back(i);
-		}
+	for(size_t i = 0; i < queue_family_properties.size(); i++) {
+        if(device.getSurfaceSupportKHR(i, surface.surface.get()))
+        {
+            queues.emplace_back(i);
+        }
 	}
 
 	return queues;

@@ -33,6 +33,7 @@ namespace magmatic
 
 		vk::UniqueFence fence;
 	};
+
 }
 
 #endif //MAGMATIC_SWAPCHAIN_HPP

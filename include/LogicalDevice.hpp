@@ -5,6 +5,7 @@
 #include "Surface.hpp"
 #include "SwapChain.hpp"
 #include "Shader.hpp"
+#include "Pipeline.hpp"
 #include <vulkan/vulkan.hpp>
 #include <filesystem>
 #include <optional>
@@ -45,9 +46,14 @@ namespace magmatic
 				) const;
 
 		Shader createShader(
-				const std::filesystem::path& file_path
+				const std::filesystem::path& file_path,
+				vk::ShaderStageFlagBits type
 				) const;
 
+		Pipeline createPipeline(
+				uint32_t extent_width, uint32_t extent_height,
+				const std::vector<Shader>& shaderStages
+				) const;
 
 	private:
 		static std::optional<std::pair<size_t, size_t>> chooseGraphicPresentQueue(

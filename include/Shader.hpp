@@ -8,14 +8,16 @@ class Shader
 {
 private:
 	const vk::UniqueShaderModule shader_module;
+	const vk::ShaderStageFlagBits type;
 
 public:
-	explicit Shader(vk::UniqueShaderModule module) noexcept : shader_module(std::move(module)){};
+	explicit Shader(vk::UniqueShaderModule module, vk::ShaderStageFlagBits type) noexcept
+	: shader_module(std::move(module)), type(type){};
 
 	Shader(const Shader&) = delete;
 	Shader& operator=(const Shader&) = delete;
 
-	vk::PipelineShaderStageCreateInfo getPipelineShaderStageCreateInfo(vk::ShaderStageFlagBits type) const noexcept;
+	[[nodiscard]] vk::PipelineShaderStageCreateInfo getPipelineShaderStageCreateInfo() const noexcept;
 };
 
 

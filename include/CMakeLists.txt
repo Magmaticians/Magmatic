@@ -7,4 +7,5 @@ target_sources(magmatic-render
 		Surface.hpp
 		SwapChain.hpp
 		Shader.hpp
+		Pipeline.hpp
 		)

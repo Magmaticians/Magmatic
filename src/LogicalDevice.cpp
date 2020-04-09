@@ -175,7 +175,7 @@ magmatic::SwapChain magmatic::LogicalDevice::createSwapchain(
 	return SwapChain(std::move(swapchain), device, surface_format.format);
 }
 
-Shader magmatic::LogicalDevice::createShader(const std::filesystem::path& file_path) const
+Shader magmatic::LogicalDevice::createShader(const std::filesystem::path& file_path, vk::ShaderStageFlagBits type) const
 {
 	if(!std::filesystem::exists(file_path))
 	{
@@ -199,5 +199,55 @@ Shader magmatic::LogicalDevice::createShader(const std::filesystem::path& file_p
 
 	vk::UniqueShaderModule shader_module = device->createShaderModuleUnique(shader_module_create_info);
 
-	return Shader(std::move(shader_module));
+	return Shader(std::move(shader_module), type);
+}
+
+magmatic::Pipeline magmatic::LogicalDevice::createPipeline(
+		uint32_t extent_width, uint32_t extent_height,
+		const std::vector<Shader>& shaderStages
+) const
+{
+	vk::PipelineVertexInputStateCreateInfo vertex_input_state_create_info(
+			vk::PipelineVertexInputStateCreateFlags(),
+			0,
+			nullptr,
+			0,
+			nullptr
+			);
+
+	vk::PipelineInputAssemblyStateCreateInfo input_assembly_state_create_info(
+			vk::PipelineInputAssemblyStateCreateFlags(),
+			vk::PrimitiveTopology::eTriangleList,
+			false
+			);
+
+	vk::Viewport viewport(
+			0.0f, 0.0f,
+			static_cast<float>(extent_width), static_cast<float>(extent_height),
+			1.0f, 1.0f
+			);
+
+	vk::Rect2D scissors({0,0}, {extent_width, extent_height});
+
+	vk::PipelineViewportStateCreateInfo viewport_state_create_info(
+			vk::PipelineViewportStateCreateFlags(),
+			1, &viewport,
+			1, &scissors
+			);
+
+	vk::PipelineRasterizationStateCreateInfo rasterization_state_create_info(
+			vk::PipelineRasterizationStateCreateFlags(),
+			false,
+			false,
+			vk::PolygonMode::eFill,
+			vk::CullModeFlagBits::eBack,
+			vk::FrontFace::eClockwise,
+			false,
+			0.0f,
+			0.0f,
+			0.0f,
+			1.0f
+			);
+
+	return Pipeline();
 }

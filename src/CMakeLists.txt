@@ -8,4 +8,5 @@ target_sources(
 		Surface.cpp
 		SwapChain.cpp
 		Shader.cpp
+		Pipeline.cpp
 )

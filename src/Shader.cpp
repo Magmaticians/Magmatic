@@ -1,6 +1,6 @@
 #include "Shader.hpp"
 
-vk::PipelineShaderStageCreateInfo Shader::getPipelineShaderStageCreateInfo(vk::ShaderStageFlagBits type) const noexcept
+[[nodiscard]] vk::PipelineShaderStageCreateInfo Shader::getPipelineShaderStageCreateInfo() const noexcept
 {
 	return vk::PipelineShaderStageCreateInfo(
 			vk::PipelineShaderStageCreateFlags(),

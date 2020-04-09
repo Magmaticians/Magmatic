@@ -24,6 +24,10 @@ set_property(TARGET magmatic-render PROPERTY CXX_STANDARD 20)
 target_include_directories(magmatic-render PRIVATE Vulkan::Vulkan)
 target_link_libraries(magmatic-render PRIVATE glfw Vulkan::Vulkan spdlog::spdlog_header_only)
 
+add_executable(main-test "")
+
 add_subdirectory("src")
 add_subdirectory("include")
 add_subdirectory("examples")
+
+target_link_libraries(main-test PRIVATE magmatic-render)

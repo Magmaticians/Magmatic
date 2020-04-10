@@ -6,8 +6,8 @@
 
 magmatic::LogicalDevice::LogicalDevice(
 		const magmatic::PhysicalDevice& physical_device,
-		const std::vector<std::string>& extensions,
-		const Surface& surface
+		const Surface& surface,
+        const std::vector<std::string>& extensions
 		)
 		:physical_dev(physical_device)
 {
@@ -55,7 +55,7 @@ magmatic::LogicalDevice::LogicalDevice(
 	const auto present_queue_indexes = physical_device.getPresentQueue(surface);
 
 	const auto chosen_queues = chooseGraphicPresentQueue(graphic_queue_indexes, present_queue_indexes);
-	if(chosen_queues)
+	if(!chosen_queues)
 	{
 		spdlog::error("Failed to find queues");
 		throw std::runtime_error("Failed to initialize device");
@@ -144,7 +144,7 @@ magmatic::SwapChain magmatic::LogicalDevice::createSwapchain(
 
 	vk::SwapchainCreateInfoKHR swapchain_create_info(
 			vk::SwapchainCreateFlagsKHR(),
-			surface.surface.get(),
+			*surface.surface,
 			image_count,
 			surface_format.format,
 			surface_format.colorSpace,

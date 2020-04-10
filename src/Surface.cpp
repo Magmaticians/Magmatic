@@ -1,7 +1,7 @@
 #include "Surface.hpp"
 
 
-magmatic::Surface::Surface(vk::UniqueSurfaceKHR surface)
+magmatic::Surface::Surface(vk::UniqueSurfaceKHR surface): surface(std::move(surface))
 {
 
 }

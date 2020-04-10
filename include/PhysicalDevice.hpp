@@ -25,17 +25,17 @@ namespace magmatic
 		explicit PhysicalDevice(vk::PhysicalDevice physical_device);
 
 	public:
-		uint32_t calculateScore() const noexcept;
+		[[nodiscard]] uint32_t calculateScore() const noexcept;
 
 		const vk::PhysicalDevice device;
 		const vk::PhysicalDeviceProperties device_properties;
 		const vk::PhysicalDeviceFeatures device_features;
 		const std::vector<vk::QueueFamilyProperties> queue_family_properties;
 
-		std::vector<size_t> getGraphicQueue() const noexcept;
-		std::vector<size_t> getPresentQueue(const Surface& surface) const noexcept;
+		[[nodiscard]] std::vector<size_t> getGraphicQueue() const noexcept;
+		[[nodiscard]] std::vector<size_t> getPresentQueue(const Surface& surface) const noexcept;
 
-		SwapChainSupportDetails getSwapChainSupportDetails(const Surface& surface) const;
+		[[nodiscard]] SwapChainSupportDetails getSwapChainSupportDetails(const Surface& surface) const;
 
 	};
 }

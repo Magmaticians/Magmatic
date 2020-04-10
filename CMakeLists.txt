@@ -25,8 +25,7 @@ add_library(magmatic-render SHARED "")
 #Executables
 add_custom_target(examples)
 add_executable(main-test "")
-add_executable(test "")
-add_dependencies(examples main-test test)
+add_dependencies(examples main-test)
 
 #Use external fmt
 target_compile_definitions(magmatic-render PRIVATE SPDLOG_FMT_EXTERNAL=1)
@@ -36,7 +35,6 @@ target_include_directories(magmatic-render PUBLIC Vulkan::Vulkan)
 target_link_libraries(magmatic-render PUBLIC glfw Vulkan::Vulkan spdlog::spdlog_header_only tabulate::tabulate)
 
 target_link_libraries(main-test PRIVATE magmatic-render)
-target_link_libraries(test PRIVATE magmatic-render)
 
 add_subdirectory("src")
 add_subdirectory("include")

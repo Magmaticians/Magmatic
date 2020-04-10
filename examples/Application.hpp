@@ -4,12 +4,18 @@
 #include "Window.hpp"
 #include "Instance.hpp"
 #include "Surface.hpp"
+#include "PhysicalDevice.hpp"
+#include "LogicalDevice.hpp"
+#include "SwapChain.hpp"
 
 class Application {
     static constexpr const char* DEFAULT_NAME{"Test application"};
     magmatic::Window window;
     magmatic::Instance instance;
     magmatic::Surface surface;
+    magmatic::PhysicalDevice physicalDevice;
+    magmatic::LogicalDevice logicalDevice;
+    magmatic::SwapChain swapChain;
 public:
     Application();
 

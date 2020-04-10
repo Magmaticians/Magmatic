@@ -9,4 +9,5 @@ target_sources(
 		SwapChain.cpp
 		Shader.cpp
 		Pipeline.cpp
+		RenderPass.cpp
 )

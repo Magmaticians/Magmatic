@@ -73,7 +73,7 @@ magmatic::Instance::Instance(
 				&& std::find_if(available_layers.begin(), available_layers.end(),
 				                [layer](const vk::LayerProperties& prop)
 				                {
-					                return layer == prop.layerName;
+					                return strcmp(layer, prop.layerName) == 0;
 				                }
 				) != available_layers.end()
 				)

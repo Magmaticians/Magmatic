@@ -33,24 +33,24 @@ namespace magmatic
 	public:
 		explicit LogicalDevice(
 				const PhysicalDevice& physical_device,
-				const std::vector<std::string>& extensions,
-				const Surface& surface
+				const Surface& surface,
+                const std::vector<std::string>& extensions={}
 				);
 
 		LogicalDevice(const LogicalDevice&) = delete;
 		LogicalDevice& operator=(LogicalDevice&) = delete;
 
-		SwapChain createSwapchain(
+		[[nodiscard]] SwapChain createSwapchain(
 				const Surface& surface,
 				uint32_t window_width, uint32_t window_height
 				) const;
 
-		Shader createShader(
+		[[nodiscard]] Shader createShader(
 				const std::filesystem::path& file_path,
 				vk::ShaderStageFlagBits type
 				) const;
 
-		Pipeline createPipeline(
+		[[nodiscard]] Pipeline createPipeline(
 				uint32_t extent_width, uint32_t extent_height,
 				const std::vector<Shader>& shaderStages
 				) const;

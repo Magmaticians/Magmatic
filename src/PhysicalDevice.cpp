@@ -46,7 +46,7 @@ std::vector<size_t> magmatic::PhysicalDevice::getPresentQueue(const magmatic::Su
 	std::vector<size_t> queues;
 
 	for(size_t i = 0; i < queue_family_properties.size(); i++) {
-        if(device.getSurfaceSupportKHR(i, surface.surface.get()))
+        if(device.getSurfaceSupportKHR(i, *surface.surface))
         {
             queues.emplace_back(i);
         }

@@ -8,7 +8,6 @@
 #include <vector>
 #include <string>
 
-
 namespace magmatic
 {
 	class Instance
@@ -29,8 +28,8 @@ namespace magmatic
 		Instance(const Instance&) = delete;
 		Instance& operator=(const Instance&) = delete;
 
-		std::vector<PhysicalDevice> enumeratePhysicalDevices() const;
-		Surface createSurface(const Window& window) const;
+		[[nodiscard]] std::vector<PhysicalDevice> enumeratePhysicalDevices() const;
+		[[nodiscard]] Surface createSurface(const Window& window) const;
 	};
 }
 

@@ -9,7 +9,7 @@ namespace {
 	}
 }
 
-magmatic::Window::Window(int width, int height, const std::string& name)
+magmatic::Window::Window(const std::string& name, int width, int height)
 {
 	glfwSetErrorCallback(errorCallback);
 
@@ -17,6 +17,7 @@ magmatic::Window::Window(int width, int height, const std::string& name)
 		throw std::runtime_error("GLFW: Failed to initialize");
 	}
 
+    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 	glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
 	const auto temp_handler = glfwCreateWindow(width, height, name.c_str(), nullptr, nullptr);
 
@@ -25,7 +26,6 @@ magmatic::Window::Window(int width, int height, const std::string& name)
 		glfwTerminate();
 		throw std::runtime_error("GLFW: Failed to create window");
 	}
-
 	window = std::unique_ptr<GLFWwindow, GLFWWindowDeleter> (temp_handler, GLFWWindowDeleter());
 }
 
@@ -101,7 +101,8 @@ std::vector<std::string> magmatic::Window::getRequiredExtensions() const
 
 	glfw_extensions = glfwGetRequiredInstanceExtensions(&glfw_extension_count);
 
-	std::vector<std::string> extensions(glfw_extension_count);
+	std::vector<std::string> extensions;
+	extensions.reserve(glfw_extension_count);
 	std::copy_n(glfw_extensions, glfw_extension_count, std::back_inserter(extensions));
 
 	return extensions;

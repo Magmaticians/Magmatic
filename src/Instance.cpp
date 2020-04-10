@@ -6,7 +6,6 @@
 #include <vector>
 #include <fmt/format.h>
 
-
 namespace
 {
 	VKAPI_ATTR VkBool32 VKAPI_CALL debugUtilsMessengerCallback
@@ -87,7 +86,6 @@ magmatic::Instance::Instance(
 	std::vector<char const*> enabled_extensions;
 	enabled_extensions.reserve(extensions.size());
 
-
 	for(auto const& extension : extensions)
 	{
 		assert(
@@ -160,7 +158,6 @@ magmatic::Instance::Instance(
 			}
 	);
 	#endif
-
 	instance = vk::createInstanceUnique(instance_create_info.get<vk::InstanceCreateInfo>());
 }
 

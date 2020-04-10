@@ -14,8 +14,8 @@ namespace magmatic
 
 		const vk::UniqueSurfaceKHR surface;
 
-		vk::SurfaceCapabilitiesKHR getCapabilities(const PhysicalDevice& physical_device) const;
-		std::vector<vk::SurfaceFormatKHR> getFormat(const PhysicalDevice& physical_device) const;
+		[[nodiscard]] vk::SurfaceCapabilitiesKHR getCapabilities(const PhysicalDevice& physical_device) const;
+		[[nodiscard]] std::vector<vk::SurfaceFormatKHR> getFormat(const PhysicalDevice& physical_device) const;
 
 		Surface(const Surface&) = delete;
 		Surface& operator=(const Surface&) = delete;

@@ -1,7 +1,9 @@
 #include <iostream>
+#include "Application.hpp"
 
 int main() {
-
-    std::cout<<"Hello world"<<std::endl;
+    std::cout<<"Starting"<<std::endl;
+    Application application;
+    application.run();
     return 0;
 }

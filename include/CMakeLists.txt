@@ -1,5 +1,5 @@
 target_sources(magmatic-render
-		PRIVATE
+		PUBLIC
 		Window.hpp
 		Instance.hpp
 		PhysicalDevice.hpp

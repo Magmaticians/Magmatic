@@ -23,9 +23,9 @@ namespace magmatic
 
 	public:
 		explicit Window(
+                const std::string& name=DEFAULT_NAME,
 				int width=DEFAULT_WIDTH,
-				int height=DEFAULT_HEIGHT,
-				const std::string& name=DEFAULT_NAME
+				int height=DEFAULT_HEIGHT
 		);
 
 		~Window();
@@ -37,10 +37,10 @@ namespace magmatic
 		Window& operator=(Window&& rhs) = default;
 
 		void setName(const std::string& new_name) noexcept;
-		std::string getName() const noexcept;
+		[[nodiscard]] std::string getName() const noexcept;
 
 		void setSize(int width, int height);
-		std::pair<int, int> getSize() const;
+		[[nodiscard]] std::pair<int, int> getSize() const;
 
 		void hide() noexcept;
 		void minimize() noexcept;
@@ -49,7 +49,7 @@ namespace magmatic
 		void restore() noexcept;
 		void focus() noexcept;
 
-		std::vector<std::string> getRequiredExtensions() const;
+		[[nodiscard]] std::vector<std::string> getRequiredExtensions() const;
 
 		struct GLFWWindowDeleter
 		{

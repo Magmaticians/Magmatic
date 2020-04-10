@@ -16,6 +16,8 @@ class Application {
     magmatic::PhysicalDevice physicalDevice;
     magmatic::LogicalDevice logicalDevice;
     magmatic::SwapChain swapChain;
+    magmatic::RenderPass renderPass;
+
 public:
     Application();
 

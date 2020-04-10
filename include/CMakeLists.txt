@@ -8,4 +8,5 @@ target_sources(magmatic-render
 		SwapChain.hpp
 		Shader.hpp
 		Pipeline.hpp
+		RenderPass.hpp
 		)

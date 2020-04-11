@@ -9,4 +9,5 @@ target_sources(magmatic-render
 		Shader.hpp
 		Pipeline.hpp
 		RenderPass.hpp
+		Framebuffers.hpp
 		)

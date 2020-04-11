@@ -9,6 +9,7 @@ namespace magmatic
 {
 	class SwapChain
 	{
+	friend class LogicalDevice;
 	public:
 		static vk::SurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector <vk::SurfaceFormatKHR>& formats);
 		static vk::PresentModeKHR chooseSwapPresentMode(const std::vector<vk::PresentModeKHR>& present_modes);
@@ -27,6 +28,7 @@ namespace magmatic
 		SwapChain(const SwapChain&) = delete;
 		SwapChain& operator=(const SwapChain&) = delete;
 
+	private:
 		vk::UniqueSwapchainKHR swapchain_;
 
 		vk::Extent2D extent;

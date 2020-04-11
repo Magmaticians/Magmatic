@@ -7,6 +7,7 @@
 #include "Shader.hpp"
 #include "Pipeline.hpp"
 #include "RenderPass.hpp"
+#include "Framebuffers.hpp"
 #include <vulkan/vulkan.hpp>
 #include <filesystem>
 #include <optional>
@@ -61,6 +62,7 @@ namespace magmatic
 		        const Surface& surface
 		        ) const;
 
+		[[nodiscard]] Framebuffers createFramebuffers(const RenderPass& render_pass, const SwapChain& swapchain) const;
 	private:
 		static std::optional<std::pair<size_t, size_t>> chooseGraphicPresentQueue(
 				const std::vector<size_t>& graphics,

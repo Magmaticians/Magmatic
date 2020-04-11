@@ -338,46 +338,75 @@ magmatic::Pipeline magmatic::LogicalDevice::createPipeline(
 }
 
 magmatic::RenderPass magmatic::LogicalDevice::createRenderPass(const Surface& surface) const {
-    const auto &support_details = physical_dev.getSwapChainSupportDetails(surface);
-    const auto surface_format = SwapChain::chooseSwapSurfaceFormat(support_details.formats);
+	const auto& support_details = physical_dev.getSwapChainSupportDetails(surface);
+	const auto surface_format = SwapChain::chooseSwapSurfaceFormat(support_details.formats);
 
-    vk::AttachmentDescription colorAttachment(
-            vk::AttachmentDescriptionFlags(),
-            surface_format.format,
-            vk::SampleCountFlagBits::e1,
-            vk::AttachmentLoadOp::eClear,
-            vk::AttachmentStoreOp::eStore,
-            vk::AttachmentLoadOp::eDontCare,
-            vk::AttachmentStoreOp::eDontCare,
-            vk::ImageLayout::eUndefined,
-            vk::ImageLayout::ePresentSrcKHR
-            );
+	vk::AttachmentDescription colorAttachment(
+			vk::AttachmentDescriptionFlags(),
+			surface_format.format,
+			vk::SampleCountFlagBits::e1,
+			vk::AttachmentLoadOp::eClear,
+			vk::AttachmentStoreOp::eStore,
+			vk::AttachmentLoadOp::eDontCare,
+			vk::AttachmentStoreOp::eDontCare,
+			vk::ImageLayout::eUndefined,
+			vk::ImageLayout::ePresentSrcKHR
+	);
 
-    vk::AttachmentReference colorAttachmentRef(
-            0,
-            vk::ImageLayout::eColorAttachmentOptimal
-            );
+	vk::AttachmentReference colorAttachmentRef(
+			0,
+			vk::ImageLayout::eColorAttachmentOptimal
+	);
 
-    vk::SubpassDescription subpass(
-            vk::SubpassDescriptionFlags(),
-            vk::PipelineBindPoint::eGraphics,
-            0,
-            nullptr,
-            1,
-            &colorAttachmentRef,
-            nullptr,
-            nullptr
-            );
+	vk::SubpassDescription subpass(
+			vk::SubpassDescriptionFlags(),
+			vk::PipelineBindPoint::eGraphics,
+			0,
+			nullptr,
+			1,
+			&colorAttachmentRef,
+			nullptr,
+			nullptr
+	);
 
-    vk::RenderPassCreateInfo renderPassInfo(
-            vk::RenderPassCreateFlags(),
-            1,
-            &colorAttachment,
-            1,
-            &subpass
-            );
+	vk::RenderPassCreateInfo renderPassInfo(
+			vk::RenderPassCreateFlags(),
+			1,
+			&colorAttachment,
+			1,
+			&subpass
+	);
 
     vk::UniqueRenderPass renderPass = device->createRenderPassUnique(renderPassInfo);
 
     return RenderPass(std::move(renderPass));
+}
+
+magmatic::Framebuffers magmatic::LogicalDevice::createFramebuffers(
+		const magmatic::RenderPass& render_pass,
+		const magmatic::SwapChain& swapchain
+		) const
+{
+	std::vector<vk::UniqueFramebuffer> framebuffers;
+	framebuffers.reserve(swapchain.image_views_.size());
+
+	const vk::ImageView* attachment;
+	for(const auto& view: swapchain.image_views_)
+	{
+		attachment = &view.get();
+		auto framebuffer = device->createFramebufferUnique(
+				vk::FramebufferCreateInfo(
+						vk::FramebufferCreateFlags(),
+						render_pass.renderPass.get(),
+						1,
+						attachment,
+						swapchain.extent.width,
+						swapchain.extent.height,
+						1
+						)
+				);
+		framebuffers.emplace_back(std::move(framebuffer));
+	}
+
+	return Framebuffers(framebuffers);
 };

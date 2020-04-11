@@ -10,7 +10,12 @@ namespace magmatic
 	private:
 
 	public:
-	    const vk::Pipeline pipeline;
+	    const vk::UniquePipeline pipeline;
+
+        explicit Pipeline(vk::UniquePipeline pipeline);
+
+        Pipeline(const Pipeline&) = delete;
+        Pipeline& operator=(const Pipeline&) = delete;
 	};
 }
 

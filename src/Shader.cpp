@@ -1,6 +1,6 @@
 #include "Shader.hpp"
 
-[[nodiscard]] vk::PipelineShaderStageCreateInfo Shader::getPipelineShaderStageCreateInfo() const noexcept
+[[nodiscard]] vk::PipelineShaderStageCreateInfo magmatic::Shader::getPipelineShaderStageCreateInfo() const noexcept
 {
 	return vk::PipelineShaderStageCreateInfo(
 			vk::PipelineShaderStageCreateFlags(),

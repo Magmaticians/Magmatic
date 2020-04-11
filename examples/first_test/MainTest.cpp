@@ -1,8 +1,10 @@
 #include <iostream>
+#include <spdlog/spdlog.h>
 #include "Application.hpp"
 
 int main() {
-    std::cout<<"Starting"<<std::endl;
+	spdlog::info("Starting first test");
+
     Application application;
     application.run();
     return 0;

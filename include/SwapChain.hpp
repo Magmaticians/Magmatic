@@ -20,13 +20,16 @@ namespace magmatic
 		SwapChain(
 				vk::UniqueSwapchainKHR swapchain,
 				const vk::UniqueDevice& device,
-				const vk::Format& format
+				const vk::Format& format,
+				vk::Extent2D extent
 		);
 
 		SwapChain(const SwapChain&) = delete;
 		SwapChain& operator=(const SwapChain&) = delete;
 
 		vk::UniqueSwapchainKHR swapchain_;
+
+		vk::Extent2D extent;
 
 		std::vector<vk::Image> images_;
 		std::vector<vk::UniqueImageView> image_views_;

@@ -64,9 +64,10 @@ vk::Extent2D magmatic::SwapChain::chooseSwapExtent(
 magmatic::SwapChain::SwapChain(
 		vk::UniqueSwapchainKHR swapchain,
 		const vk::UniqueDevice& device,
-		const vk::Format& format
+		const vk::Format& format,
+        vk::Extent2D extent
 		)
-:swapchain_(std::move(swapchain))
+:swapchain_(std::move(swapchain)), extent(extent)
 {
 	images_ = device->getSwapchainImagesKHR(swapchain_.get());
 	image_views_.reserve(images_.size());

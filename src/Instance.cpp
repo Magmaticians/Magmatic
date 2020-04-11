@@ -1,4 +1,5 @@
 #include "Instance.hpp"
+#include "PhysicalDevice.hpp"
 #include <string>
 #include <GLFW/glfw3.h>
 #include <spdlog/spdlog.h>
@@ -175,6 +176,20 @@ std::vector<magmatic::PhysicalDevice> magmatic::Instance::enumeratePhysicalDevic
 	std::transform(devices.begin(), devices.end(), std::back_inserter(retval), to_physical_device);
 
 	return retval;
+}
+
+magmatic::PhysicalDevice magmatic::Instance::getBestDevice() const {
+	const auto devices = this->enumeratePhysicalDevices();
+	uint32_t bestScore = 0;
+	size_t bestIndex = 0;
+
+	for(size_t i = 0; i < devices.size(); i++) {
+		if(devices[i].calculateScore() > bestScore) {
+			bestScore = devices[i].calculateScore();
+			bestIndex = i;
+		}
+	}
+	return devices[bestIndex];
 }
 
 magmatic::Surface magmatic::Instance::createSurface(const magmatic::Window& window) const

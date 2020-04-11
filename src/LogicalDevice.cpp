@@ -186,7 +186,7 @@ magmatic::Shader magmatic::LogicalDevice::createShader(const std::filesystem::pa
 
 	std::vector<char> spirv(file_size);
 
-	std::ifstream spirv_file(file_path, std::ios::ate | std::ios::binary);
+	std::ifstream spirv_file(file_path, std::ios::binary);
 
 	if (!spirv_file.is_open()) {
 		spdlog::error("Failed to open file {}", file_path.string());

@@ -10,4 +10,5 @@ target_sources(magmatic-render
 		Pipeline.hpp
 		RenderPass.hpp
 		Framebuffers.hpp
+		CommandPool.hpp
 		)

@@ -409,4 +409,14 @@ magmatic::Framebuffers magmatic::LogicalDevice::createFramebuffers(
 	}
 
 	return Framebuffers(framebuffers);
+}
+
+magmatic::CommandPool magmatic::LogicalDevice::createCommandPool(uint32_t queue_family_index) const
+{
+	vk::UniqueCommandPool commandPool = device->createCommandPoolUnique(
+			vk::CommandPoolCreateInfo(
+					vk::CommandPoolCreateFlags(),
+					queue_family_index
+			));
+	return CommandPool(std::move(commandPool));
 };

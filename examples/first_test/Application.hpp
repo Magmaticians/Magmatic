@@ -10,13 +10,16 @@
 
 class Application {
     static constexpr const char* DEFAULT_NAME{"Test application"};
-    magmatic::Window window;
-    magmatic::Instance instance;
-    magmatic::Surface surface;
-    magmatic::PhysicalDevice physicalDevice;
-    magmatic::LogicalDevice logicalDevice;
-    magmatic::SwapChain swapChain;
-    magmatic::RenderPass renderPass;
+    const magmatic::Window window;
+    const magmatic::Instance instance;
+    const magmatic::Surface surface;
+	const magmatic::PhysicalDevice physicalDevice;
+	const magmatic::LogicalDevice logicalDevice;
+	magmatic::Shader vertShader;
+	magmatic::Shader fragShader;
+	const magmatic::SwapChain swapChain;
+	const magmatic::RenderPass renderPass;
+	const magmatic::Pipeline pipeline;
 
 public:
     Application();

@@ -53,7 +53,8 @@ namespace magmatic
 
 		[[nodiscard]] Pipeline createPipeline(
 				uint32_t extent_width, uint32_t extent_height,
-				const std::vector<Shader>& shaderStages
+				std::vector<std::reference_wrapper<Shader>> shaderStages,
+				const RenderPass& renderPass
 				) const;
 
 		[[nodiscard]] RenderPass createRenderPass(

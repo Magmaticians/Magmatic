@@ -3,7 +3,6 @@
 #include <set>
 #include <fstream>
 
-
 magmatic::LogicalDevice::LogicalDevice(
 		const magmatic::PhysicalDevice& physical_device,
 		const Surface& surface,
@@ -172,14 +171,14 @@ magmatic::SwapChain magmatic::LogicalDevice::createSwapchain(
 
 	vk::UniqueSwapchainKHR swapchain = device->createSwapchainKHRUnique(swapchain_create_info);
 
-	return SwapChain(std::move(swapchain), device, surface_format.format);
+	return SwapChain(std::move(swapchain), device, surface_format.format, extent);
 }
 
-Shader magmatic::LogicalDevice::createShader(const std::filesystem::path& file_path, vk::ShaderStageFlagBits type) const
+magmatic::Shader magmatic::LogicalDevice::createShader(const std::filesystem::path& file_path, vk::ShaderStageFlagBits type) const
 {
 	if(!std::filesystem::exists(file_path))
 	{
-		spdlog::error("Shader file not exist: %s", file_path.string());
+		spdlog::error("Shader file not exist: {}", file_path.string());
 		throw std::runtime_error("Shader file not exist");
 	}
 
@@ -188,6 +187,12 @@ Shader magmatic::LogicalDevice::createShader(const std::filesystem::path& file_p
 	std::vector<char> spirv(file_size);
 
 	std::ifstream spirv_file(file_path, std::ios::ate | std::ios::binary);
+
+	if (!spirv_file.is_open()) {
+		spdlog::error("Failed to open file {}", file_path.string());
+		throw std::runtime_error("failed to open file!");
+	}
+
 	spirv_file.read(spirv.data(), file_size);
 	spirv_file.close();
 
@@ -204,7 +209,8 @@ Shader magmatic::LogicalDevice::createShader(const std::filesystem::path& file_p
 
 magmatic::Pipeline magmatic::LogicalDevice::createPipeline(
 		uint32_t extent_width, uint32_t extent_height,
-		const std::vector<Shader>& shaderStages
+		std::vector<std::reference_wrapper<Shader>> shaderStages,
+		const RenderPass& renderPass
 ) const
 {
 	vk::PipelineVertexInputStateCreateInfo vertex_input_state_create_info(
@@ -220,6 +226,11 @@ magmatic::Pipeline magmatic::LogicalDevice::createPipeline(
 			vk::PrimitiveTopology::eTriangleList,
 			false
 			);
+
+	vk::PipelineShaderStageCreateInfo shaderStageInfos[2] = {
+	        shaderStages[0].get().getPipelineShaderStageCreateInfo(),
+	        shaderStages[1].get().getPipelineShaderStageCreateInfo()
+    };
 
 	vk::Viewport viewport(
 			0.0f, 0.0f,
@@ -249,38 +260,122 @@ magmatic::Pipeline magmatic::LogicalDevice::createPipeline(
 			1.0f
 			);
 
-	return Pipeline();
+    vk::PipelineMultisampleStateCreateInfo multisampling(
+            vk::PipelineMultisampleStateCreateFlags(),
+            vk::SampleCountFlagBits::e1
+            );
+
+    vk::StencilOpState stencilOpState(vk::StencilOp::eKeep, vk::StencilOp::eKeep, vk::StencilOp::eKeep, vk::CompareOp::eAlways);
+    vk::PipelineDepthStencilStateCreateInfo depthStencilState(
+            vk::PipelineDepthStencilStateCreateFlags(),
+            true,
+            true,
+            vk::CompareOp::eLessOrEqual,
+            false,
+            false,
+            stencilOpState,
+            stencilOpState
+            );
+
+    vk::ColorComponentFlags colorComponentFlags(vk::ColorComponentFlagBits::eR | vk::ColorComponentFlagBits::eG | vk::ColorComponentFlagBits::eB | vk::ColorComponentFlagBits::eA);
+    vk::PipelineColorBlendAttachmentState pipelineColorBlendAttachmentState(
+            false,
+            vk::BlendFactor::eZero,
+            vk::BlendFactor::eZero,
+            vk::BlendOp::eAdd,
+            vk::BlendFactor::eZero,
+            vk::BlendFactor::eZero,
+            vk::BlendOp::eAdd,
+            colorComponentFlags
+            );
+
+    vk::PipelineColorBlendStateCreateInfo colorBlending(
+            vk::PipelineColorBlendStateCreateFlags(),
+            false,
+            vk::LogicOp::eNoOp,
+            1, &pipelineColorBlendAttachmentState,
+            { {1.0f, 1.0f, 1.0f, 1.0f} }
+            );
+
+    vk::PipelineDynamicStateCreateInfo dynamicStates(
+            vk::PipelineDynamicStateCreateFlags(),
+            0,
+            nullptr);
+
+    //TODO: Check descriptorSetLayout
+    vk::DescriptorSetLayoutCreateInfo descriptorSetLayoutCreateInfo(
+            vk::DescriptorSetLayoutCreateFlags(),
+            0,
+            nullptr
+            );
+    vk::UniqueDescriptorSetLayout descriptorSetLayout = device->createDescriptorSetLayoutUnique(descriptorSetLayoutCreateInfo);
+    vk::PipelineLayoutCreateInfo pipelineLayoutInfo(
+            vk::PipelineLayoutCreateFlags(),
+            1,
+            &descriptorSetLayout.get()
+            );
+    vk::UniquePipelineLayout pipelineLayout = device->createPipelineLayoutUnique(pipelineLayoutInfo);
+
+	vk::GraphicsPipelineCreateInfo pipelineCreateInfo(
+	        vk::PipelineCreateFlags(),
+	        2,
+	        shaderStageInfos,
+	        &vertex_input_state_create_info,
+	        &input_assembly_state_create_info,
+	        nullptr,
+	        &viewport_state_create_info,
+	        &rasterization_state_create_info,
+            &multisampling,
+            &depthStencilState,
+            &colorBlending,
+            &dynamicStates,
+            pipelineLayout.get(),
+            renderPass.renderPass.get()
+	        );
+
+	vk::UniquePipeline pipeline = device->createGraphicsPipelineUnique(nullptr, pipelineCreateInfo);
+	return Pipeline(std::move(pipeline));
 }
 
 magmatic::RenderPass magmatic::LogicalDevice::createRenderPass(const Surface& surface) const {
     const auto &support_details = physical_dev.getSwapChainSupportDetails(surface);
     const auto surface_format = SwapChain::chooseSwapSurfaceFormat(support_details.formats);
 
-    vk::AttachmentDescription colorAttachment;
-    colorAttachment.format = surface_format.format;
-    colorAttachment.samples = vk::SampleCountFlagBits::e1;
-    colorAttachment.loadOp = vk::AttachmentLoadOp::eClear;
-    colorAttachment.storeOp = vk::AttachmentStoreOp::eStore;
-    colorAttachment.stencilLoadOp = vk::AttachmentLoadOp::eDontCare;
-    colorAttachment.stencilStoreOp = vk::AttachmentStoreOp::eDontCare;
-    colorAttachment.initialLayout = vk::ImageLayout::eUndefined;
-    colorAttachment.finalLayout = vk::ImageLayout::ePresentSrcKHR;
+    vk::AttachmentDescription colorAttachment(
+            vk::AttachmentDescriptionFlags(),
+            surface_format.format,
+            vk::SampleCountFlagBits::e1,
+            vk::AttachmentLoadOp::eClear,
+            vk::AttachmentStoreOp::eStore,
+            vk::AttachmentLoadOp::eDontCare,
+            vk::AttachmentStoreOp::eDontCare,
+            vk::ImageLayout::eUndefined,
+            vk::ImageLayout::ePresentSrcKHR
+            );
 
     vk::AttachmentReference colorAttachmentRef(
             0,
             vk::ImageLayout::eColorAttachmentOptimal
             );
 
-    vk::SubpassDescription subpass;
-    subpass.pipelineBindPoint = vk::PipelineBindPoint::eGraphics;
-    subpass.colorAttachmentCount = 1;
-    subpass.pColorAttachments = &colorAttachmentRef;
+    vk::SubpassDescription subpass(
+            vk::SubpassDescriptionFlags(),
+            vk::PipelineBindPoint::eGraphics,
+            0,
+            nullptr,
+            1,
+            &colorAttachmentRef,
+            nullptr,
+            nullptr
+            );
 
-    vk::RenderPassCreateInfo renderPassInfo;
-    renderPassInfo.attachmentCount = 1;
-    renderPassInfo.pAttachments = &colorAttachment;
-    renderPassInfo.subpassCount = 1;
-    renderPassInfo.pSubpasses = &subpass;
+    vk::RenderPassCreateInfo renderPassInfo(
+            vk::RenderPassCreateFlags(),
+            1,
+            &colorAttachment,
+            1,
+            &subpass
+            );
 
     vk::UniqueRenderPass renderPass = device->createRenderPassUnique(renderPassInfo);
 

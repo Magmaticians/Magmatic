@@ -1,5 +1,3 @@
-//
-// Created by xert on 09.04.2020.
-//
-
 #include "Pipeline.hpp"
+
+magmatic::Pipeline::Pipeline(vk::UniquePipeline pipeline): pipeline(std::move(pipeline)) {}

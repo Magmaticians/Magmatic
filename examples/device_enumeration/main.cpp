@@ -112,10 +112,16 @@ void printDevicesSummary(const std::vector<magmatic::PhysicalDevice>& devices)
 	devices_summary.add_row({"Physical devices: ", std::to_string(devices.size())});
 	devices_summary[0].format().font_align(tabulate::FontAlign::center);
 	devices_summary[0].format().font_color(tabulate::Color::green);
-
-	for(const auto& device : devices)
+	if(devices.size() >=2 )
 	{
-		devices_summary.add_row({getDeviceSummary(device)});
+		for(size_t i = 0; i < devices.size(); i+=2)
+		{
+			devices_summary.add_row({getDeviceSummary(devices[i]), getDeviceSummary(devices[i+1])});
+		}
+	}
+	if(devices.size()%2 != 0)
+	{
+		devices_summary.add_row({getDeviceSummary(devices[devices.size()-1])});
 	}
 	devices_summary[0].format().border_color(tabulate::Color::blue);
 	devices_summary.format().border_color(tabulate::Color::blue);

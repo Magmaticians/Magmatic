@@ -5,7 +5,7 @@
 Application::Application():window(magmatic::Window(DEFAULT_NAME)),
 instance(magmatic::Instance(DEFAULT_NAME, window.getRequiredExtensions())),
 surface(instance.createSurface(window)),
-physicalDevice(magmatic::PhysicalDevice(instance.enumeratePhysicalDevices()[0])),
+physicalDevice(magmatic::PhysicalDevice(instance.getBestDevice())),
 logicalDevice(magmatic::LogicalDevice(physicalDevice, surface)),
 vertShader(logicalDevice.createShader("./examples/first_test/vert.spv", vk::ShaderStageFlagBits::eVertex)),
 fragShader(logicalDevice.createShader("./examples/first_test/frag.spv", vk::ShaderStageFlagBits::eFragment)),

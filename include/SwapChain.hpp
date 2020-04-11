@@ -28,10 +28,10 @@ namespace magmatic
 		SwapChain(const SwapChain&) = delete;
 		SwapChain& operator=(const SwapChain&) = delete;
 
+		const vk::Extent2D extent;
+
 	private:
 		vk::UniqueSwapchainKHR swapchain_;
-
-		vk::Extent2D extent;
 
 		std::vector<vk::Image> images_;
 		std::vector<vk::UniqueImageView> image_views_;

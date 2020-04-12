@@ -77,7 +77,6 @@ namespace magmatic
 				const std::vector<size_t>& presents
 				);
 	};
-
 }
 
 

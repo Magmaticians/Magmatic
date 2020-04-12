@@ -12,4 +12,5 @@ target_sources(magmatic-render
 		Framebuffers.hpp
 		CommandPool.hpp
 		CommandBuffer.hpp
+		QueueType.hpp
 		)

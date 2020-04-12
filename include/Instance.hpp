@@ -29,7 +29,7 @@ namespace magmatic
 		Instance& operator=(const Instance&) = delete;
 
 		[[nodiscard]] std::vector<PhysicalDevice> enumeratePhysicalDevices() const;
-		PhysicalDevice getBestDevice() const;
+		[[nodiscard]] PhysicalDevice getBestDevice() const;
 		[[nodiscard]] Surface createSurface(const Window& window) const;
 	};
 }

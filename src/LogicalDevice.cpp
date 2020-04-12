@@ -411,22 +411,44 @@ magmatic::Framebuffers magmatic::LogicalDevice::createFramebuffers(
 	return Framebuffers(framebuffers);
 }
 
-magmatic::CommandPool magmatic::LogicalDevice::createCommandPool(uint32_t queue_family_index) const
+magmatic::CommandPool magmatic::LogicalDevice::createCommandPool(QueueType type) const
 {
+	size_t queue_family_index;
+	switch(type)
+	{
+		case QueueType::GraphicalQueue:
+			queue_family_index = graphic_queue_index;
+			break;
+		case QueueType::PresentQueue:
+			queue_family_index = present_queue_index;
+			break;
+	}
 	vk::UniqueCommandPool command_pool = device->createCommandPoolUnique(
 			vk::CommandPoolCreateInfo(
 					vk::CommandPoolCreateFlags(),
 					queue_family_index
 			));
-	return CommandPool(std::move(command_pool));
+	return CommandPool(std::move(command_pool), type);
 }
 
 magmatic::CommandBuffer magmatic::LogicalDevice::createCommandBuffer(const CommandPool& pool) const
 {
-	vk::CommandBufferAllocateInfo command_buffer_allocate_info{
+	vk::CommandBufferAllocateInfo command_buffer_info{
 		pool.command_pool.get(),
 		vk::CommandBufferLevel::ePrimary,
 		1
 	};
-	return CommandBuffer(std::move(device->allocateCommandBuffersUnique(command_buffer_allocate_info).front()));
+
+	vk::UniqueCommandBuffer buffer = std::move(device->allocateCommandBuffersUnique(command_buffer_info).front());
+
+	switch(pool.type)
+	{
+		case QueueType::PresentQueue:
+			return CommandBuffer(std::move(buffer), present_queue);
+		case QueueType::GraphicalQueue:
+			return CommandBuffer(std::move(buffer), graphics_queue);
+		default:
+			spdlog::error("Magmatic: Buffer for provided queue not implemented");
+			throw std::runtime_error("Magmatic: Buffer for provided queue not implemented");
+	}
 };

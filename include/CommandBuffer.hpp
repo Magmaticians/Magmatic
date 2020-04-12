@@ -10,12 +10,14 @@ namespace magmatic
 	public:
 		friend class LogicalDevice;
 		const vk::UniqueCommandBuffer command_buffer;
+		const vk::Queue& queue;
 
 		CommandBuffer(const CommandBuffer&) = delete;
 		CommandBuffer& operator=(CommandBuffer&) = delete;
 
 	private:
-		explicit CommandBuffer(vk::UniqueCommandBuffer buffer) : command_buffer(std::move(buffer)){};
+		explicit CommandBuffer(vk::UniqueCommandBuffer buffer,const vk::Queue& queue)
+		: command_buffer(std::move(buffer)), queue(queue){};
 
 	};
 }

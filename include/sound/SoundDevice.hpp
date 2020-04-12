@@ -2,6 +2,8 @@
 #define MAGMATIC_SOUNDDEVICE_HPP
 
 #include <memory>
+#include <vector>
+#include <string>
 
 typedef struct ALCdevice_struct ALCdevice;
 typedef struct ALCcontext_struct ALCcontext;
@@ -27,6 +29,8 @@ namespace magmatic::sound
 
 		AudioDevice(const AudioDevice&) = delete;
 		AudioDevice& operator=(const AudioDevice&) = delete;
+
+		static std::vector<std::string> enumerateDevices() noexcept;
 
 	private:
 		std::unique_ptr<ALCdevice, ALCdeviceDeleter> alc_device;

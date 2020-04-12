@@ -26,7 +26,7 @@ namespace magmatic
 		const vk::Queue& queue;
 		const vk::UniqueCommandBuffer command_buffer;
 
-		std::mutex recording_mutex;
+		bool recording;
 	};
 }
 

@@ -1,9 +1,15 @@
 #include "CommandBuffer.hpp"
+#include <spdlog/spdlog.h>
 
 
 const vk::UniqueCommandBuffer& magmatic::CommandBuffer::beginRecording(vk::CommandBufferUsageFlags usage)
 {
-	recording_mutex.lock();
+	if(recording)
+	{
+		spdlog::error("Magmatic: Recording started on not ended command buffer");
+		throw std::runtime_error("Recording started on not ended command buffer");
+	}
+	recording = true;
 	vk::CommandBufferBeginInfo begin_info{
 		usage
 	};
@@ -13,6 +19,11 @@ const vk::UniqueCommandBuffer& magmatic::CommandBuffer::beginRecording(vk::Comma
 
 void magmatic::CommandBuffer::endRecording()
 {
+	if(!recording)
+	{
+		spdlog::error("Magmatic: Cannot end not started recording");
+		throw std::runtime_error("Magmatic: Cannot end not started recording");
+	}
 	command_buffer->end();
-	recording_mutex.unlock();
+	recording = false;
 }

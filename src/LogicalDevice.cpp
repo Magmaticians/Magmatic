@@ -2,6 +2,8 @@
 #include <spdlog/spdlog.h>
 #include <set>
 #include <fstream>
+#include <functional>
+#include <algorithm>
 
 magmatic::LogicalDevice::LogicalDevice(
 		const magmatic::PhysicalDevice& physical_device,
@@ -431,52 +433,37 @@ magmatic::CommandPool magmatic::LogicalDevice::createCommandPool(QueueType type)
 	return CommandPool(std::move(command_pool), type);
 }
 
-std::vector<vk::UniqueCommandBuffer> magmatic::LogicalDevice::getUniqueBuffers(const CommandPool& pool) const {
+std::vector<magmatic::CommandBuffer> magmatic::LogicalDevice::createCommandBuffers(const CommandPool& pool, size_t count) const
+{
 	vk::CommandBufferAllocateInfo command_buffer_info{
 			pool.command_pool.get(),
 			vk::CommandBufferLevel::ePrimary,
-			1
+			static_cast<uint32_t>(count)
 	};
 
-	return device->allocateCommandBuffersUnique(command_buffer_info);
-}
-
-magmatic::CommandBuffer magmatic::LogicalDevice::createCommandBuffer(const CommandPool& pool) const {
-	vk::UniqueCommandBuffer buffer = std::move(getUniqueBuffers(pool).front());
-
-	switch(pool.type)
-	{
-		case QueueType::PresentQueue:
-			return CommandBuffer(std::move(buffer), present_queue);
-		case QueueType::GraphicalQueue:
-			return CommandBuffer(std::move(buffer), graphics_queue);
-		default:
-			spdlog::error("Magmatic: Buffer for provided queue not implemented");
-			throw std::runtime_error("Magmatic: Buffer for provided queue not implemented");
-	}
-}
-
-std::vector<magmatic::CommandBuffer> magmatic::LogicalDevice::createCommandBuffers(const CommandPool& pool, size_t buffersCount) const
-{
-	std::vector<vk::UniqueCommandBuffer> buffers = getUniqueBuffers(pool);
+	auto buffers = device->allocateCommandBuffersUnique(command_buffer_info);
 
 	std::vector<CommandBuffer> resBuffers;
-	resBuffers.reserve(buffersCount);
+	resBuffers.reserve(count);
 
 	switch(pool.type)
 	{
 		case QueueType::PresentQueue:
-			for(size_t i = 0; i < buffersCount; i++) {
-				resBuffers.emplace_back(std::move(CommandBuffer(std::move(buffers[i]), present_queue)));
+			for(auto& buffer : buffers) {
+				resBuffers.emplace_back(CommandBuffer(buffer, present_queue));
 			}
 			return resBuffers;
 		case QueueType::GraphicalQueue:
-			for(size_t i = 0; i < buffersCount; i++) {
-				resBuffers.emplace_back(std::move(CommandBuffer(std::move(buffers[i]), graphics_queue)));
+			for(auto& buffer : buffers) {
+				resBuffers.emplace_back(CommandBuffer(buffer, graphics_queue));
 			}
 			return resBuffers;
 		default:
 			spdlog::error("Magmatic: Buffers for provided queue not implemented");
 			throw std::runtime_error("Magmatic: Buffers for provided queue not implemented");
 	}
+}
+
+magmatic::CommandBuffer magmatic::LogicalDevice::createCommandBuffer(const CommandPool& pool) const {
+	return CommandBuffer(std::move(createCommandBuffers(pool, 1).front()));
 }

@@ -1,6 +1,12 @@
 #include "CommandBuffer.hpp"
 #include <spdlog/spdlog.h>
 
+magmatic::CommandBuffer& magmatic::CommandBuffer::operator=(magmatic::CommandBuffer&& rhs) noexcept
+{
+	command_buffer = std::move(rhs.command_buffer);
+	queue = rhs.queue;
+	return *this;
+}
 
 const vk::UniqueCommandBuffer& magmatic::CommandBuffer::beginRecording(vk::CommandBufferUsageFlags usage)
 {

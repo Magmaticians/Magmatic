@@ -12,6 +12,7 @@ namespace magmatic
 
 		explicit Framebuffers(std::vector<vk::UniqueFramebuffer>& framebuffers) : framebuffers(std::move(framebuffers)) {};
 
+	public:
 		Framebuffers(Framebuffers&) = delete;
 		Framebuffers& operator=(Framebuffers&) = delete;
 	};

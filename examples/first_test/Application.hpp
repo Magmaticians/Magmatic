@@ -20,6 +20,9 @@ class Application {
 	const magmatic::SwapChain swapChain;
 	const magmatic::RenderPass renderPass;
 	const magmatic::Pipeline pipeline;
+	const magmatic::Framebuffers framebuffers;
+	const magmatic::CommandPool commandPool;
+	const magmatic::CommandBuffer commandBuffer;
 
 public:
     Application();

@@ -12,3 +12,5 @@ target_sources(
 		RenderPass.cpp
 		CommandBuffer.cpp
 )
+
+add_subdirectory(sound)

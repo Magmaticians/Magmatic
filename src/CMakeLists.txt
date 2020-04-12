@@ -10,4 +10,5 @@ target_sources(
 		Shader.cpp
 		Pipeline.cpp
 		RenderPass.cpp
+		CommandBuffer.cpp
 )

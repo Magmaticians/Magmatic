@@ -11,4 +11,5 @@ target_sources(magmatic-render
 		RenderPass.hpp
 		Framebuffers.hpp
 		CommandPool.hpp
+		CommandBuffer.hpp
 		)

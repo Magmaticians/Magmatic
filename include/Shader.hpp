@@ -14,9 +14,8 @@ namespace magmatic {
 		explicit Shader(vk::UniqueShaderModule module, vk::ShaderStageFlagBits type) noexcept
 				: shader_module(std::move(module)), type(type) {};
 
-		Shader(const Shader &) = delete;
-
-		Shader &operator=(const Shader &) = delete;
+		Shader(const Shader&) = delete;
+		Shader &operator=(const Shader&) = delete;
 
 		[[nodiscard]] vk::PipelineShaderStageCreateInfo getPipelineShaderStageCreateInfo() const noexcept;
 	};

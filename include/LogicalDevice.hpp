@@ -9,6 +9,7 @@
 #include "RenderPass.hpp"
 #include "Framebuffers.hpp"
 #include "CommandPool.hpp"
+#include "CommandBuffer.hpp"
 #include <vulkan/vulkan.hpp>
 #include <filesystem>
 #include <optional>
@@ -66,6 +67,8 @@ namespace magmatic
 		[[nodiscard]] Framebuffers createFramebuffers(const RenderPass& render_pass, const SwapChain& swapchain) const;
 
 		[[nodiscard]] CommandPool createCommandPool(uint32_t queue_family_index) const;
+
+		[[nodiscard]] CommandBuffer createCommandBuffer(const CommandPool& pool) const;
 
 	private:
 		static std::optional<std::pair<size_t, size_t>> chooseGraphicPresentQueue(

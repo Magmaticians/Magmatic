@@ -11,6 +11,10 @@ namespace magmatic
 		const vk::UniqueCommandPool command_pool;
 
 		explicit CommandPool(vk::UniqueCommandPool pool) : command_pool(std::move(pool)) {}
+
+	public:
+		CommandPool(const CommandPool&) = delete;
+		CommandPool& operator=(CommandPool&) = delete;
 	};
 }
 

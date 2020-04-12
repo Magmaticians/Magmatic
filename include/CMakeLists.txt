@@ -14,3 +14,5 @@ target_sources(magmatic-render
 		CommandBuffer.hpp
 		QueueType.hpp
 		)
+
+add_subdirectory(sound)

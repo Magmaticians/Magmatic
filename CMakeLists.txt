@@ -16,6 +16,9 @@ find_package(Vulkan REQUIRED)
 find_package(spdlog REQUIRED)
 find_package(fmt REQUIRED)
 
+#Audio
+find_package(OpenAL REQUIRED)
+
 #Table display
 find_package(tabulate REQUIRED)
 
@@ -32,9 +35,13 @@ add_dependencies(examples main-test)
 #Use external fmt
 target_compile_definitions(magmatic-render PRIVATE SPDLOG_FMT_EXTERNAL=1)
 
-set_property(TARGET magmatic-render PROPERTY CXX_STANDARD 20)
 target_include_directories(magmatic-render PUBLIC Vulkan::Vulkan)
 target_link_libraries(magmatic-render PUBLIC glfw Vulkan::Vulkan spdlog::spdlog_header_only)
+
+#magmatic-sound
+add_library(magmatic-sound SHARED "")
+target_link_libraries(magmatic-sound PRIVATE ${OPENAL_LIBRARY})
+target_include_directories(magmatic-sound PRIVATE ${OPENAL_INCLUDE_DIRS})
 
 target_link_libraries(main-test PRIVATE magmatic-render)
 

@@ -69,7 +69,9 @@ namespace magmatic
 
 		[[nodiscard]] CommandPool createCommandPool(QueueType type) const;
 
+		[[nodiscard]] std::vector<vk::UniqueCommandBuffer> getUniqueBuffers(const CommandPool& pool) const;
 		[[nodiscard]] CommandBuffer createCommandBuffer(const CommandPool& pool) const;
+		[[nodiscard]] std::vector<CommandBuffer> createCommandBuffers(const CommandPool& pool, size_t buffersCount) const;
 
 	private:
 		static std::optional<std::pair<size_t, size_t>> chooseGraphicPresentQueue(

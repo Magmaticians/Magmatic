@@ -14,7 +14,7 @@ renderPass(logicalDevice.createRenderPass(surface)),
 pipeline(logicalDevice.createPipeline(swapChain.extent.width, swapChain.extent.height, {vertShader, fragShader}, renderPass)),
 framebuffers(logicalDevice.createFramebuffers(renderPass, swapChain)),
 commandPool(logicalDevice.createCommandPool(magmatic::QueueType::GraphicalQueue)),
-commandBuffer(logicalDevice.createCommandBuffer(commandPool)) {
+commandBuffers(logicalDevice.createCommandBuffers(commandPool, framebuffers.getSize())) {
 	spdlog::info("Application constructor called and finished work");
 }
 

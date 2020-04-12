@@ -266,7 +266,7 @@ magmatic::Pipeline magmatic::LogicalDevice::createPipeline(
             );
 
     vk::StencilOpState stencilOpState(vk::StencilOp::eKeep, vk::StencilOp::eKeep, vk::StencilOp::eKeep, vk::CompareOp::eAlways);
-    vk::PipelineDepthStencilStateCreateInfo depthStencilState(
+    vk::PipelineDepthStencilStateCreateInfo depth_stencil_state(
             vk::PipelineDepthStencilStateCreateFlags(),
             true,
             true,
@@ -278,7 +278,7 @@ magmatic::Pipeline magmatic::LogicalDevice::createPipeline(
             );
 
     vk::ColorComponentFlags colorComponentFlags(vk::ColorComponentFlagBits::eR | vk::ColorComponentFlagBits::eG | vk::ColorComponentFlagBits::eB | vk::ColorComponentFlagBits::eA);
-    vk::PipelineColorBlendAttachmentState pipelineColorBlendAttachmentState(
+    vk::PipelineColorBlendAttachmentState pipeline_color_blend_attachment_state(
             false,
             vk::BlendFactor::eZero,
             vk::BlendFactor::eZero,
@@ -289,51 +289,51 @@ magmatic::Pipeline magmatic::LogicalDevice::createPipeline(
             colorComponentFlags
             );
 
-    vk::PipelineColorBlendStateCreateInfo colorBlending(
+    vk::PipelineColorBlendStateCreateInfo color_blending(
             vk::PipelineColorBlendStateCreateFlags(),
             false,
             vk::LogicOp::eNoOp,
-            1, &pipelineColorBlendAttachmentState,
+            1, &pipeline_color_blend_attachment_state,
             { {1.0f, 1.0f, 1.0f, 1.0f} }
             );
 
-    vk::PipelineDynamicStateCreateInfo dynamicStates(
+    vk::PipelineDynamicStateCreateInfo dynamic_states(
             vk::PipelineDynamicStateCreateFlags(),
             0,
             nullptr);
 
     //TODO: Check descriptorSetLayout
-    vk::DescriptorSetLayoutCreateInfo descriptorSetLayoutCreateInfo(
+    vk::DescriptorSetLayoutCreateInfo descriptor_set_layout_create_info(
             vk::DescriptorSetLayoutCreateFlags(),
             0,
             nullptr
             );
-    vk::UniqueDescriptorSetLayout descriptorSetLayout = device->createDescriptorSetLayoutUnique(descriptorSetLayoutCreateInfo);
-    vk::PipelineLayoutCreateInfo pipelineLayoutInfo(
+    vk::UniqueDescriptorSetLayout descriptor_set_layout = device->createDescriptorSetLayoutUnique(descriptor_set_layout_create_info);
+    vk::PipelineLayoutCreateInfo pipeline_layout_info(
             vk::PipelineLayoutCreateFlags(),
             1,
-            &descriptorSetLayout.get()
+            &descriptor_set_layout.get()
             );
-    vk::UniquePipelineLayout pipelineLayout = device->createPipelineLayoutUnique(pipelineLayoutInfo);
+    vk::UniquePipelineLayout pipeline_layout = device->createPipelineLayoutUnique(pipeline_layout_info);
 
-	vk::GraphicsPipelineCreateInfo pipelineCreateInfo(
-	        vk::PipelineCreateFlags(),
-	        2,
-	        shaderStageInfos,
-	        &vertex_input_state_create_info,
-	        &input_assembly_state_create_info,
-	        nullptr,
-	        &viewport_state_create_info,
-	        &rasterization_state_create_info,
-            &multisampling,
-            &depthStencilState,
-            &colorBlending,
-            &dynamicStates,
-            pipelineLayout.get(),
-            renderPass.renderPass.get()
+	vk::GraphicsPipelineCreateInfo pipeline_create_info(
+			vk::PipelineCreateFlags(),
+			2,
+			shaderStageInfos,
+			&vertex_input_state_create_info,
+			&input_assembly_state_create_info,
+			nullptr,
+			&viewport_state_create_info,
+			&rasterization_state_create_info,
+			&multisampling,
+			&depth_stencil_state,
+			&color_blending,
+			&dynamic_states,
+			pipeline_layout.get(),
+			renderPass.renderPass.get()
 	        );
 
-	vk::UniquePipeline pipeline = device->createGraphicsPipelineUnique(nullptr, pipelineCreateInfo);
+	vk::UniquePipeline pipeline = device->createGraphicsPipelineUnique(nullptr, pipeline_create_info);
 	return Pipeline(std::move(pipeline));
 }
 
@@ -341,7 +341,7 @@ magmatic::RenderPass magmatic::LogicalDevice::createRenderPass(const Surface& su
 	const auto& support_details = physical_dev.getSwapChainSupportDetails(surface);
 	const auto surface_format = SwapChain::chooseSwapSurfaceFormat(support_details.formats);
 
-	vk::AttachmentDescription colorAttachment(
+	vk::AttachmentDescription color_attachment(
 			vk::AttachmentDescriptionFlags(),
 			surface_format.format,
 			vk::SampleCountFlagBits::e1,
@@ -353,7 +353,7 @@ magmatic::RenderPass magmatic::LogicalDevice::createRenderPass(const Surface& su
 			vk::ImageLayout::ePresentSrcKHR
 	);
 
-	vk::AttachmentReference colorAttachmentRef(
+	vk::AttachmentReference color_attachment_reference(
 			0,
 			vk::ImageLayout::eColorAttachmentOptimal
 	);
@@ -364,20 +364,20 @@ magmatic::RenderPass magmatic::LogicalDevice::createRenderPass(const Surface& su
 			0,
 			nullptr,
 			1,
-			&colorAttachmentRef,
+			&color_attachment_reference,
 			nullptr,
 			nullptr
 	);
 
-	vk::RenderPassCreateInfo renderPassInfo(
+	vk::RenderPassCreateInfo render_pass_info(
 			vk::RenderPassCreateFlags(),
 			1,
-			&colorAttachment,
+			&color_attachment,
 			1,
 			&subpass
 	);
 
-    vk::UniqueRenderPass renderPass = device->createRenderPassUnique(renderPassInfo);
+    vk::UniqueRenderPass renderPass = device->createRenderPassUnique(render_pass_info);
 
     return RenderPass(std::move(renderPass));
 }
@@ -413,10 +413,20 @@ magmatic::Framebuffers magmatic::LogicalDevice::createFramebuffers(
 
 magmatic::CommandPool magmatic::LogicalDevice::createCommandPool(uint32_t queue_family_index) const
 {
-	vk::UniqueCommandPool commandPool = device->createCommandPoolUnique(
+	vk::UniqueCommandPool command_pool = device->createCommandPoolUnique(
 			vk::CommandPoolCreateInfo(
 					vk::CommandPoolCreateFlags(),
 					queue_family_index
 			));
-	return CommandPool(std::move(commandPool));
+	return CommandPool(std::move(command_pool));
+}
+
+magmatic::CommandBuffer magmatic::LogicalDevice::createCommandBuffer(const CommandPool& pool) const
+{
+	vk::CommandBufferAllocateInfo command_buffer_allocate_info{
+		pool.command_pool.get(),
+		vk::CommandBufferLevel::ePrimary,
+		1
+	};
+	return CommandBuffer(std::move(device->allocateCommandBuffersUnique(command_buffer_allocate_info).front()));
 };

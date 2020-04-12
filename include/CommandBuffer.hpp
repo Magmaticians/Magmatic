@@ -15,16 +15,19 @@ namespace magmatic
 		CommandBuffer(const CommandBuffer&) = delete;
 		CommandBuffer& operator=(CommandBuffer&) = delete;
 
+		CommandBuffer(CommandBuffer&& rhs) noexcept : queue(rhs.queue), command_buffer(std::move(rhs.command_buffer)) {};
+		CommandBuffer& operator=(CommandBuffer&& rhs) noexcept;
+
 		const vk::UniqueCommandBuffer& beginRecording(vk::CommandBufferUsageFlags usage = vk::CommandBufferUsageFlagBits::eOneTimeSubmit);
 		void endRecording();
 
 	private:
 
-		explicit CommandBuffer(vk::UniqueCommandBuffer buffer, vk::Queue queue)
+		CommandBuffer(vk::UniqueCommandBuffer& buffer,  vk::Queue queue) noexcept
 		: command_buffer(std::move(buffer)), queue(queue){};
 
-		const std::reference_wrapper<vk::Queue> queue;
-		const vk::UniqueCommandBuffer command_buffer;
+		vk::Queue queue;
+		vk::UniqueCommandBuffer command_buffer;
 
 		bool recording;
 	};

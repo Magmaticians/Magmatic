@@ -25,7 +25,8 @@ namespace magmatic::sound
 			void operator()(ALCcontext* pointer) noexcept;
 		};
 
-		AudioDevice();
+		AudioDevice() : AudioDevice(nullptr) {};
+		AudioDevice(const std::string& device) : AudioDevice(device.c_str()) {};
 
 		AudioDevice(const AudioDevice&) = delete;
 		AudioDevice& operator=(const AudioDevice&) = delete;
@@ -33,6 +34,8 @@ namespace magmatic::sound
 		static std::vector<std::string> enumerateDevices() noexcept;
 
 	private:
+		AudioDevice(const char* device);
+
 		std::unique_ptr<ALCdevice, ALCdeviceDeleter> alc_device;
 		std::unique_ptr<ALCcontext, ALCcontextDeleter> alc_context;
 	};

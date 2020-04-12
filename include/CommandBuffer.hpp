@@ -20,10 +20,10 @@ namespace magmatic
 
 	private:
 
-		explicit CommandBuffer(vk::UniqueCommandBuffer buffer,const vk::Queue& queue)
+		explicit CommandBuffer(vk::UniqueCommandBuffer buffer, vk::Queue queue)
 		: command_buffer(std::move(buffer)), queue(queue){};
 
-		const vk::Queue& queue;
+		const std::reference_wrapper<vk::Queue> queue;
 		const vk::UniqueCommandBuffer command_buffer;
 
 		bool recording;

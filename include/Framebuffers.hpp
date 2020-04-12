@@ -15,6 +15,8 @@ namespace magmatic
 	public:
 		Framebuffers(Framebuffers&) = delete;
 		Framebuffers& operator=(Framebuffers&) = delete;
+
+		[[nodiscard]] size_t getSize() const { return framebuffers.size(); }
 	};
 }
 

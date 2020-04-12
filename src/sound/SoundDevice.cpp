@@ -1,5 +1,6 @@
 #include "sound/SoundDevice.hpp"
 #include <AL/alc.h>
+#include <spdlog/spdlog.h>
 
 void magmatic::sound::AudioDevice::ALCdeviceDeleter::operator()(ALCdevice* pointer) noexcept
 {
@@ -15,10 +16,24 @@ void magmatic::sound::AudioDevice::ALCcontextDeleter::operator()(ALCcontext* poi
 	alcDestroyContext(pointer);
 }
 
-magmatic::sound::AudioDevice::AudioDevice()
-:alc_device(alcOpenDevice(nullptr)), alc_context(alcCreateContext(alc_device.get(), nullptr))
+magmatic::sound::AudioDevice::AudioDevice(const char* device)
+:alc_device(alcOpenDevice(device)), alc_context(alcCreateContext(alc_device.get(), nullptr))
 {
-	// todo: check errors
+	if(!alc_device)
+	{
+		spdlog::error("Magmatic: Failed to open audio device");
+		throw std::runtime_error("Failed to open audio device");
+	}
+	if(!alc_context)
+	{
+		spdlog::error("Magmatic: Failed to create context");
+		throw std::runtime_error(" Failed to create context");
+	}
+	if(!alcMakeContextCurrent(alc_context.get()))
+	{
+		spdlog::error("Magmatic: Failed to set current context");
+		throw std::runtime_error(" Failed to set current context");
+	}
 }
 
 std::vector<std::string> magmatic::sound::AudioDevice::enumerateDevices() noexcept

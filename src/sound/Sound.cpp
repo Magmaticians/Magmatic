@@ -1,10 +1,11 @@
 #include "sound/Sound.hpp"
+#include "sound/formats/SoundLoader.hpp"
 
-bool magmatic::sound::Sound::register_format(const std::string& name, TSoundLoader loader)
+bool magmatic::sound::Sound::register_format(const std::string& name, TSoundLoaderCreator loader)
 {
 	if(auto it = loaders.find(name); it == std::end(loaders))
 	{
-		loaders[name] = loader;
+		loaders[name] = loader();
 		return true;
 	}
 	return false;
@@ -17,7 +18,7 @@ std::shared_ptr<magmatic::sound::SoundBuffer> magmatic::sound::Sound::open(
 {
 	if(auto it = loaders.find(name); it != loaders.end())
 	{
-		return it->second(path);
+		return it->second->open(path);
 	}
 	return nullptr;
 }

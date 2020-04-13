@@ -1,7 +1,6 @@
 #ifndef MAGMATIC_SOUND_HPP
 #define MAGMATIC_SOUND_HPP
 
-#include "sound/formats/SoundLoader.hpp"
 #include "sound/SoundBuffer.hpp"
 #include <memory>
 #include <filesystem>
@@ -11,20 +10,22 @@
 
 namespace magmatic::sound
 {
+	class SoundLoader;
+
 	class Sound
 	{
 	public:
-		using TSoundBuffer = std::shared_ptr<SoundBuffer>;
-		using TSoundLoader = std::function<TSoundBuffer(const std::filesystem::path&)>;
+		using TSoundLoaderCreator = std::unique_ptr<SoundLoader>(*)();
+		using TSoundLoader = std::unique_ptr<SoundLoader>;
 	public:
 		Sound() = delete;
 
-		static bool register_format(const std::string& name, TSoundLoader loader);
+		static bool register_format(const std::string& name, TSoundLoaderCreator loader);
 
 		static std::shared_ptr<SoundBuffer> open(const std::string& name, const std::filesystem::path& path);
 
 	private:
-		static std::map<std::string, TSoundLoader> loaders;
+		static std::unordered_map<std::string, TSoundLoader> loaders;
 	};
 }
 

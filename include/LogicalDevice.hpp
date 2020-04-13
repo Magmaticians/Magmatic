@@ -11,9 +11,9 @@
 #include "CommandPool.hpp"
 #include "CommandBuffer.hpp"
 #include "QueueType.hpp"
-#include "Semaphore.hpp"
+#include "Semaphores.hpp"
 #include "SemaphoreType.hpp"
-#include "Fence.hpp"
+#include "Fences.hpp"
 #include <vulkan/vulkan.hpp>
 #include <filesystem>
 #include <optional>
@@ -75,18 +75,18 @@ namespace magmatic
 		[[nodiscard]] CommandBuffer createCommandBuffer(const CommandPool& pool) const;
 		[[nodiscard]] std::vector<CommandBuffer> createCommandBuffers(const CommandPool& pool, size_t count) const;
 
-		[[nodiscard]] Semaphore createSemaphore(SemaphoreType type) const;
+		[[nodiscard]] Semaphores createSemaphores(SemaphoreType type, size_t count) const;
 
-		[[nodiscard]] Fence createFence() const;
+		[[nodiscard]] Fences createFences(size_t count) const;
 
-		[[nodiscard]] vk::ResultValue<uint32_t> getCurrentBuffer(const SwapChain& swapChain, const Semaphore& imageAcquiredSemaphore, uint64_t timeout) const;
+		[[nodiscard]] uint32_t acquireNextImageKHR(const SwapChain& swapChain, const Semaphores& imageAcquiredSemaphores, size_t index, uint64_t timeout) const;
 
-		void submitToGraphicsQueue(const Semaphore& imageAcquiredSemaphore, const Semaphore& renderFinishedSemaphore,  const CommandBuffer& commandBuffer, const Fence& drawFence) const;
+		void submitToGraphicsQueue(const Semaphores& imageAcquiredSemaphores, const Semaphores& renderFinishedSemaphores, const CommandBuffer& commandBuffer, const Fences& fences, size_t index) const;
 
-		[[nodiscard]] vk::Result waitForFences(const Fence& drawFence, uint64_t timeout) const;
-		void resetFences(const Fence& drawFence) const;
+		vk::Result waitForFences(const Fences& fences, size_t index, uint64_t timeout) const;
+		void resetFences(const Fences& fences, size_t index) const;
 
-		void presentKHR(const Semaphore& renderFinishedSemaphore, const SwapChain& swapChain, vk::ResultValue<uint32_t> currentBuffer) const;
+		void presentKHR(const Semaphores& renderFinishedSemaphores, size_t index, const SwapChain& swapChain, uint32_t currentBuffer) const;
 
 		void waitIdle() const;
 	private:

@@ -480,46 +480,58 @@ magmatic::CommandBuffer magmatic::LogicalDevice::createCommandBuffer(const Comma
 	return CommandBuffer(std::move(createCommandBuffers(pool, 1).front()));
 }
 
-magmatic::Semaphore magmatic::LogicalDevice::createSemaphore(SemaphoreType type) const {
-	return Semaphore(device->createSemaphoreUnique(vk::SemaphoreCreateInfo()), type);
+magmatic::Semaphores magmatic::LogicalDevice::createSemaphores(SemaphoreType type, size_t count) const {
+	std::vector<vk::UniqueSemaphore> semaphores;
+	semaphores.reserve(count);
+	for(size_t i = 0; i < count; i++) {
+		semaphores.emplace_back(device->createSemaphoreUnique(vk::SemaphoreCreateInfo()));
+	}
+	return Semaphores(std::move(semaphores), type);
 }
 
-magmatic::Fence magmatic::LogicalDevice::createFence() const {
-	return Fence(device->createFenceUnique(vk::FenceCreateInfo()));
+magmatic::Fences magmatic::LogicalDevice::createFences(size_t count) const {
+	std::vector<vk::UniqueFence> fences;
+	fences.reserve(count);
+	for(size_t i = 0; i < count; i++) {
+		fences.emplace_back(device->createFenceUnique(vk::FenceCreateInfo()));
+	}
+	return Fences(std::move(fences));
 }
 
-vk::ResultValue<uint32_t> magmatic::LogicalDevice::getCurrentBuffer(const SwapChain& swapChain, const Semaphore& imageAcquiredSemaphore, uint64_t timeout) const {
-	return device->acquireNextImageKHR(swapChain.swapchain_.get(), timeout, imageAcquiredSemaphore.semaphore.get(), nullptr);
+uint32_t magmatic::LogicalDevice::acquireNextImageKHR(const SwapChain& swapChain, const Semaphores& imageAcquiredSemaphores, size_t index, uint64_t timeout) const {
+	uint32_t imageIndex;
+	device->acquireNextImageKHR(swapChain.swapchain_.get(), timeout, imageAcquiredSemaphores.semaphores[index].get(), nullptr, &imageIndex);
+	return imageIndex;
 }
 
-void magmatic::LogicalDevice::submitToGraphicsQueue(const Semaphore& imageAcquiredSemaphore, const Semaphore& renderFinishedSemaphore, const CommandBuffer& commandBuffer, const Fence& drawFence) const {
+void magmatic::LogicalDevice::submitToGraphicsQueue(const Semaphores& imageAcquiredSemaphores, const Semaphores& renderFinishedSemaphores, const CommandBuffer& commandBuffer, const Fences& fences, size_t index) const {
 	vk::PipelineStageFlags flags(vk::PipelineStageFlagBits::eColorAttachmentOutput);
 	vk::SubmitInfo submitInfo(
 			1,
-			&imageAcquiredSemaphore.semaphore.get(),
+			&imageAcquiredSemaphores.semaphores[index].get(),
 			&flags,
 			1,
 			&commandBuffer.command_buffer.get(),
 			1,
-			&renderFinishedSemaphore.semaphore.get());
-	graphics_queue.submit(submitInfo, drawFence.fence.get());
+			&renderFinishedSemaphores.semaphores[index].get());
+	graphics_queue.submit(submitInfo, nullptr/*, drawFence.fence.get()*/);
 }
 
-void magmatic::LogicalDevice::resetFences(const Fence& drawFence) const {
-	device->resetFences(1, &drawFence.fence.get());
+void magmatic::LogicalDevice::resetFences(const Fences& fences, size_t index) const {
+	device->resetFences(1, &fences.fences[index].get());
 }
 
-vk::Result magmatic::LogicalDevice::waitForFences(const Fence& drawFence, uint64_t timeout) const {
-	return device->waitForFences(drawFence.fence.get(), VK_TRUE, timeout);
+vk::Result magmatic::LogicalDevice::waitForFences(const Fences& fences, size_t index, uint64_t timeout) const {
+	return device->waitForFences(fences.fences[index].get(), VK_TRUE, timeout);
 }
 
-void magmatic::LogicalDevice::presentKHR(const Semaphore& renderFinishedSemaphore, const SwapChain& swapChain, vk::ResultValue<uint32_t> currentBuffer) const {
+void magmatic::LogicalDevice::presentKHR(const Semaphores& renderFinishedSemaphores, size_t index, const SwapChain& swapChain, uint32_t currentBuffer) const {
 	present_queue.presentKHR(vk::PresentInfoKHR(
 			1,
-			&renderFinishedSemaphore.semaphore.get(),
+			&renderFinishedSemaphores.semaphores[index].get(),
 			1,
 			&swapChain.swapchain_.get(),
-			&currentBuffer.value
+			&currentBuffer
 			));
 }
 

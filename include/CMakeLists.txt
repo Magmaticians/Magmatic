@@ -13,7 +13,7 @@ target_sources(magmatic-render
 		CommandPool.hpp
 		CommandBuffer.hpp
 		QueueType.hpp
-		Semaphore.hpp
+        Semaphores.hpp
 		SemaphoreType.hpp
-		Fence.hpp
+		Fences.hpp
 		)

@@ -15,17 +15,18 @@ pipeline(logicalDevice.createPipeline(swapChain.extent.width, swapChain.extent.h
 framebuffers(logicalDevice.createFramebuffers(renderPass, swapChain)),
 commandPool(logicalDevice.createCommandPool(magmatic::QueueType::GraphicalQueue)),
 commandBuffer(logicalDevice.createCommandBuffer(commandPool)),
-drawFence(logicalDevice.createFence()),
-imageAcquiredSemaphore(logicalDevice.createSemaphore(magmatic::SemaphoreType::ImageAvailableSemaphore)),
-renderFinishedSemaphore(logicalDevice.createSemaphore(magmatic::SemaphoreType::RenderFinishedSemaphore)){
+fences(logicalDevice.createFences(MAX_FRAMES_IN_FLIGHT)),
+//imagesInFlight(logicalDevice.createFences(swapChain.images_.size())),
+imageAcquiredSemaphores(logicalDevice.createSemaphores(magmatic::SemaphoreType::ImageAvailableSemaphore, MAX_FRAMES_IN_FLIGHT)),
+renderFinishedSemaphores(logicalDevice.createSemaphores(magmatic::SemaphoreType::RenderFinishedSemaphore, MAX_FRAMES_IN_FLIGHT)){
 	spdlog::info("Application constructor called and finished work");
 }
 
 void Application::run() {
-	vk::ResultValue<uint32_t> currentBuffer = logicalDevice.getCurrentBuffer(swapChain, imageAcquiredSemaphore, fenceTimeout);
+	currentFrame = 0;
 
 	commandBuffer.beginRecording(/*vk::CommandBufferUsageFlags()*/);
-	commandBuffer.beginRenderPass(renderPass, currentBuffer, framebuffers, swapChain.extent);
+	commandBuffer.beginRenderPass(renderPass, framebuffers, swapChain.extent);
 	commandBuffer.bindPipeline(pipeline);
 	//commandBuffer.setViewport(swapChain.extent);
 	//commandBuffer.setScissor(swapChain.extent);
@@ -38,17 +39,20 @@ void Application::run() {
 		glfwPollEvents();
 		drawFrame();
 		std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+		break;
 	}
 
+	logicalDevice.waitIdle();
 }
 
 void Application::drawFrame() {
-	while(vk::Result::eTimeout == logicalDevice.waitForFences(drawFence, fenceTimeout));
-	vk::ResultValue<uint32_t> currentBuffer = logicalDevice.getCurrentBuffer(swapChain, imageAcquiredSemaphore, fenceTimeout);
-	while(vk::Result::eTimeout == logicalDevice.waitForFences(drawFence, fenceTimeout));
-	logicalDevice.resetFences(drawFence);
-	logicalDevice.submitToGraphicsQueue(imageAcquiredSemaphore, renderFinishedSemaphore, commandBuffer, drawFence);
-	logicalDevice.presentKHR(renderFinishedSemaphore, swapChain, currentBuffer);
-	//std::this_thread::sleep_for(std::chrono::milliseconds(2000));
-	//logicalDevice.waitIdle();
+	logicalDevice.waitForFences(fences, currentFrame, fenceTimeout);
+	uint32_t currentBuffer = logicalDevice.acquireNextImageKHR(swapChain, imageAcquiredSemaphores,
+	                                                                            currentFrame, fenceTimeout);
+	logicalDevice.waitForFences(fences, currentBuffer, fenceTimeout);
+	//TODO: Check if needed and possible: imagesInFlight.setFence(std::move(fences.fences[currentFrame]), currentBuffer.value);
+	logicalDevice.resetFences(fences, currentFrame);
+	logicalDevice.submitToGraphicsQueue(imageAcquiredSemaphores, renderFinishedSemaphores, commandBuffer, fences, currentFrame);
+	logicalDevice.presentKHR(renderFinishedSemaphores, currentFrame, swapChain, currentBuffer);
+	currentFrame = (currentFrame+1)%MAX_FRAMES_IN_FLIGHT;
 }

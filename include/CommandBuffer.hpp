@@ -23,7 +23,7 @@ namespace magmatic
 
 	private:
 
-		CommandBuffer(vk::UniqueCommandBuffer& buffer,  vk::Queue queue) noexcept
+		CommandBuffer(vk::UniqueCommandBuffer& buffer, vk::Queue queue) noexcept
 		: command_buffer(std::move(buffer)), queue(queue){};
 
 		vk::Queue queue;

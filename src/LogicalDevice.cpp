@@ -467,3 +467,11 @@ std::vector<magmatic::CommandBuffer> magmatic::LogicalDevice::createCommandBuffe
 magmatic::CommandBuffer magmatic::LogicalDevice::createCommandBuffer(const CommandPool& pool) const {
 	return CommandBuffer(std::move(createCommandBuffers(pool, 1).front()));
 }
+
+magmatic::Semaphore magmatic::LogicalDevice::createSemaphore(SemaphoreType type) const {
+	return Semaphore(device->createSemaphoreUnique(vk::SemaphoreCreateInfo()), type);
+}
+
+magmatic::Fence magmatic::LogicalDevice::createFence() const {
+	return Fence(device->createFenceUnique(vk::FenceCreateInfo()));
+}

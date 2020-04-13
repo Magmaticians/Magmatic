@@ -4,6 +4,7 @@
 #include <string>
 #include <memory>
 #include <vector>
+#include <GLFW/glfw3.h>
 
 struct GLFWwindow;
 
@@ -48,6 +49,7 @@ namespace magmatic
 		void maximize() noexcept;
 		void restore() noexcept;
 		void focus() noexcept;
+		[[nodiscard]] bool shouldClose() const { return glfwWindowShouldClose(this->window.get()); }
 
 		[[nodiscard]] std::vector<std::string> getRequiredExtensions() const;
 

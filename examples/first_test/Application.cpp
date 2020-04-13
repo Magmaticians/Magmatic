@@ -1,5 +1,5 @@
-#include <iostream>
 #include <spdlog/spdlog.h>
+#include <vulkan/vulkan.hpp>
 #include "Application.hpp"
 
 Application::Application():window(magmatic::Window(DEFAULT_NAME)),
@@ -14,10 +14,15 @@ renderPass(logicalDevice.createRenderPass(surface)),
 pipeline(logicalDevice.createPipeline(swapChain.extent.width, swapChain.extent.height, {vertShader, fragShader}, renderPass)),
 framebuffers(logicalDevice.createFramebuffers(renderPass, swapChain)),
 commandPool(logicalDevice.createCommandPool(magmatic::QueueType::GraphicalQueue)),
-commandBuffers(logicalDevice.createCommandBuffers(commandPool, framebuffers.getSize())) {
+commandBuffer(logicalDevice.createCommandBuffer(commandPool)),
+drawFence(logicalDevice.createFence()),
+imageAcquiredSemaphore(logicalDevice.createSemaphore(magmatic::SemaphoreType::ImageAvailableSemaphore)) {
 	spdlog::info("Application constructor called and finished work");
 }
 
 void Application::run() {
-	spdlog::info("App running");
+	while(!window.shouldClose()) {
+		spdlog::info("App running");
+		std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+	}
 }

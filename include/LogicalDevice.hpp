@@ -11,6 +11,9 @@
 #include "CommandPool.hpp"
 #include "CommandBuffer.hpp"
 #include "QueueType.hpp"
+#include "Semaphore.hpp"
+#include "SemaphoreType.hpp"
+#include "Fence.hpp"
 #include <vulkan/vulkan.hpp>
 #include <filesystem>
 #include <optional>
@@ -72,6 +75,9 @@ namespace magmatic
 		[[nodiscard]] CommandBuffer createCommandBuffer(const CommandPool& pool) const;
 		[[nodiscard]] std::vector<CommandBuffer> createCommandBuffers(const CommandPool& pool, size_t count) const;
 
+		[[nodiscard]] Semaphore createSemaphore(SemaphoreType type) const;
+
+		[[nodiscard]] Fence createFence() const;
 	private:
 		static std::optional<std::pair<size_t, size_t>> chooseGraphicPresentQueue(
 				const std::vector<size_t>& graphics,

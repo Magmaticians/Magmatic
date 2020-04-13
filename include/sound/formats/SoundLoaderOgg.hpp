@@ -10,7 +10,10 @@ namespace magmatic::sound
 	{
 	public:
 		std::shared_ptr<SoundBuffer> open(const std::filesystem::path& path) override;
+		static bool registered;
+		static std::string factoryName() { return "OGG"; }
 
+		static std::unique_ptr<SoundLoader> createLoader();
 	};
 }
 

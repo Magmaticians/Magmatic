@@ -9,9 +9,13 @@ namespace {
 	constexpr int endian = 0;//little endian
 }
 
+bool magmatic::sound::SoundLoaderOgg::registered = magmatic::sound::Sound::register_format(
+		magmatic::sound::SoundLoaderOgg::factoryName(),
+		magmatic::sound::SoundLoaderOgg::createLoader
+);
+
 std::shared_ptr<magmatic::sound::SoundBuffer> magmatic::sound::SoundLoaderOgg::open(const std::filesystem::path& path)
 {
-	//todo: extract file loading to utils
 	if(!std::filesystem::exists(path))
 	{
 		spdlog::error("Magamtic: Ogg file doesn't exist: {}", path.string());
@@ -61,4 +65,9 @@ std::shared_ptr<magmatic::sound::SoundBuffer> magmatic::sound::SoundLoaderOgg::o
 	}
 
 	return SoundLoader::fromID(buffer_ID);
+}
+
+std::unique_ptr<magmatic::sound::SoundLoader> magmatic::sound::SoundLoaderOgg::createLoader()
+{
+	return std::make_unique<SoundLoaderOgg>();
 }

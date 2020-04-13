@@ -4,4 +4,6 @@ target_sources(
 		SoundDevice.cpp
 		Sound.cpp
 		SoundBuffer.cpp
+		formats/SoundLoaderOgg.cpp
+		formats/SoundLoader.cpp
 )

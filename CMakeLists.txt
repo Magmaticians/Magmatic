@@ -18,6 +18,7 @@ find_package(fmt REQUIRED)
 
 #Audio
 find_package(OpenAL REQUIRED)
+#todo: custom find for libvorbis
 
 #Table display
 find_package(tabulate REQUIRED)

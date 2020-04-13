@@ -2,6 +2,7 @@
 #define MAGMATIC_RENDERPASS_HPP
 
 #include <vulkan/vulkan.hpp>
+#include "Framebuffers.hpp"
 
 namespace magmatic {
     class RenderPass {

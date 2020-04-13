@@ -78,6 +78,17 @@ namespace magmatic
 		[[nodiscard]] Semaphore createSemaphore(SemaphoreType type) const;
 
 		[[nodiscard]] Fence createFence() const;
+
+		[[nodiscard]] vk::ResultValue<uint32_t> getCurrentBuffer(const SwapChain& swapChain, const Semaphore& imageAcquiredSemaphore, uint64_t timeout) const;
+
+		void submitToGraphicsQueue(const Semaphore& imageAcquiredSemaphore, const Semaphore& renderFinishedSemaphore,  const CommandBuffer& commandBuffer, const Fence& drawFence) const;
+
+		[[nodiscard]] vk::Result waitForFences(const Fence& drawFence, uint64_t timeout) const;
+		void resetFences(const Fence& drawFence) const;
+
+		void presentKHR(const Semaphore& renderFinishedSemaphore, const SwapChain& swapChain, vk::ResultValue<uint32_t> currentBuffer) const;
+
+		void waitIdle() const;
 	private:
 		static std::optional<std::pair<size_t, size_t>> chooseGraphicPresentQueue(
 				const std::vector<size_t>& graphics,

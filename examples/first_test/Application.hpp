@@ -23,14 +23,20 @@ class Application {
 	const magmatic::Framebuffers framebuffers;
 	const magmatic::CommandPool commandPool;
 	//const std::vector<magmatic::CommandBuffer> commandBuffers;
-	const magmatic::CommandBuffer commandBuffer;
+	magmatic::CommandBuffer commandBuffer;
 	const magmatic::Fence drawFence;
 	const magmatic::Semaphore imageAcquiredSemaphore;
+	const magmatic::Semaphore renderFinishedSemaphore;
 
 public:
     Application();
 
     void run();
+
+private:
+	static const uint64_t fenceTimeout = 1000000;
+
+	void drawFrame();
 };
 
 

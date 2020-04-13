@@ -2,4 +2,7 @@ target_sources(
 		magmatic-sound
 		PUBLIC
 		SoundDevice.hpp
+		Sound.hpp
+		SoundBuffer.hpp
+		formats/SoundLoader.hpp
 		)

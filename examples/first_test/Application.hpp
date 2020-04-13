@@ -22,7 +22,10 @@ class Application {
 	const magmatic::Pipeline pipeline;
 	const magmatic::Framebuffers framebuffers;
 	const magmatic::CommandPool commandPool;
-	const std::vector<magmatic::CommandBuffer> commandBuffers;
+	//const std::vector<magmatic::CommandBuffer> commandBuffers;
+	const magmatic::CommandBuffer commandBuffer;
+	const magmatic::Fence drawFence;
+	const magmatic::Semaphore imageAcquiredSemaphore;
 
 public:
     Application();

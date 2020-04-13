@@ -1,4 +1,4 @@
-#include "sound/formats/SoundLoaderOgg.hpp"
+#include "sound/formats/SoundLoaderVorbis.hpp"
 #include <spdlog/spdlog.h>
 #include <vorbis/vorbisfile.h>
 #include <AL/al.h>
@@ -9,17 +9,17 @@ namespace {
 	constexpr int endian = 0;//little endian
 }
 
-bool magmatic::sound::SoundLoaderOgg::registered = magmatic::sound::Sound::register_format(
-		magmatic::sound::SoundLoaderOgg::factoryName(),
-		magmatic::sound::SoundLoaderOgg::createLoader
+bool magmatic::sound::SoundLoaderVorbis::registered = magmatic::sound::Sound::register_format(
+		magmatic::sound::SoundLoaderVorbis::factoryName(),
+		magmatic::sound::SoundLoaderVorbis::createLoader
 );
 
-std::shared_ptr<magmatic::sound::SoundBuffer> magmatic::sound::SoundLoaderOgg::open(const std::filesystem::path& path)
+std::shared_ptr<magmatic::sound::SoundBuffer> magmatic::sound::SoundLoaderVorbis::open(const std::filesystem::path& path)
 {
 	if(!std::filesystem::exists(path))
 	{
-		spdlog::error("Magamtic: Ogg file doesn't exist: {}", path.string());
-		throw std::runtime_error("Ogg file doesn't exist");
+		spdlog::error("Magamtic: Sound file doesn't exist: {}", path.string());
+		throw std::runtime_error("Sound file doesn't exist");
 	}
 
 	OggVorbis_File ogg_file;
@@ -67,7 +67,7 @@ std::shared_ptr<magmatic::sound::SoundBuffer> magmatic::sound::SoundLoaderOgg::o
 	return SoundLoader::fromID(buffer_ID);
 }
 
-std::unique_ptr<magmatic::sound::SoundLoader> magmatic::sound::SoundLoaderOgg::createLoader()
+std::unique_ptr<magmatic::sound::SoundLoader> magmatic::sound::SoundLoaderVorbis::createLoader()
 {
-	return std::make_unique<SoundLoaderOgg>();
+	return std::make_unique<SoundLoaderVorbis>();
 }

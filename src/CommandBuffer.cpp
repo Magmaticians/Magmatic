@@ -35,7 +35,7 @@ void magmatic::CommandBuffer::endRecording()
 }
 
 
-void magmatic::CommandBuffer::beginRenderPass(const RenderPass& renderPass, vk::ResultValue<uint32_t> currentBuffer, const Framebuffers& framebuffers, vk::Extent2D extent) {
+void magmatic::CommandBuffer::beginRenderPass(const RenderPass& renderPass, const Framebuffers& framebuffers, vk::Extent2D extent) {
 	if(renderPassRunning) {
 		spdlog::error("Magmatic: Render pass started on not ended render pass");
 		throw std::runtime_error("Magmatic: Render pass started on not ended render pass");
@@ -44,7 +44,7 @@ void magmatic::CommandBuffer::beginRenderPass(const RenderPass& renderPass, vk::
 	vk::ClearValue clearValue;
 	clearValue.color = vk::ClearColorValue(std::array<float, 4>({0.2f, 0.2f, 0.2f, 0.2f}));
 	vk::RenderPassBeginInfo beginInfo(renderPass.renderPass.get(),
-	                                  framebuffers.framebuffers[currentBuffer.value].get(),
+	                                  framebuffers.framebuffers[0].get(),
 	                                  vk::Rect2D(vk::Offset2D(0, 0), extent),
 	                                  1,
 	                                  &clearValue);

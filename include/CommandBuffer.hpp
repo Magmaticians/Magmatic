@@ -24,7 +24,7 @@ namespace magmatic
 		const vk::UniqueCommandBuffer& beginRecording(vk::CommandBufferUsageFlags usage = vk::CommandBufferUsageFlagBits::eOneTimeSubmit);
 		void endRecording();
 
-		void beginRenderPass(const RenderPass& renderPass, vk::ResultValue<uint32_t> currentBuffer, const Framebuffers& framebuffers, vk::Extent2D extent);
+		void beginRenderPass(const RenderPass& renderPass, const Framebuffers& framebuffers, vk::Extent2D extent);
 		void endRenderPass();
 
 		void bindPipeline(const Pipeline& pipeline);

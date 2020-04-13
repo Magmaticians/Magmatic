@@ -4,6 +4,9 @@
 #include "sound/Sound.hpp"
 #include "sound/SoundBuffer.hpp"
 #include <filesystem>
+#include <AL/al.h>
+#include <memory>
+
 
 namespace magmatic::sound
 {
@@ -15,6 +18,9 @@ namespace magmatic::sound
 		virtual ~SoundLoader() = default;
 
 		virtual std::shared_ptr<SoundBuffer> open(const std::filesystem::path& path) = 0;
+
+	protected:
+		static std::shared_ptr<SoundBuffer> fromID(ALuint buffer_ID);
 	};
 }
 

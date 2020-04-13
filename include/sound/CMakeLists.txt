@@ -5,4 +5,5 @@ target_sources(
 		Sound.hpp
 		SoundBuffer.hpp
 		formats/SoundLoader.hpp
+		formats/SoundLoaderOgg.hpp
 		)

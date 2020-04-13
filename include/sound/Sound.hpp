@@ -4,6 +4,7 @@
 #include "sound/formats/SoundLoader.hpp"
 #include "sound/SoundBuffer.hpp"
 #include <memory>
+#include <filesystem>
 #include <map>
 #include <functional>
 

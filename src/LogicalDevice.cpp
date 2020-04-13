@@ -371,12 +371,24 @@ magmatic::RenderPass magmatic::LogicalDevice::createRenderPass(const Surface& su
 			nullptr
 	);
 
+	vk::SubpassDependency dependency(
+			VK_SUBPASS_EXTERNAL,
+			0,
+			vk::PipelineStageFlagBits::eColorAttachmentOutput,
+			vk::PipelineStageFlagBits::eColorAttachmentOutput,
+			vk::AccessFlags(),
+			vk::AccessFlagBits::eColorAttachmentWrite,
+			vk::DependencyFlags()
+			);
+
 	vk::RenderPassCreateInfo render_pass_info(
 			vk::RenderPassCreateFlags(),
 			1,
 			&color_attachment,
 			1,
-			&subpass
+			&subpass,
+			1,
+			&dependency
 	);
 
     vk::UniqueRenderPass renderPass = device->createRenderPassUnique(render_pass_info);
@@ -474,4 +486,43 @@ magmatic::Semaphore magmatic::LogicalDevice::createSemaphore(SemaphoreType type)
 
 magmatic::Fence magmatic::LogicalDevice::createFence() const {
 	return Fence(device->createFenceUnique(vk::FenceCreateInfo()));
+}
+
+vk::ResultValue<uint32_t> magmatic::LogicalDevice::getCurrentBuffer(const SwapChain& swapChain, const Semaphore& imageAcquiredSemaphore, uint64_t timeout) const {
+	return device->acquireNextImageKHR(swapChain.swapchain_.get(), timeout, imageAcquiredSemaphore.semaphore.get(), nullptr);
+}
+
+void magmatic::LogicalDevice::submitToGraphicsQueue(const Semaphore& imageAcquiredSemaphore, const Semaphore& renderFinishedSemaphore, const CommandBuffer& commandBuffer, const Fence& drawFence) const {
+	vk::PipelineStageFlags flags(vk::PipelineStageFlagBits::eColorAttachmentOutput);
+	vk::SubmitInfo submitInfo(
+			1,
+			&imageAcquiredSemaphore.semaphore.get(),
+			&flags,
+			1,
+			&commandBuffer.command_buffer.get(),
+			1,
+			&renderFinishedSemaphore.semaphore.get());
+	graphics_queue.submit(submitInfo, drawFence.fence.get());
+}
+
+void magmatic::LogicalDevice::resetFences(const Fence& drawFence) const {
+	device->resetFences(1, &drawFence.fence.get());
+}
+
+vk::Result magmatic::LogicalDevice::waitForFences(const Fence& drawFence, uint64_t timeout) const {
+	return device->waitForFences(drawFence.fence.get(), VK_TRUE, timeout);
+}
+
+void magmatic::LogicalDevice::presentKHR(const Semaphore& renderFinishedSemaphore, const SwapChain& swapChain, vk::ResultValue<uint32_t> currentBuffer) const {
+	present_queue.presentKHR(vk::PresentInfoKHR(
+			1,
+			&renderFinishedSemaphore.semaphore.get(),
+			1,
+			&swapChain.swapchain_.get(),
+			&currentBuffer.value
+			));
+}
+
+void magmatic::LogicalDevice::waitIdle() const {
+	device->waitIdle();
 }

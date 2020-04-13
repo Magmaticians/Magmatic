@@ -16,13 +16,39 @@ framebuffers(logicalDevice.createFramebuffers(renderPass, swapChain)),
 commandPool(logicalDevice.createCommandPool(magmatic::QueueType::GraphicalQueue)),
 commandBuffer(logicalDevice.createCommandBuffer(commandPool)),
 drawFence(logicalDevice.createFence()),
-imageAcquiredSemaphore(logicalDevice.createSemaphore(magmatic::SemaphoreType::ImageAvailableSemaphore)) {
+imageAcquiredSemaphore(logicalDevice.createSemaphore(magmatic::SemaphoreType::ImageAvailableSemaphore)),
+renderFinishedSemaphore(logicalDevice.createSemaphore(magmatic::SemaphoreType::RenderFinishedSemaphore)){
 	spdlog::info("Application constructor called and finished work");
 }
 
 void Application::run() {
+	vk::ResultValue<uint32_t> currentBuffer = logicalDevice.getCurrentBuffer(swapChain, imageAcquiredSemaphore, fenceTimeout);
+
+	commandBuffer.beginRecording(/*vk::CommandBufferUsageFlags()*/);
+	commandBuffer.beginRenderPass(renderPass, currentBuffer, framebuffers, swapChain.extent);
+	commandBuffer.bindPipeline(pipeline);
+	//commandBuffer.setViewport(swapChain.extent);
+	//commandBuffer.setScissor(swapChain.extent);
+	commandBuffer.draw(3, 1, 0, 0);
+	commandBuffer.endRenderPass();
+	commandBuffer.endRecording();
+
 	while(!window.shouldClose()) {
 		spdlog::info("App running");
+		glfwPollEvents();
+		drawFrame();
 		std::this_thread::sleep_for(std::chrono::milliseconds(2000));
 	}
+
+}
+
+void Application::drawFrame() {
+	while(vk::Result::eTimeout == logicalDevice.waitForFences(drawFence, fenceTimeout));
+	vk::ResultValue<uint32_t> currentBuffer = logicalDevice.getCurrentBuffer(swapChain, imageAcquiredSemaphore, fenceTimeout);
+	while(vk::Result::eTimeout == logicalDevice.waitForFences(drawFence, fenceTimeout));
+	logicalDevice.resetFences(drawFence);
+	logicalDevice.submitToGraphicsQueue(imageAcquiredSemaphore, renderFinishedSemaphore, commandBuffer, drawFence);
+	logicalDevice.presentKHR(renderFinishedSemaphore, swapChain, currentBuffer);
+	//std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+	//logicalDevice.waitIdle();
 }

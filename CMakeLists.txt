@@ -11,7 +11,7 @@ Enable_language(GLSL)
 #Required libraries
 find_package(glfw3 REQUIRED)
 find_package(Vulkan REQUIRED)
-find_package(glm REQUIRED)
+find_package(GLM REQUIRED)
 
 #Logger
 find_package(spdlog REQUIRED)

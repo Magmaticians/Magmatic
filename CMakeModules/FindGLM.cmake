@@ -3,41 +3,32 @@
 #  GLM_LIBRARIES - The libraries needed to use VorbisFile
 
 find_package(PkgConfig)
-pkg_check_modules(PC_GLM QUIET glm)
+pkg_check_modules(PC_glm QUIET glm)
 
 find_path(
-		GLM_INCLUDE_DIRS
+		glm_INCLUDE_DIR
 		glm/glm.hpp
-		HINTS ${PC_GLM_INCLUDEDIR} ${PC_GLM_INCLUDE_DIRS}
-)
-
-find_library(
-		GLM_LIBRARY
-		NAMES libglm glm
-		HINTS ${PC_GLM_LIBDIR} ${PC_GLM_LIBRARY_DIRS}
+		HINTS ${PC_glm_INCLUDEDIR} ${PC_glm_INCLUDE_DIRS}
 )
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(
-		GLM
+		glm
 		DEFAULT_MSG
-		GLM_LIBRARY
-		GLM_INCLUDE_DIR
+		glm_INCLUDE_DIR
 )
 
-if(GLM_FOUND)
-	set(GLM_LIBRARIES ${GLM_LIBRARY})
-	set(GLM_INCLUDE_DIRS ${GLM_INCLUDE_DIR})
+if(glm_FOUND)
+	set(glm_INCLUDE_DIRS ${glm_INCLUDE_DIR})
 
 	if(NOT TARGET glm::glm)
-		add_library(glm::glm UNKNOWN IMPORTED)
+		add_library(glm::glm INTERFACE IMPORTED)
 		set_target_properties(
 				glm::glm
 				PROPERTIES
-				INTERFACE_INCLUDE_DIRECTORIES ${GLM_INCLUDE_DIR}
-				IMPORTED_LOCATION ${GLM_LIBRARY}
+				INTERFACE_INCLUDE_DIRECTORIES ${glm_INCLUDE_DIR}
 		)
 	endif()
 endif()
 
-mark_as_advanced(GLM_LIBRARY GLM_INCLUDE_DIR)
+mark_as_advanced(glm_INCLUDE_DIR)

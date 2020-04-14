@@ -73,7 +73,10 @@ namespace magmatic
 
 		[[nodiscard]] CommandPool createCommandPool(QueueType type) const;
 
-		[[nodiscard]] VertexBuffer createVertexBuffer(const std::vector<Vertex>& vertices) const;
+		void copyBuffer(const vk::UniqueBuffer& srcBuffer, const vk::UniqueBuffer& dstBuffer, vk::DeviceSize size, const CommandPool& commandPool) const;
+		[[nodiscard]] std::pair<vk::UniqueBuffer, vk::UniqueDeviceMemory> createBuffer(vk::DeviceSize size, const vk::BufferUsageFlags& usageFlags, const vk::MemoryPropertyFlags& memoryFlags) const;
+		[[nodiscard]] VertexBuffer createVertexBuffer(const std::vector<Vertex>& vertices, const CommandPool& commandPool) const;
+		[[nodiscard]] VertexBuffer createStagingBuffer(const std::vector<Vertex>& vertices) const;
 
 		[[nodiscard]] CommandBuffer createCommandBuffer(const CommandPool& pool) const;
 		[[nodiscard]] std::vector<CommandBuffer> createCommandBuffers(const CommandPool& pool, size_t count) const;

@@ -449,31 +449,72 @@ magmatic::CommandPool magmatic::LogicalDevice::createCommandPool(QueueType type)
 	return CommandPool(std::move(command_pool), type);
 }
 
-magmatic::VertexBuffer magmatic::LogicalDevice::createVertexBuffer(const std::vector<Vertex>& vertices) const {
+void magmatic::LogicalDevice::copyBuffer(const vk::UniqueBuffer& srcBuffer, const vk::UniqueBuffer& dstBuffer, vk::DeviceSize size, const CommandPool& commandPool) const {
+	CommandBuffer commandBuffer = createCommandBuffer(commandPool);
+	auto& commandBufferHandle = commandBuffer.beginRecording(vk::CommandBufferUsageFlagBits::eOneTimeSubmit);
+	vk::BufferCopy copyRegion(
+			0,
+			0,
+			size
+			);
+	commandBufferHandle->copyBuffer(srcBuffer.get(), dstBuffer.get(), 1, &copyRegion);
+	commandBuffer.endRecording();
+
+	vk::SubmitInfo submitInfo;
+	submitInfo.commandBufferCount = 1;
+	submitInfo.pCommandBuffers = &commandBufferHandle.get();
+	graphics_queue.submit(1, &submitInfo, nullptr);
+	graphics_queue.waitIdle();
+}
+
+std::pair<vk::UniqueBuffer, vk::UniqueDeviceMemory> magmatic::LogicalDevice::createBuffer(vk::DeviceSize size, const vk::BufferUsageFlags& usageFlags, const vk::MemoryPropertyFlags& memoryFlags) const {
+	std::pair<vk::UniqueBuffer, vk::UniqueDeviceMemory> res;
 	vk::BufferCreateInfo bufferCreateInfo(
 			vk::BufferCreateFlags(),
-			sizeof(vertices[0])*vertices.size(),
-			vk::BufferUsageFlagBits::eVertexBuffer,
+			size,
+			usageFlags,
 			vk::SharingMode::eExclusive,
 			1,
 			&graphic_queue_index
-			);
-	vk::UniqueBuffer vertexBuffer = device->createBufferUnique(bufferCreateInfo);
-	vk::MemoryRequirements memoryRequirements = device->getBufferMemoryRequirements(vertexBuffer.get());
+	);
+	res.first = device->createBufferUnique(bufferCreateInfo);
+	vk::MemoryRequirements memoryRequirements = device->getBufferMemoryRequirements(res.first.get());
 	vk::MemoryAllocateInfo memoryAllocateInfo(
 			memoryRequirements.size,
 			magmatic::utils::findMemoryType(memoryRequirements.memoryTypeBits,
-					vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent, physical_dev)
-			);
-	vk::UniqueDeviceMemory vertexMemory = device->allocateMemoryUnique(memoryAllocateInfo);
-	device->bindBufferMemory(vertexBuffer.get(), vertexMemory.get(), 0);
+			                                memoryFlags, physical_dev)
+	);
+	res.second = device->allocateMemoryUnique(memoryAllocateInfo);
+	device->bindBufferMemory(res.first.get(), res.second.get(), 0);
 
-	void* data;
-	device->mapMemory(vertexMemory.get(), 0, bufferCreateInfo.size, vk::MemoryMapFlags(), &data);
-	memcpy(data, vertices.data(), (size_t) bufferCreateInfo.size);
-	device->unmapMemory(vertexMemory.get());
+	return res;
+}
+
+magmatic::VertexBuffer magmatic::LogicalDevice::createVertexBuffer(const std::vector<Vertex>& vertices, const CommandPool& commandPool) const {
+	VertexBuffer stagingBuffer = createStagingBuffer(vertices);
+
+	vk::DeviceSize bufferSize = sizeof(vertices[0])*vertices.size();
+	auto bufferAndMemory = createBuffer(bufferSize, vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eVertexBuffer, vk::MemoryPropertyFlagBits::eDeviceLocal);
+	vk::UniqueBuffer vertexBuffer = std::move(bufferAndMemory.first);
+	vk::UniqueDeviceMemory vertexMemory = std::move(bufferAndMemory.second);
+
+	copyBuffer(stagingBuffer.vertexBuffer, vertexBuffer, bufferSize, commandPool);
 
 	return VertexBuffer(std::move(vertexBuffer), std::move(vertexMemory));
+}
+
+magmatic::VertexBuffer magmatic::LogicalDevice::createStagingBuffer(const std::vector<Vertex>& vertices) const{
+	vk::DeviceSize bufferSize = sizeof(vertices[0])*vertices.size();
+	auto bufferAndMemory = createBuffer(bufferSize, vk::BufferUsageFlagBits::eTransferSrc, vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent);
+	vk::UniqueBuffer stagingBuffer = std::move(bufferAndMemory.first);
+	vk::UniqueDeviceMemory stagingMemory = std::move(bufferAndMemory.second);
+
+	void* data;
+	device->mapMemory(stagingMemory.get(), 0, bufferSize, vk::MemoryMapFlags(), &data);
+	memcpy(data, vertices.data(), (size_t) bufferSize);
+	device->unmapMemory(stagingMemory.get());
+
+	return VertexBuffer(std::move(stagingBuffer), std::move(stagingMemory));
 }
 
 std::vector<magmatic::CommandBuffer> magmatic::LogicalDevice::createCommandBuffers(const CommandPool& pool, size_t count) const
@@ -545,7 +586,7 @@ void magmatic::LogicalDevice::submitToGraphicsQueue(const Semaphores& imageAcqui
 			&commandBuffer.command_buffer.get(),
 			1,
 			&renderFinishedSemaphores.semaphores[index].get());
-	graphics_queue.submit(submitInfo, nullptr/*, drawFence.fence.get()*/);
+	graphics_queue.submit(submitInfo, fence.get());
 }
 
 void magmatic::LogicalDevice::waitForFences(const vk::UniqueFence& fence, uint64_t timeout) const {

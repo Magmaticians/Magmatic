@@ -35,7 +35,7 @@ add_dependencies(examples main-test)
 
 target_compile_definitions(magmatic-render PRIVATE SPDLOG_FMT_EXTERNAL=1)
 target_include_directories(magmatic-render PUBLIC Vulkan::Vulkan)
-target_link_libraries(magmatic-render PUBLIC glfw Vulkan::Vulkan spdlog::spdlog_header_only glm)
+target_link_libraries(magmatic-render PUBLIC glfw Vulkan::Vulkan spdlog::spdlog_header_only glm::glm)
 
 #magmatic-sound
 add_library(magmatic-sound SHARED "")

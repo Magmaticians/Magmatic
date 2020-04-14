@@ -10,9 +10,11 @@ namespace magmatic {
 		glm::vec2 position;
 		glm::vec3 color;
 
+		static constexpr uint32_t binding = 0;
+
 		static vk::VertexInputBindingDescription getBindingDescription() {
 			return vk::VertexInputBindingDescription(
-					0,
+					binding,
 					sizeof(Vertex),
 					vk::VertexInputRate::eVertex
 			);
@@ -20,8 +22,8 @@ namespace magmatic {
 
 		static std::array<vk::VertexInputAttributeDescription, 2> getAttributeDescriptions() {
 			return {
-					vk::VertexInputAttributeDescription(0, 0, vk::Format::eR32G32Sfloat, offsetof(Vertex, position)),
-					vk::VertexInputAttributeDescription(1, 0, vk::Format::eR32G32B32Sfloat, offsetof(Vertex, color))
+					vk::VertexInputAttributeDescription(0, binding, vk::Format::eR32G32Sfloat, offsetof(Vertex, position)),
+					vk::VertexInputAttributeDescription(1, binding, vk::Format::eR32G32B32Sfloat, offsetof(Vertex, color))
 			};
 		}
 	};

@@ -12,22 +12,32 @@
 class Application {
     static constexpr const char* DEFAULT_NAME{"Test application"};
     /** Triangle */
-	const std::vector<magmatic::Vertex> vertices = {
-			{{0.0f, -0.5f}, {1.0f, 1.0f, 1.0f}},
+	const std::vector<magmatic::Vertex> triangleVertices = {
+			{{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
 			{{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
 			{{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
 	};
-    /** Square? */
-    /*
-	const std::vector<magmatic::Vertex> vertices = {
-			{{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}},
-			{{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
-			{{0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}},
-			{{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}},
-			{{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
-			{{-0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}}
+    /** Square */
+	const std::vector<magmatic::Vertex> squareVertices = {
+			{{-0.8f, -0.8f}, {1.0f, 0.0f, 0.0f}},
+			{{0.8f, -0.8f}, {0.0f, 1.0f, 0.0f}},
+			{{-0.8f, 0.8f}, {0.0f, 0.0f, 1.0f}},
+			{{-0.8f, 0.8f}, {0.0f, 0.0f, 1.0f}},
+			{{0.8f, -0.8f}, {0.0f, 1.0f, 0.0f}},
+			{{0.8f, 0.8f}, {1.0f, 0.0f, 0.0f}}
 	};
-     */
+	/** Hourglass */
+	const std::vector<magmatic::Vertex> hourglassVertices = {
+			{{-0.5f, -0.8f}, {0.2f, 0.2f, 1.0f}},
+			{{0.5f, -0.8f}, {0.2f, 0.2f, 1.0f}},
+			{{0.0f, 0.0f}, {1.0f, 1.0f, 1.0f}},
+			{{0.0f, 0.0f}, {1.0f, 1.0f, 1.0f}},
+			{{0.5f, 0.8f}, {1.0f, 1.0f, 0.0f}},
+			{{-0.5f, 0.8f}, {1.0f, 1.0f, 0.0f}}
+	};
+
+	const std::vector<magmatic::Vertex> vertices;
+
     const magmatic::Window window;
     const magmatic::Instance instance;
     const magmatic::Surface surface;
@@ -47,7 +57,7 @@ class Application {
 	const magmatic::Semaphores renderFinishedSemaphores;
 	std::vector<int> imagesInFlight;
 public:
-    Application();
+    Application(std::string mode);
 
     void run();
 
@@ -56,6 +66,8 @@ private:
 	static constexpr size_t MAX_FRAMES_IN_FLIGHT = 3;
 
 	size_t currentFrame = 0;
+
+	[[nodiscard]] std::vector<magmatic::Vertex> getVertexConfig(const std::string &mode) const;
 
 	void drawFrame();
 };

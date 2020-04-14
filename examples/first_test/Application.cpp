@@ -1,8 +1,12 @@
+#include <cctype>
+#include <algorithm>
 #include <spdlog/spdlog.h>
 #include <vulkan/vulkan.hpp>
 #include "Application.hpp"
 
-Application::Application():window(magmatic::Window(DEFAULT_NAME)),
+Application::Application(std::string mode):
+vertices(std::move(getVertexConfig(mode))),
+window(magmatic::Window(DEFAULT_NAME)),
 instance(magmatic::Instance(DEFAULT_NAME, window.getRequiredExtensions())),
 surface(instance.createSurface(window)),
 physicalDevice(magmatic::PhysicalDevice(instance.getBestDevice())),
@@ -66,4 +70,17 @@ void Application::drawFrame() {
 	logicalDevice.submitToGraphicsQueue(imageAcquiredSemaphores, renderFinishedSemaphores, commandBuffers[currentBuffer], fences[currentFrame], currentFrame);
 	logicalDevice.presentKHR(renderFinishedSemaphores, currentFrame, swapChain, currentBuffer);
 	currentFrame = (currentFrame+1)%MAX_FRAMES_IN_FLIGHT;
+}
+
+std::vector<magmatic::Vertex> Application::getVertexConfig(const std::string& mode) const {
+	if(mode == "square") {
+		return squareVertices;
+	} else if(mode == "triangle") {
+		return triangleVertices;
+	} else if(mode == "hourglass") {
+		return hourglassVertices;
+	} else {
+		spdlog::error("Mode {} not implemented", mode);
+		throw std::runtime_error("Mode '" + mode + "' is not yet implemented");
+	}
 }

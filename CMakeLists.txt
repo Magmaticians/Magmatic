@@ -11,6 +11,7 @@ Enable_language(GLSL)
 #Required libraries
 find_package(glfw3 REQUIRED)
 find_package(Vulkan REQUIRED)
+find_package(glm REQUIRED)
 
 #Logger
 find_package(spdlog REQUIRED)
@@ -34,7 +35,7 @@ target_compile_definitions(magmatic-render PRIVATE SPDLOG_FMT_EXTERNAL=1)
 
 set_property(TARGET magmatic-render PROPERTY CXX_STANDARD 20)
 target_include_directories(magmatic-render PUBLIC Vulkan::Vulkan)
-target_link_libraries(magmatic-render PUBLIC glfw Vulkan::Vulkan spdlog::spdlog_header_only)
+target_link_libraries(magmatic-render PUBLIC glfw Vulkan::Vulkan spdlog::spdlog_header_only glm)
 
 target_link_libraries(main-test PRIVATE magmatic-render)
 

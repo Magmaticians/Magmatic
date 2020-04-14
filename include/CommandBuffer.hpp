@@ -8,8 +8,10 @@
 #include "RenderPass.hpp"
 #include "Pipeline.hpp"
 
+
 namespace magmatic
 {
+
 	class CommandBuffer
 	{
 	public:

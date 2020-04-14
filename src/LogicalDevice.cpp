@@ -4,6 +4,7 @@
 #include <fstream>
 #include <functional>
 #include <algorithm>
+#include <Vertex.hpp>
 
 magmatic::LogicalDevice::LogicalDevice(
 		const magmatic::PhysicalDevice& physical_device,
@@ -215,12 +216,15 @@ magmatic::Pipeline magmatic::LogicalDevice::createPipeline(
 		const RenderPass& renderPass
 ) const
 {
+	auto bindingDescription = Vertex::getBindingDescription();
+	auto attributeDescriptions = Vertex::getAttributeDescriptions();
+
 	vk::PipelineVertexInputStateCreateInfo vertex_input_state_create_info(
 			vk::PipelineVertexInputStateCreateFlags(),
-			0,
-			nullptr,
-			0,
-			nullptr
+			1,
+			&bindingDescription,
+			static_cast<uint32_t>(attributeDescriptions.size()),
+			attributeDescriptions.data()
 			);
 
 	vk::PipelineInputAssemblyStateCreateInfo input_assembly_state_create_info(
@@ -304,7 +308,6 @@ magmatic::Pipeline magmatic::LogicalDevice::createPipeline(
             0,
             nullptr);
 
-    //TODO: Check descriptorSetLayout
     vk::DescriptorSetLayoutCreateInfo descriptor_set_layout_create_info(
             vk::DescriptorSetLayoutCreateFlags(),
             0,
@@ -443,6 +446,19 @@ magmatic::CommandPool magmatic::LogicalDevice::createCommandPool(QueueType type)
 					queue_family_index
 			));
 	return CommandPool(std::move(command_pool), type);
+}
+
+magmatic::VertexBuffer magmatic::LogicalDevice::createVertexBuffer(const std::vector<Vertex>& vertices) const {
+	vk::BufferCreateInfo bufferCreateInfo(
+			vk::BufferCreateFlags(),
+			sizeof(vertices[0])*vertices.size(),
+			vk::BufferUsageFlagBits::eVertexBuffer,
+			vk::SharingMode::eExclusive,
+			//TODO: Check if last two parameters are even required
+			1,
+			&graphic_queue_index
+			);
+	return VertexBuffer(std::move(device->createBufferUnique(bufferCreateInfo)));
 }
 
 std::vector<magmatic::CommandBuffer> magmatic::LogicalDevice::createCommandBuffers(const CommandPool& pool, size_t count) const

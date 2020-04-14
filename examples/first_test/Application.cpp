@@ -14,6 +14,7 @@ renderPass(logicalDevice.createRenderPass(surface)),
 pipeline(logicalDevice.createPipeline(swapChain.extent.width, swapChain.extent.height, {vertShader, fragShader}, renderPass)),
 framebuffers(logicalDevice.createFramebuffers(renderPass, swapChain)),
 commandPool(logicalDevice.createCommandPool(magmatic::QueueType::GraphicalQueue)),
+vertexBuffer(logicalDevice.createVertexBuffer(vertices)),
 commandBuffers(logicalDevice.createCommandBuffers(commandPool, framebuffers.getSize())),
 fences(logicalDevice.createFences(MAX_FRAMES_IN_FLIGHT)),
 imageAcquiredSemaphores(logicalDevice.createSemaphores(magmatic::SemaphoreType::ImageAvailableSemaphore, MAX_FRAMES_IN_FLIGHT)),
@@ -28,7 +29,7 @@ void Application::run() {
 	for(size_t i = 0; i < commandBuffers.size(); i++) {
 		auto& commandBufferHandle = std::move(commandBuffers[i].beginRecording(vk::CommandBufferUsageFlagBits::eSimultaneousUse));
 		vk::ClearValue clearValues[2];
-		clearValues[0].color =  vk::ClearColorValue(std::array<float, 4>({0.2f, 0.2f, 0.2f, 0.2f}));
+		clearValues[0].color =  vk::ClearColorValue(std::array<float, 4>({0.2f, 0.2f, 0.2f, 1.0f}));
 		clearValues[1].depthStencil = vk::ClearDepthStencilValue(1.0f, 0);
 		vk::RenderPassBeginInfo beginInfo(renderPass.renderPass.get(),
 		                                  framebuffers.framebuffers[i].get(),

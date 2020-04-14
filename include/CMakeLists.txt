@@ -15,4 +15,6 @@ target_sources(magmatic-render
 		QueueType.hpp
         Semaphores.hpp
 		SemaphoreType.hpp
+		Vertex.hpp
+		VertexBuffer.hpp
 		)

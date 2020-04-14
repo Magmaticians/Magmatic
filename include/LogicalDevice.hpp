@@ -13,6 +13,8 @@
 #include "QueueType.hpp"
 #include "Semaphores.hpp"
 #include "SemaphoreType.hpp"
+#include "VertexBuffer.hpp"
+#include "Vertex.hpp"
 #include <vulkan/vulkan.hpp>
 #include <filesystem>
 #include <optional>
@@ -70,6 +72,8 @@ namespace magmatic
 		[[nodiscard]] Framebuffers createFramebuffers(const RenderPass& render_pass, const SwapChain& swapchain) const;
 
 		[[nodiscard]] CommandPool createCommandPool(QueueType type) const;
+
+		[[nodiscard]] VertexBuffer createVertexBuffer(const std::vector<Vertex>& vertices) const;
 
 		[[nodiscard]] CommandBuffer createCommandBuffer(const CommandPool& pool) const;
 		[[nodiscard]] std::vector<CommandBuffer> createCommandBuffers(const CommandPool& pool, size_t count) const;

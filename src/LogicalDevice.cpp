@@ -466,8 +466,15 @@ magmatic::VertexBuffer magmatic::LogicalDevice::createVertexBuffer(const std::ve
 			magmatic::utils::findMemoryType(memoryRequirements.memoryTypeBits,
 					vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent, physical_dev)
 			);
-	device->bindBufferMemory(vertexBuffer.get(), device->allocateMemoryUnique(memoryAllocateInfo).get(), 0);
-	return VertexBuffer(std::move(vertexBuffer));
+	vk::UniqueDeviceMemory vertexMemory = device->allocateMemoryUnique(memoryAllocateInfo);
+	device->bindBufferMemory(vertexBuffer.get(), vertexMemory.get(), 0);
+
+	void* data;
+	device->mapMemory(vertexMemory.get(), 0, bufferCreateInfo.size, vk::MemoryMapFlags(), &data);
+	memcpy(data, vertices.data(), (size_t) bufferCreateInfo.size);
+	device->unmapMemory(vertexMemory.get());
+
+	return VertexBuffer(std::move(vertexBuffer), std::move(vertexMemory));
 }
 
 std::vector<magmatic::CommandBuffer> magmatic::LogicalDevice::createCommandBuffers(const CommandPool& pool, size_t count) const

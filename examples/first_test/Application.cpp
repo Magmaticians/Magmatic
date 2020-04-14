@@ -26,6 +26,9 @@ void Application::run() {
 	currentFrame = 0;
 	imagesInFlight.resize(swapChain.images_.size(), -1);
 
+	vk::Buffer vertexBuffers[] = { vertexBuffer.vertexBuffer.get() };
+	vk::DeviceSize offsets[] = { 0 };
+
 	for(size_t i = 0; i < commandBuffers.size(); i++) {
 		auto& commandBufferHandle = std::move(commandBuffers[i].beginRecording(vk::CommandBufferUsageFlagBits::eSimultaneousUse));
 		vk::ClearValue clearValues[2];
@@ -38,7 +41,8 @@ void Application::run() {
 		                                  clearValues);
 		commandBufferHandle->beginRenderPass(beginInfo, vk::SubpassContents::eInline);
 		commandBufferHandle->bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline.pipeline.get());
-		commandBufferHandle->draw(3, 1, 0, 0);
+		commandBufferHandle->bindVertexBuffers(0, 1, vertexBuffers, offsets);
+		commandBufferHandle->draw(static_cast<uint32_t>(vertices.size()), 1, 0, 0);
 		commandBufferHandle->endRenderPass();
 		commandBuffers[i].endRecording();
 	}

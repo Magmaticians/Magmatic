@@ -182,8 +182,8 @@ magmatic::Shader magmatic::LogicalDevice::createShader(const std::filesystem::pa
 {
 	if(!std::filesystem::exists(file_path))
 	{
-		spdlog::error("Shader file not exist: {}", file_path.string());
-		throw std::runtime_error("Shader file not exist");
+		spdlog::error("Shader file doesn't exist: {}", file_path.string());
+		throw std::runtime_error("Shader file doesn't exist");
 	}
 
 	size_t file_size = std::filesystem::file_size(file_path);
@@ -455,7 +455,6 @@ magmatic::VertexBuffer magmatic::LogicalDevice::createVertexBuffer(const std::ve
 			sizeof(vertices[0])*vertices.size(),
 			vk::BufferUsageFlagBits::eVertexBuffer,
 			vk::SharingMode::eExclusive,
-			//TODO: Check if last two parameters are even required
 			1,
 			&graphic_queue_index
 			);

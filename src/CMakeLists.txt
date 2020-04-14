@@ -11,4 +11,5 @@ target_sources(
 		Pipeline.cpp
 		RenderPass.cpp
 		CommandBuffer.cpp
+		utils.cpp
 )

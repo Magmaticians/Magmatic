@@ -15,5 +15,4 @@ target_sources(magmatic-render
 		QueueType.hpp
         Semaphores.hpp
 		SemaphoreType.hpp
-		Fences.hpp
 		)

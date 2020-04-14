@@ -18,7 +18,7 @@ magmatic::Window::Window(const std::string& name, int width, int height)
 	}
 
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-	glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
+	//glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
 	const auto temp_handler = glfwCreateWindow(width, height, name.c_str(), nullptr, nullptr);
 
 	if(temp_handler == nullptr)

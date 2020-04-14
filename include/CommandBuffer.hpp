@@ -24,14 +24,6 @@ namespace magmatic
 		const vk::UniqueCommandBuffer& beginRecording(vk::CommandBufferUsageFlags usage = vk::CommandBufferUsageFlagBits::eOneTimeSubmit);
 		void endRecording();
 
-		void beginRenderPass(const RenderPass& renderPass, const Framebuffers& framebuffers, vk::Extent2D extent);
-		void endRenderPass();
-
-		void bindPipeline(const Pipeline& pipeline);
-		void setViewport(vk::Extent2D extent) const;
-		void setScissor(vk::Extent2D extent) const;
-
-		void draw(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance) const;
 	private:
 
 		CommandBuffer(vk::UniqueCommandBuffer& buffer, vk::Queue queue) noexcept
@@ -41,7 +33,6 @@ namespace magmatic
 		vk::UniqueCommandBuffer command_buffer;
 
 		bool recording = false;
-		bool renderPassRunning = false;
 	};
 }
 

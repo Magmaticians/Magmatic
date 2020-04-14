@@ -13,7 +13,6 @@
 #include "QueueType.hpp"
 #include "Semaphores.hpp"
 #include "SemaphoreType.hpp"
-#include "Fences.hpp"
 #include <vulkan/vulkan.hpp>
 #include <filesystem>
 #include <optional>
@@ -77,14 +76,14 @@ namespace magmatic
 
 		[[nodiscard]] Semaphores createSemaphores(SemaphoreType type, size_t count) const;
 
-		[[nodiscard]] Fences createFences(size_t count) const;
+		[[nodiscard]] std::vector<vk::UniqueFence> createFences(size_t count) const;
 
 		[[nodiscard]] uint32_t acquireNextImageKHR(const SwapChain& swapChain, const Semaphores& imageAcquiredSemaphores, size_t index, uint64_t timeout) const;
 
-		void submitToGraphicsQueue(const Semaphores& imageAcquiredSemaphores, const Semaphores& renderFinishedSemaphores, const CommandBuffer& commandBuffer, const Fences& fences, size_t index) const;
+		void submitToGraphicsQueue(const Semaphores& imageAcquiredSemaphores, const Semaphores& renderFinishedSemaphores, const CommandBuffer& commandBuffer, const vk::UniqueFence& fences, size_t index) const;
 
-		vk::Result waitForFences(const Fences& fences, size_t index, uint64_t timeout) const;
-		void resetFences(const Fences& fences, size_t index) const;
+		void waitForFences(const vk::UniqueFence& fence, uint64_t timeout) const;
+		void resetFences(const vk::UniqueFence& fence) const;
 
 		void presentKHR(const Semaphores& renderFinishedSemaphores, size_t index, const SwapChain& swapChain, uint32_t currentBuffer) const;
 

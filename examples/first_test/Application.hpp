@@ -22,20 +22,19 @@ class Application {
 	const magmatic::Pipeline pipeline;
 	const magmatic::Framebuffers framebuffers;
 	const magmatic::CommandPool commandPool;
-	magmatic::CommandBuffer commandBuffer;
-	const magmatic::Fences fences;
-	//magmatic::Fences imagesInFlight;
+	std::vector<magmatic::CommandBuffer> commandBuffers;
+	const std::vector<vk::UniqueFence> fences;
 	const magmatic::Semaphores imageAcquiredSemaphores;
 	const magmatic::Semaphores renderFinishedSemaphores;
-
+	std::vector<int> imagesInFlight;
 public:
     Application();
 
     void run();
 
 private:
-	static const uint64_t fenceTimeout = 1000000;
-	static const size_t MAX_FRAMES_IN_FLIGHT = 1;
+	static constexpr uint64_t fenceTimeout = 1000000;
+	static constexpr size_t MAX_FRAMES_IN_FLIGHT = 3;
 
 	size_t currentFrame;
 

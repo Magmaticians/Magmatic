@@ -13,3 +13,5 @@ target_sources(
 		CommandBuffer.cpp
 		utils.cpp
 )
+
+add_subdirectory(sound)

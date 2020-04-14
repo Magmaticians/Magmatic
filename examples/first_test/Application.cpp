@@ -18,7 +18,7 @@ renderPass(logicalDevice.createRenderPass(surface)),
 pipeline(logicalDevice.createPipeline(swapChain.extent.width, swapChain.extent.height, {vertShader, fragShader}, renderPass)),
 framebuffers(logicalDevice.createFramebuffers(renderPass, swapChain)),
 commandPool(logicalDevice.createCommandPool(magmatic::QueueType::GraphicalQueue)),
-vertexBuffer(logicalDevice.createVertexBuffer(vertices)),
+vertexBuffer(logicalDevice.createVertexBuffer(vertices, commandPool)),
 commandBuffers(logicalDevice.createCommandBuffers(commandPool, framebuffers.getSize())),
 fences(logicalDevice.createFences(MAX_FRAMES_IN_FLIGHT)),
 imageAcquiredSemaphores(logicalDevice.createSemaphores(magmatic::SemaphoreType::ImageAvailableSemaphore, MAX_FRAMES_IN_FLIGHT)),
@@ -79,6 +79,12 @@ std::vector<magmatic::Vertex> Application::getVertexConfig(const std::string& mo
 		return triangleVertices;
 	} else if(mode == "hourglass") {
 		return hourglassVertices;
+	} else if(mode == "hourglass on square") {
+		std::vector<magmatic::Vertex> res;
+		res.reserve(hourglassVertices.size() + squareVertices.size());
+		res.insert(res.end(), squareVertices.begin(), squareVertices.end());
+		res.insert(res.end(), hourglassVertices.begin(), hourglassVertices.end());
+		return res;
 	} else {
 		spdlog::error("Mode {} not implemented", mode);
 		throw std::runtime_error("Mode '" + mode + "' is not yet implemented");

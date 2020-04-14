@@ -24,7 +24,7 @@ std::shared_ptr<magmatic::sound::SoundBuffer> magmatic::sound::SoundLoaderVorbis
 
 	OggVorbis_File ogg_file;
 
-	if(ov_fopen(path.c_str(), &ogg_file) != 0)
+	if(ov_fopen(path.string().c_str(), &ogg_file) != 0)
 	{
 		spdlog::error("Magmatic: Failed to decode ogg file");
 		throw std::runtime_error("Failed to decode ogg file");
@@ -35,7 +35,7 @@ std::shared_ptr<magmatic::sound::SoundBuffer> magmatic::sound::SoundLoaderVorbis
 	const auto sample_rate = info->rate;
 
 	char temp_buffer[buffer_size];
-	size_t readed_bytes = 0;
+	size_t read_bytes = 0;
 	int bit_stream;
 
 	ALuint buffer_ID;
@@ -50,10 +50,10 @@ std::shared_ptr<magmatic::sound::SoundBuffer> magmatic::sound::SoundLoaderVorbis
 
 	do
 	{
-		readed_bytes = ov_read(&ogg_file, temp_buffer, buffer_size, endian, 2, 1, &bit_stream);
-		buffer.insert(buffer.end(), temp_buffer, temp_buffer+readed_bytes);
+		read_bytes = ov_read(&ogg_file, temp_buffer, buffer_size, endian, 2, 1, &bit_stream);
+		buffer.insert(buffer.end(), temp_buffer, temp_buffer + read_bytes);
 	}
-	while(readed_bytes > 0);
+	while(read_bytes > 0);
 
 	ov_clear(&ogg_file);
 

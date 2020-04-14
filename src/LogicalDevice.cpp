@@ -5,6 +5,7 @@
 #include <functional>
 #include <algorithm>
 #include <Vertex.hpp>
+#include <utils.hpp>
 
 magmatic::LogicalDevice::LogicalDevice(
 		const magmatic::PhysicalDevice& physical_device,
@@ -458,7 +459,15 @@ magmatic::VertexBuffer magmatic::LogicalDevice::createVertexBuffer(const std::ve
 			1,
 			&graphic_queue_index
 			);
-	return VertexBuffer(std::move(device->createBufferUnique(bufferCreateInfo)));
+	vk::UniqueBuffer vertexBuffer = device->createBufferUnique(bufferCreateInfo);
+	vk::MemoryRequirements memoryRequirements = device->getBufferMemoryRequirements(vertexBuffer.get());
+	vk::MemoryAllocateInfo memoryAllocateInfo(
+			memoryRequirements.size,
+			magmatic::utils::findMemoryType(memoryRequirements.memoryTypeBits,
+					vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent, physical_dev)
+			);
+	device->bindBufferMemory(vertexBuffer.get(), device->allocateMemoryUnique(memoryAllocateInfo).get(), 0);
+	return VertexBuffer(std::move(vertexBuffer));
 }
 
 std::vector<magmatic::CommandBuffer> magmatic::LogicalDevice::createCommandBuffers(const CommandPool& pool, size_t count) const

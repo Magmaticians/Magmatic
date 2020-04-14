@@ -9,7 +9,7 @@ namespace magmatic {
 	public:
 		vk::UniqueBuffer vertexBuffer;
 
-		explicit VertexBuffer(vk::UniqueBuffer buffer) : vertexBuffer(std::move(buffer)) {};
+		explicit VertexBuffer(vk::UniqueBuffer buffer) : vertexBuffer(std::move(buffer)) {}
 
 	public:
 		VertexBuffer(const VertexBuffer&) = delete;

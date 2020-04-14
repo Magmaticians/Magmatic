@@ -1,6 +1,8 @@
 #include "sound/Sound.hpp"
 #include "sound/formats/SoundLoader.hpp"
 
+std::unordered_map<std::string, magmatic::sound::Sound::TSoundLoader> magmatic::sound::Sound::loaders;
+
 bool magmatic::sound::Sound::register_format(const std::string& name, TSoundLoaderCreator loader)
 {
 	if(auto it = loaders.find(name); it == std::end(loaders))

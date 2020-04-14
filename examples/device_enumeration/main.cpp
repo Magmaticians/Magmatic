@@ -1,6 +1,7 @@
 #include <tabulate/table.hpp>
 #include <fmt/format.h>
 #include "Instance.hpp"
+#include "sound/SoundDevice.hpp"
 
 std::string decodeAPIVersion(uint32_t api_version)
 {
@@ -131,11 +132,31 @@ void printDevicesSummary(const std::vector<magmatic::PhysicalDevice>& devices)
 	std::cout << devices_summary << std::endl;
 }
 
+void printSoundDevicesSummary()
+{
+	const auto enumerated_devices = magmatic::sound::AudioDevice::enumerateDevices();
+	tabulate::Table devices_summary;
+	devices_summary.add_row({"Sound devices", std::to_string(enumerated_devices.size())});
+	devices_summary[0].format().font_align(tabulate::FontAlign::center);
+	devices_summary[0].format().font_color(tabulate::Color::green);
+	devices_summary.format().border_color(tabulate::Color::cyan);
+	devices_summary[0].format().border_color(tabulate::Color::cyan);
+	devices_summary.format().corner_color(tabulate::Color::red);
+	devices_summary[0].format().corner_color(tabulate::Color::red);
+	for(size_t i = 0; i < enumerated_devices.size(); ++i)
+	{
+		devices_summary.add_row({std::to_string(i), enumerated_devices[i]});
+	}
+	std::cout<<devices_summary << std::endl;
+}
+
 int main() {
 	magmatic::Instance instance("Device enumeration");
 
 	auto physical_devices = instance.enumeratePhysicalDevices();
 
 	printDevicesSummary(physical_devices);
+	std::cout << "\n";
+	printSoundDevicesSummary();
 
 }

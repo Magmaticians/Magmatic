@@ -489,13 +489,13 @@ magmatic::Semaphores magmatic::LogicalDevice::createSemaphores(SemaphoreType typ
 	return Semaphores(std::move(semaphores), type);
 }
 
-magmatic::Fences magmatic::LogicalDevice::createFences(size_t count) const {
+std::vector<vk::UniqueFence> magmatic::LogicalDevice::createFences(size_t count) const {
 	std::vector<vk::UniqueFence> fences;
 	fences.reserve(count);
 	for(size_t i = 0; i < count; i++) {
 		fences.emplace_back(device->createFenceUnique(vk::FenceCreateInfo()));
 	}
-	return Fences(std::move(fences));
+	return fences;
 }
 
 uint32_t magmatic::LogicalDevice::acquireNextImageKHR(const SwapChain& swapChain, const Semaphores& imageAcquiredSemaphores, size_t index, uint64_t timeout) const {
@@ -504,7 +504,7 @@ uint32_t magmatic::LogicalDevice::acquireNextImageKHR(const SwapChain& swapChain
 	return imageIndex;
 }
 
-void magmatic::LogicalDevice::submitToGraphicsQueue(const Semaphores& imageAcquiredSemaphores, const Semaphores& renderFinishedSemaphores, const CommandBuffer& commandBuffer, const Fences& fences, size_t index) const {
+void magmatic::LogicalDevice::submitToGraphicsQueue(const Semaphores& imageAcquiredSemaphores, const Semaphores& renderFinishedSemaphores, const CommandBuffer& commandBuffer, const vk::UniqueFence& fence, size_t index) const {
 	vk::PipelineStageFlags flags(vk::PipelineStageFlagBits::eColorAttachmentOutput);
 	vk::SubmitInfo submitInfo(
 			1,
@@ -517,12 +517,12 @@ void magmatic::LogicalDevice::submitToGraphicsQueue(const Semaphores& imageAcqui
 	graphics_queue.submit(submitInfo, nullptr/*, drawFence.fence.get()*/);
 }
 
-void magmatic::LogicalDevice::resetFences(const Fences& fences, size_t index) const {
-	device->resetFences(1, &fences.fences[index].get());
+void magmatic::LogicalDevice::waitForFences(const vk::UniqueFence& fence, uint64_t timeout) const {
+	device->waitForFences(fence.get(), VK_TRUE, timeout);
 }
 
-vk::Result magmatic::LogicalDevice::waitForFences(const Fences& fences, size_t index, uint64_t timeout) const {
-	return device->waitForFences(fences.fences[index].get(), VK_TRUE, timeout);
+void magmatic::LogicalDevice::resetFences(const vk::UniqueFence& fence) const {
+	device->resetFences(1, &fence.get());
 }
 
 void magmatic::LogicalDevice::presentKHR(const Semaphores& renderFinishedSemaphores, size_t index, const SwapChain& swapChain, uint32_t currentBuffer) const {

@@ -8,8 +8,9 @@ namespace magmatic {
 		friend class LogicalDevice;
 	public:
 		vk::UniqueBuffer vertexBuffer;
+		vk::UniqueDeviceMemory vertexMemory;
 
-		explicit VertexBuffer(vk::UniqueBuffer buffer) : vertexBuffer(std::move(buffer)) {}
+		explicit VertexBuffer(vk::UniqueBuffer buffer, vk::UniqueDeviceMemory vertexMemory) : vertexBuffer(std::move(buffer)), vertexMemory(std::move(vertexMemory)) {}
 
 	public:
 		VertexBuffer(const VertexBuffer&) = delete;

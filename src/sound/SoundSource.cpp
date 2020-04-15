@@ -61,6 +61,7 @@ void magmatic::sound::SoundSource::wait() const noexcept
 
 	while(state == AL_PLAYING)
 	{
+		std::this_thread::yield();
 		alGetSourcei(source, AL_SOURCE_STATE, &state);
 	}
 }

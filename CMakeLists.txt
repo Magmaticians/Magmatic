@@ -20,6 +20,7 @@ find_package(fmt REQUIRED)
 #Audio
 find_package(OpenAL REQUIRED)
 find_package(VorbisFile REQUIRED)
+find_package(OpusFile REQUIRED)
 #Table display
 find_package(tabulate REQUIRED)
 
@@ -40,9 +41,9 @@ target_link_libraries(magmatic-render PUBLIC glfw Vulkan::Vulkan spdlog::spdlog_
 
 #magmatic-sound
 add_library(magmatic-sound SHARED "")
-target_link_libraries(magmatic-sound PRIVATE ${OPENAL_LIBRARY} spdlog::spdlog_header_only VorbisFile::VorbisFile)
-target_link_libraries(magmatic-sound PUBLIC glm::glm)
-target_include_directories(magmatic-sound PUBLIC ${OPENAL_INCLUDE_DIRS})
+target_link_libraries(magmatic-sound PRIVATE ${OPENAL_LIBRARY} spdlog::spdlog_header_only)
+target_link_libraries(magmatic-sound PRIVATE VorbisFile::VorbisFile OpusFile::OpusFile)
+target_include_directories(magmatic-sound PRIVATE ${OPENAL_INCLUDE_DIRS})
 target_compile_definitions(magmatic-sound PRIVATE SPDLOG_FMT_EXTERNAL=1)
 
 

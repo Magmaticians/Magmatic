@@ -7,5 +7,5 @@ target_sources(
 		SoundSource.cpp
 		formats/SoundLoaderVorbis.cpp
 		formats/SoundLoader.cpp
-		#formats/SoundLoaderOpus.cpp
+		formats/SoundLoaderOpus.cpp
 )

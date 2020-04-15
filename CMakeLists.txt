@@ -42,8 +42,8 @@ target_link_libraries(magmatic-render PUBLIC glfw Vulkan::Vulkan spdlog::spdlog_
 #magmatic-sound
 add_library(magmatic-sound SHARED "")
 target_link_libraries(magmatic-sound PRIVATE ${OPENAL_LIBRARY} spdlog::spdlog_header_only)
-target_link_libraries(magmatic-sound PRIVATE VorbisFile::VorbisFile OpusFile::OpusFile)
-target_include_directories(magmatic-sound PRIVATE ${OPENAL_INCLUDE_DIRS})
+target_link_libraries(magmatic-sound PUBLIC VorbisFile::VorbisFile OpusFile::OpusFile)
+target_include_directories(magmatic-sound PUBLIC ${OPENAL_INCLUDE_DIRS})
 target_compile_definitions(magmatic-sound PRIVATE SPDLOG_FMT_EXTERNAL=1)
 
 

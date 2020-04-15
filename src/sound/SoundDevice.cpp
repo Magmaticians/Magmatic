@@ -1,13 +1,14 @@
 #include "sound/SoundDevice.hpp"
 #include <AL/alc.h>
 #include <spdlog/spdlog.h>
+#include <AL/al.h>
 
-void magmatic::sound::AudioDevice::ALCdeviceDeleter::operator()(ALCdevice* pointer) noexcept
+void magmatic::sound::SoundDevice::ALCdeviceDeleter::operator()(ALCdevice* pointer) noexcept
 {
 	alcCloseDevice(pointer);
 }
 
-void magmatic::sound::AudioDevice::ALCcontextDeleter::operator()(ALCcontext* pointer) noexcept
+void magmatic::sound::SoundDevice::ALCcontextDeleter::operator()(ALCcontext* pointer) noexcept
 {
 	if(alcGetCurrentContext() == pointer)
 	{
@@ -16,7 +17,7 @@ void magmatic::sound::AudioDevice::ALCcontextDeleter::operator()(ALCcontext* poi
 	alcDestroyContext(pointer);
 }
 
-magmatic::sound::AudioDevice::AudioDevice(const char* device)
+magmatic::sound::SoundDevice::SoundDevice(const char* device)
 :alc_device(alcOpenDevice(device)), alc_context(alcCreateContext(alc_device.get(), nullptr))
 {
 	if(!alc_device)
@@ -34,9 +35,10 @@ magmatic::sound::AudioDevice::AudioDevice(const char* device)
 		spdlog::error("Magmatic: Failed to set current context");
 		throw std::runtime_error(" Failed to set current context");
 	}
+	alDistanceModel(AL_EXPONENT_DISTANCE);
 }
 
-std::vector<std::string> magmatic::sound::AudioDevice::enumerateDevices() noexcept
+std::vector<std::string> magmatic::sound::SoundDevice::enumerateDevices() noexcept
 {
 	const ALCchar* devices;
 	devices = alcGetString(nullptr, ALC_DEVICE_SPECIFIER);

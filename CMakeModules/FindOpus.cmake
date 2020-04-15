@@ -18,6 +18,8 @@ find_library(
 		HINTS ${PC_Opus_LIBDIR} ${PC_Opus_LIBRARY_DIRS}
 )
 
+find_package(Ogg REQUIRED)
+
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(
 		Opus
@@ -37,6 +39,7 @@ if(Opus_FOUND)
 				INTERFACE_INCLUDE_DIRECTORIES ${Opus_INCLUDE_DIR}
 				IMPORTED_LOCATION ${Opus_LIBRARY}
 		)
+		target_link_libraries(Opus::Opus INTERFACE Ogg::Ogg)
 	endif()
 endif()
 

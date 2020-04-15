@@ -17,7 +17,7 @@ std::shared_ptr<magmatic::sound::SoundBuffer> magmatic::sound::SoundLoaderOpus::
 	}
 
 	int error = 0;
-	OggOpusFile* ogg_file = op_open_file(path.c_str(), &error);
+	OggOpusFile* ogg_file = op_open_file(path.string().c_str(), &error);
 
 	if(error)
 	{

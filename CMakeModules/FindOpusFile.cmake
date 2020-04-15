@@ -25,7 +25,6 @@ find_package_handle_standard_args(
 		DEFAULT_MSG
 		OpusFile_LIBRARY
 		OpusFile_INCLUDE_DIR
-		Opus_INCLUDE_DIR
 )
 
 if(OpusFile_FOUND)

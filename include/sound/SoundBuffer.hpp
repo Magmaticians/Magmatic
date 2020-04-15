@@ -3,7 +3,6 @@
 
 #include <AL/al.h>
 
-
 namespace magmatic::sound
 {
 	class SoundBuffer

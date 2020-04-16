@@ -1,6 +1,7 @@
 #ifndef MAGMATIC_SOUNDDEVICE_HPP
 #define MAGMATIC_SOUNDDEVICE_HPP
 
+#include <glm/glm.hpp>
 #include <memory>
 #include <vector>
 #include <string>
@@ -14,7 +15,6 @@ namespace magmatic::sound
 	{
 
 	public:
-
 		struct ALCdeviceDeleter
 		{
 			void operator()(ALCdevice* pointer) noexcept;
@@ -26,15 +26,20 @@ namespace magmatic::sound
 		};
 
 		SoundDevice() : SoundDevice(nullptr) {};
-		SoundDevice(const std::string& device) : SoundDevice(device.c_str()) {};
+		explicit SoundDevice(const std::string& device) : SoundDevice(device.c_str()) {};
 
 		SoundDevice(const SoundDevice&) = delete;
 		SoundDevice& operator=(const SoundDevice&) = delete;
 
 		static std::vector<std::string> enumerateDevices() noexcept;
 
+		void setListenerPosition(glm::vec3 pos) const noexcept;
+		void setListenerVelocity(glm::vec3 vel) const noexcept;
+		void setListenerGain(float gain) const;
+
+
 	private:
-		SoundDevice(const char* device);
+		explicit SoundDevice(const char* device);
 
 		std::unique_ptr<ALCdevice, ALCdeviceDeleter> alc_device;
 		std::unique_ptr<ALCcontext, ALCcontextDeleter> alc_context;

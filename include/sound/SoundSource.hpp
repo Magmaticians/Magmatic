@@ -30,7 +30,7 @@ namespace magmatic::sound
 
 		void setPosition(glm::vec3 pos) const noexcept;
 		void setVelocity(glm::vec3 vec) const noexcept;
-		void setDirection(glm::vec3 dir) const noexcept;
+		void setGain(float gain) const noexcept;
 
 		void setSound(std::shared_ptr<SoundBuffer> buffer) noexcept;
 		void play() const noexcept;

@@ -35,7 +35,7 @@ magmatic::sound::SoundDevice::SoundDevice(const char* device)
 		spdlog::error("Magmatic: Failed to set current context");
 		throw std::runtime_error(" Failed to set current context");
 	}
-	alDistanceModel(AL_EXPONENT_DISTANCE);
+	alDistanceModel(AL_INVERSE_DISTANCE_CLAMPED);
 }
 
 std::vector<std::string> magmatic::sound::SoundDevice::enumerateDevices() noexcept
@@ -55,4 +55,24 @@ std::vector<std::string> magmatic::sound::SoundDevice::enumerateDevices() noexce
 	while(*(tmp+1) != '\0');
 
 	return retval;
+}
+
+void magmatic::sound::SoundDevice::setListenerPosition(glm::vec3 pos) const noexcept
+{
+	alListener3f(AL_POSITION, pos.x, pos.y, pos.z);
+}
+
+void magmatic::sound::SoundDevice::setListenerGain(float gain) const
+{
+	if(gain < 0.0f)
+	{
+		spdlog::error("Magmatic: Gain must be positive");
+		throw std::invalid_argument("Gain must be positive");
+	}
+	alListenerf(AL_GAIN, gain);
+}
+
+void magmatic::sound::SoundDevice::setListenerVelocity(glm::vec3 vel) const noexcept
+{
+	alListener3f(AL_VELOCITY, vel.x, vel.y, vel.z);
 }

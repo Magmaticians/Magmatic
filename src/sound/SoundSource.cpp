@@ -126,7 +126,7 @@ void magmatic::sound::SoundSource::setVelocity(glm::vec3 vec) const noexcept
 	alSource3f(source, AL_VELOCITY, vec.x, vec.y, vec.z);
 }
 
-void magmatic::sound::SoundSource::setDirection(glm::vec3 dir) const noexcept
+void magmatic::sound::SoundSource::setGain(float gain) const noexcept
 {
-	alSource3f(source, AL_DIRECTION, dir.x, dir.y, dir.z);
+	alSourcef(source, AL_GAIN, gain);
 }

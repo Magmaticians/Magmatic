@@ -13,7 +13,7 @@
 #include "QueueType.hpp"
 #include "Semaphores.hpp"
 #include "SemaphoreType.hpp"
-#include "VertexBuffer.hpp"
+#include "Buffer.hpp"
 #include "Vertex.hpp"
 #include <vulkan/vulkan.hpp>
 #include <filesystem>
@@ -75,8 +75,11 @@ namespace magmatic
 
 		void copyBuffer(const vk::UniqueBuffer& srcBuffer, const vk::UniqueBuffer& dstBuffer, vk::DeviceSize size, const CommandPool& commandPool) const;
 		[[nodiscard]] std::pair<vk::UniqueBuffer, vk::UniqueDeviceMemory> createBuffer(vk::DeviceSize size, const vk::BufferUsageFlags& usageFlags, const vk::MemoryPropertyFlags& memoryFlags) const;
-		[[nodiscard]] VertexBuffer createVertexBuffer(const std::vector<Vertex>& vertices, const CommandPool& commandPool) const;
-		[[nodiscard]] VertexBuffer createStagingBuffer(const std::vector<Vertex>& vertices) const;
+		[[nodiscard]] Buffer createVertexBuffer(const std::vector<Vertex>& vertices, const CommandPool& commandPool) const;
+		[[nodiscard]] Buffer createIndexBuffer(const std::vector<uint32_t>& indices, const CommandPool& commandPool) const;
+
+		template<typename T, typename A>
+		[[nodiscard]] Buffer createStagingBuffer(const std::vector<T, A>& vertices) const;
 
 		[[nodiscard]] CommandBuffer createCommandBuffer(const CommandPool& pool) const;
 		[[nodiscard]] std::vector<CommandBuffer> createCommandBuffers(const CommandPool& pool, size_t count) const;
@@ -103,5 +106,19 @@ namespace magmatic
 	};
 }
 
+template<typename T, typename A>
+magmatic::Buffer magmatic::LogicalDevice::createStagingBuffer(const std::vector<T, A>& vertices) const{
+	vk::DeviceSize bufferSize = sizeof(T)*vertices.size();
+	auto bufferAndMemory = createBuffer(bufferSize, vk::BufferUsageFlagBits::eTransferSrc, vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent);
+	vk::UniqueBuffer stagingBuffer = std::move(bufferAndMemory.first);
+	vk::UniqueDeviceMemory stagingMemory = std::move(bufferAndMemory.second);
+
+	void* data;
+	device->mapMemory(stagingMemory.get(), 0, bufferSize, vk::MemoryMapFlags(), &data);
+	memcpy(data, vertices.data(), (size_t) bufferSize);
+	device->unmapMemory(stagingMemory.get());
+
+	return Buffer(std::move(stagingBuffer), std::move(stagingMemory));
+}
 
 #endif //MAGMATIC_LOGICALDEVICE_HPP

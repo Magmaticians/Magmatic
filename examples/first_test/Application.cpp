@@ -4,8 +4,9 @@
 #include <vulkan/vulkan.hpp>
 #include "Application.hpp"
 
-Application::Application(std::string mode):
+Application::Application(const std::string& mode):
 vertices(std::move(getVertexConfig(mode))),
+indices(std::move(getIndexConfig(mode))),
 window(magmatic::Window(DEFAULT_NAME)),
 instance(magmatic::Instance(DEFAULT_NAME, window.getRequiredExtensions())),
 surface(instance.createSurface(window)),
@@ -19,6 +20,7 @@ pipeline(logicalDevice.createPipeline(swapChain.extent.width, swapChain.extent.h
 framebuffers(logicalDevice.createFramebuffers(renderPass, swapChain)),
 commandPool(logicalDevice.createCommandPool(magmatic::QueueType::GraphicalQueue)),
 vertexBuffer(logicalDevice.createVertexBuffer(vertices, commandPool)),
+indexBuffer(logicalDevice.createIndexBuffer(indices, commandPool)),
 commandBuffers(logicalDevice.createCommandBuffers(commandPool, framebuffers.getSize())),
 fences(logicalDevice.createFences(MAX_FRAMES_IN_FLIGHT)),
 imageAcquiredSemaphores(logicalDevice.createSemaphores(magmatic::SemaphoreType::ImageAvailableSemaphore, MAX_FRAMES_IN_FLIGHT)),
@@ -30,7 +32,7 @@ void Application::run() {
 	currentFrame = 0;
 	imagesInFlight.resize(swapChain.images_.size(), -1);
 
-	vk::Buffer vertexBuffers[] = { vertexBuffer.vertexBuffer.get() };
+	vk::Buffer vertexBuffers[] = { vertexBuffer.buffer.get() };
 	vk::DeviceSize offsets[] = { 0 };
 
 	for(size_t i = 0; i < commandBuffers.size(); i++) {
@@ -46,7 +48,8 @@ void Application::run() {
 		commandBufferHandle->beginRenderPass(beginInfo, vk::SubpassContents::eInline);
 		commandBufferHandle->bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline.pipeline.get());
 		commandBufferHandle->bindVertexBuffers(0, 1, vertexBuffers, offsets);
-		commandBufferHandle->draw(static_cast<uint32_t>(vertices.size()), 1, 0, 0);
+		commandBufferHandle->bindIndexBuffer(indexBuffer.buffer.get(), 0, vk::IndexType::eUint32);
+		commandBufferHandle->drawIndexed(static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
 		commandBufferHandle->endRenderPass();
 		commandBuffers[i].endRecording();
 	}
@@ -85,6 +88,17 @@ std::vector<magmatic::Vertex> Application::getVertexConfig(const std::string& mo
 		res.insert(res.end(), squareVertices.begin(), squareVertices.end());
 		res.insert(res.end(), hourglassVertices.begin(), hourglassVertices.end());
 		return res;
+	} else if (mode == "indexed square"){
+		return indexedSquareVertices;
+	} else {
+		spdlog::error("Mode {} not implemented", mode);
+		throw std::runtime_error("Mode '" + mode + "' is not yet implemented");
+	}
+}
+
+std::vector<uint32_t> Application::getIndexConfig(const std::string& mode) const {
+	if (mode == "indexed square"){
+		return squareIndices;
 	} else {
 		spdlog::error("Mode {} not implemented", mode);
 		throw std::runtime_error("Mode '" + mode + "' is not yet implemented");

@@ -4,7 +4,8 @@ target_sources(
 		SoundDevice.hpp
 		Sound.hpp
 		SoundBuffer.hpp
+		SoundSource.hpp
 		formats/SoundLoader.hpp
 		formats/SoundLoaderVorbis.hpp
-		#formats/SoundLoaderOpus.hpp
+		formats/SoundLoaderOpus.hpp
 		)

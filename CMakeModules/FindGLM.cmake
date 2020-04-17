@@ -1,6 +1,6 @@
-#  GLM_FOUND - System has VorbisFile
-#  GLM_INCLUDE_DIRS - The VorbisFile include directories
-#  GLM_LIBRARIES - The libraries needed to use VorbisFile
+#  GLM_FOUND - System has glm
+#  GLM_INCLUDE_DIRS - The glm include directories
+#  GLM_LIBRARIES - The libraries needed to use glm
 
 find_package(PkgConfig)
 pkg_check_modules(PC_glm QUIET glm)

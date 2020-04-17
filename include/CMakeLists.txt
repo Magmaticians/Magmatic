@@ -16,7 +16,7 @@ target_sources(magmatic-render
         Semaphores.hpp
 		SemaphoreType.hpp
 		Vertex.hpp
-		VertexBuffer.hpp
+        Buffer.hpp
 		utils.hpp
 		)
 

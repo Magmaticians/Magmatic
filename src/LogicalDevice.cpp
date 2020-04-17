@@ -490,20 +490,34 @@ std::pair<vk::UniqueBuffer, vk::UniqueDeviceMemory> magmatic::LogicalDevice::cre
 	return res;
 }
 
-magmatic::VertexBuffer magmatic::LogicalDevice::createVertexBuffer(const std::vector<Vertex>& vertices, const CommandPool& commandPool) const {
-	VertexBuffer stagingBuffer = createStagingBuffer(vertices);
+magmatic::Buffer magmatic::LogicalDevice::createVertexBuffer(const std::vector<Vertex>& vertices, const CommandPool& commandPool) const {
+	Buffer stagingBuffer = createStagingBuffer(vertices);
 
 	vk::DeviceSize bufferSize = sizeof(vertices[0])*vertices.size();
 	auto bufferAndMemory = createBuffer(bufferSize, vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eVertexBuffer, vk::MemoryPropertyFlagBits::eDeviceLocal);
 	vk::UniqueBuffer vertexBuffer = std::move(bufferAndMemory.first);
 	vk::UniqueDeviceMemory vertexMemory = std::move(bufferAndMemory.second);
 
-	copyBuffer(stagingBuffer.vertexBuffer, vertexBuffer, bufferSize, commandPool);
+	copyBuffer(stagingBuffer.buffer, vertexBuffer, bufferSize, commandPool);
 
-	return VertexBuffer(std::move(vertexBuffer), std::move(vertexMemory));
+	return Buffer(std::move(vertexBuffer), std::move(vertexMemory));
 }
 
-magmatic::VertexBuffer magmatic::LogicalDevice::createStagingBuffer(const std::vector<Vertex>& vertices) const{
+magmatic::Buffer magmatic::LogicalDevice::createIndexBuffer(const std::vector<uint32_t>& indices, const CommandPool& commandPool) const {
+	Buffer stagingBuffer = createStagingBuffer(indices);
+
+	vk::DeviceSize bufferSize = sizeof(indices[0]) * indices.size();
+	auto bufferAndMemory = createBuffer(bufferSize, vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eIndexBuffer, vk::MemoryPropertyFlagBits::eDeviceLocal);
+	vk::UniqueBuffer vertexBuffer = std::move(bufferAndMemory.first);
+	vk::UniqueDeviceMemory vertexMemory = std::move(bufferAndMemory.second);
+
+	copyBuffer(stagingBuffer.buffer, vertexBuffer, bufferSize, commandPool);
+
+	return Buffer(std::move(vertexBuffer), std::move(vertexMemory));
+}
+
+/*TODO: Delete
+magmatic::Buffer magmatic::LogicalDevice::createStagingBuffer(const std::vector<Vertex>& vertices) const{
 	vk::DeviceSize bufferSize = sizeof(vertices[0])*vertices.size();
 	auto bufferAndMemory = createBuffer(bufferSize, vk::BufferUsageFlagBits::eTransferSrc, vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent);
 	vk::UniqueBuffer stagingBuffer = std::move(bufferAndMemory.first);
@@ -514,8 +528,9 @@ magmatic::VertexBuffer magmatic::LogicalDevice::createStagingBuffer(const std::v
 	memcpy(data, vertices.data(), (size_t) bufferSize);
 	device->unmapMemory(stagingMemory.get());
 
-	return VertexBuffer(std::move(stagingBuffer), std::move(stagingMemory));
+	return Buffer(std::move(stagingBuffer), std::move(stagingMemory));
 }
+ */
 
 std::vector<magmatic::CommandBuffer> magmatic::LogicalDevice::createCommandBuffers(const CommandPool& pool, size_t count) const
 {

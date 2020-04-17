@@ -35,8 +35,19 @@ class Application {
 			{{0.5f, 0.8f}, {1.0f, 1.0f, 0.0f}},
 			{{-0.5f, 0.8f}, {1.0f, 1.0f, 0.0f}}
 	};
+	/** Square with index buffer */
+	const std::vector<magmatic::Vertex> indexedSquareVertices = {
+			{{-0.8f, -0.8f}, {1.0f, 0.0f, 0.0f}},
+			{{0.8f, -0.8f}, {0.0f, 1.0f, 0.0f}},
+			{{-0.8f, 0.8f}, {0.0f, 0.0f, 1.0f}},
+			{{0.8f, 0.8f}, {1.0f, 1.0f, 1.0f}}
+	};
+	const std::vector<uint32_t> squareIndices = {
+			0, 1, 2, 1, 3, 2
+	};
 
 	const std::vector<magmatic::Vertex> vertices;
+	const std::vector<uint32_t> indices;
 
     const magmatic::Window window;
     const magmatic::Instance instance;
@@ -50,14 +61,15 @@ class Application {
 	const magmatic::Pipeline pipeline;
 	const magmatic::Framebuffers framebuffers;
 	const magmatic::CommandPool commandPool;
-	const magmatic::VertexBuffer vertexBuffer;
+	const magmatic::Buffer vertexBuffer;
+	const magmatic::Buffer indexBuffer;
 	std::vector<magmatic::CommandBuffer> commandBuffers;
 	const std::vector<vk::UniqueFence> fences;
 	const magmatic::Semaphores imageAcquiredSemaphores;
 	const magmatic::Semaphores renderFinishedSemaphores;
 	std::vector<int> imagesInFlight;
 public:
-    Application(std::string mode);
+    Application(const std::string& mode);
 
     void run();
 
@@ -69,6 +81,7 @@ private:
 
 	[[nodiscard]] std::vector<magmatic::Vertex> getVertexConfig(const std::string &mode) const;
 
+	[[nodiscard]] std::vector<uint32_t> getIndexConfig(const std::string& mode) const;
 	void drawFrame();
 };
 

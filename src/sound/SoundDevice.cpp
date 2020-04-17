@@ -1,13 +1,14 @@
 #include "sound/SoundDevice.hpp"
 #include <AL/alc.h>
 #include <spdlog/spdlog.h>
+#include <AL/al.h>
 
-void magmatic::sound::AudioDevice::ALCdeviceDeleter::operator()(ALCdevice* pointer) noexcept
+void magmatic::sound::SoundDevice::ALCdeviceDeleter::operator()(ALCdevice* pointer) noexcept
 {
 	alcCloseDevice(pointer);
 }
 
-void magmatic::sound::AudioDevice::ALCcontextDeleter::operator()(ALCcontext* pointer) noexcept
+void magmatic::sound::SoundDevice::ALCcontextDeleter::operator()(ALCcontext* pointer) noexcept
 {
 	if(alcGetCurrentContext() == pointer)
 	{
@@ -16,7 +17,7 @@ void magmatic::sound::AudioDevice::ALCcontextDeleter::operator()(ALCcontext* poi
 	alcDestroyContext(pointer);
 }
 
-magmatic::sound::AudioDevice::AudioDevice(const char* device)
+magmatic::sound::SoundDevice::SoundDevice(const char* device)
 :alc_device(alcOpenDevice(device)), alc_context(alcCreateContext(alc_device.get(), nullptr))
 {
 	if(!alc_device)
@@ -34,9 +35,10 @@ magmatic::sound::AudioDevice::AudioDevice(const char* device)
 		spdlog::error("Magmatic: Failed to set current context");
 		throw std::runtime_error(" Failed to set current context");
 	}
+	alDistanceModel(AL_INVERSE_DISTANCE_CLAMPED);
 }
 
-std::vector<std::string> magmatic::sound::AudioDevice::enumerateDevices() noexcept
+std::vector<std::string> magmatic::sound::SoundDevice::enumerateDevices() noexcept
 {
 	const ALCchar* devices;
 	devices = alcGetString(nullptr, ALC_DEVICE_SPECIFIER);
@@ -53,4 +55,24 @@ std::vector<std::string> magmatic::sound::AudioDevice::enumerateDevices() noexce
 	while(*(tmp+1) != '\0');
 
 	return retval;
+}
+
+void magmatic::sound::SoundDevice::setListenerPosition(glm::vec3 pos) const noexcept
+{
+	alListener3f(AL_POSITION, pos.x, pos.y, pos.z);
+}
+
+void magmatic::sound::SoundDevice::setListenerGain(float gain) const
+{
+	if(gain < 0.0f)
+	{
+		spdlog::error("Magmatic: Gain must be positive");
+		throw std::invalid_argument("Gain must be positive");
+	}
+	alListenerf(AL_GAIN, gain);
+}
+
+void magmatic::sound::SoundDevice::setListenerVelocity(glm::vec3 vel) const noexcept
+{
+	alListener3f(AL_VELOCITY, vel.x, vel.y, vel.z);
 }

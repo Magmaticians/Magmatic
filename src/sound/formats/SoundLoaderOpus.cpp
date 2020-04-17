@@ -17,7 +17,7 @@ std::shared_ptr<magmatic::sound::SoundBuffer> magmatic::sound::SoundLoaderOpus::
 	}
 
 	int error = 0;
-	OggOpusFile* ogg_file = op_open_file(path.c_str(), &error);
+	OggOpusFile* ogg_file = op_open_file(path.string().c_str(), &error);
 
 	if(error)
 	{
@@ -49,7 +49,7 @@ std::shared_ptr<magmatic::sound::SoundBuffer> magmatic::sound::SoundLoaderOpus::
 
 	while(sample_read < pcm_length)
 	{
-		size_t temp_readed = op_read(ogg_file. buffer + sample_read * channel_count, pcm_length * channel_count, 0);
+		size_t temp_readed = op_read(ogg_file, buffer + sample_read * channel_count, pcm_length * channel_count, 0);
 		if(temp_readed < 0)
 		{
 			spdlog::error("Magmatic: Error while decoding opus file");

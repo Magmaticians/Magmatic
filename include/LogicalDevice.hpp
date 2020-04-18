@@ -15,6 +15,7 @@
 #include "SemaphoreType.hpp"
 #include "Buffer.hpp"
 #include "Vertex.hpp"
+#include "DescriptorSets.hpp"
 #include <vulkan/vulkan.hpp>
 #include <filesystem>
 #include <optional>
@@ -59,15 +60,20 @@ namespace magmatic
 				vk::ShaderStageFlagBits type
 				) const;
 
-		[[nodiscard]] Pipeline createPipeline(
-				uint32_t extent_width, uint32_t extent_height,
-				std::vector<std::reference_wrapper<Shader>> shaderStages,
-				const RenderPass& renderPass
-				) const;
-
 		[[nodiscard]] RenderPass createRenderPass(
 		        const Surface& surface
 		        ) const;
+
+		[[nodiscard]] vk::UniqueDescriptorSetLayout createDescriptorSetLayout() const;
+
+		[[nodiscard]] vk::UniquePipelineLayout createPipelineLayout(const vk::UniqueDescriptorSetLayout& descriptorSetLayout) const;
+
+		[[nodiscard]] Pipeline createPipeline(
+				uint32_t extent_width, uint32_t extent_height,
+				std::vector<std::reference_wrapper<Shader>> shaderStages,
+				const RenderPass& renderPass,
+				const vk::UniquePipelineLayout& pipelineLayout
+		) const;
 
 		[[nodiscard]] Framebuffers createFramebuffers(const RenderPass& render_pass, const SwapChain& swapchain) const;
 
@@ -83,6 +89,8 @@ namespace magmatic
 		void copyBufferMemory(const vk::UniqueDeviceMemory& memory, size_t size, const T& dataToCopy) const;
 		template<typename T, typename A>
 		[[nodiscard]] Buffer createStagingBuffer(const std::vector<T, A>& dataToCopy) const;
+
+		[[nodiscard]] DescriptorSets createDescriptorSets(const SwapChain& swapChain, const vk::UniqueDescriptorSetLayout& descriptorSetLayout, const std::vector<Buffer>& uniformBuffers) const;
 
 		[[nodiscard]] CommandBuffer createCommandBuffer(const CommandPool& pool) const;
 		[[nodiscard]] std::vector<CommandBuffer> createCommandBuffers(const CommandPool& pool, size_t count) const;

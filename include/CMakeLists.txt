@@ -19,6 +19,7 @@ target_sources(magmatic-render
         Buffer.hpp
 		utils.hpp
 		UniformBufferObject.hpp
+		DescriptorSets.hpp
 		)
 
 add_subdirectory(sound)

@@ -212,10 +212,20 @@ magmatic::Shader magmatic::LogicalDevice::createShader(const std::filesystem::pa
 	return Shader(std::move(shader_module), type);
 }
 
+vk::UniquePipelineLayout magmatic::LogicalDevice::createPipelineLayout(const vk::UniqueDescriptorSetLayout& descriptorSetLayout) const {
+	vk::PipelineLayoutCreateInfo pipeline_layout_info(
+			vk::PipelineLayoutCreateFlags(),
+			1,
+			&descriptorSetLayout.get()
+	);
+	return device->createPipelineLayoutUnique(pipeline_layout_info);
+}
+
 magmatic::Pipeline magmatic::LogicalDevice::createPipeline(
 		uint32_t extent_width, uint32_t extent_height,
 		std::vector<std::reference_wrapper<Shader>> shaderStages,
-		const RenderPass& renderPass
+		const RenderPass& renderPass,
+		const vk::UniquePipelineLayout& pipelineLayout
 ) const
 {
 	auto bindingDescription = Vertex::getBindingDescription();
@@ -260,7 +270,7 @@ magmatic::Pipeline magmatic::LogicalDevice::createPipeline(
 			false,
 			vk::PolygonMode::eFill,
 			vk::CullModeFlagBits::eBack,
-			vk::FrontFace::eClockwise,
+			vk::FrontFace::eCounterClockwise,
 			false,
 			0.0f,
 			0.0f,
@@ -310,27 +320,6 @@ magmatic::Pipeline magmatic::LogicalDevice::createPipeline(
             0,
             nullptr);
 
-	vk::DescriptorSetLayoutBinding uboLayoutBinding(
-			0,
-			vk::DescriptorType::eUniformBuffer,
-			1,
-			vk::ShaderStageFlagBits::eVertex,
-			nullptr
-	);
-	vk::DescriptorSetLayoutCreateInfo descriptor_set_layout_create_info(
-			vk::DescriptorSetLayoutCreateFlags(),
-			1,
-			&uboLayoutBinding
-	);
-
-    vk::UniqueDescriptorSetLayout descriptor_set_layout = device->createDescriptorSetLayoutUnique(descriptor_set_layout_create_info);
-    vk::PipelineLayoutCreateInfo pipeline_layout_info(
-            vk::PipelineLayoutCreateFlags(),
-            1,
-            &descriptor_set_layout.get()
-            );
-    vk::UniquePipelineLayout pipeline_layout = device->createPipelineLayoutUnique(pipeline_layout_info);
-
 	vk::GraphicsPipelineCreateInfo pipeline_create_info(
 			vk::PipelineCreateFlags(),
 			2,
@@ -344,7 +333,7 @@ magmatic::Pipeline magmatic::LogicalDevice::createPipeline(
 			&depth_stencil_state,
 			&color_blending,
 			&dynamic_states,
-			pipeline_layout.get(),
+			pipelineLayout.get(),
 			renderPass.renderPass.get()
 	        );
 
@@ -407,6 +396,22 @@ magmatic::RenderPass magmatic::LogicalDevice::createRenderPass(const Surface& su
     vk::UniqueRenderPass renderPass = device->createRenderPassUnique(render_pass_info);
 
     return RenderPass(std::move(renderPass));
+}
+
+vk::UniqueDescriptorSetLayout magmatic::LogicalDevice::createDescriptorSetLayout() const{
+	vk::DescriptorSetLayoutBinding uboLayoutBinding(
+			0,
+			vk::DescriptorType::eUniformBuffer,
+			1,
+			vk::ShaderStageFlagBits::eVertex,
+			nullptr
+	);
+	vk::DescriptorSetLayoutCreateInfo descriptor_set_layout_create_info(
+			vk::DescriptorSetLayoutCreateFlags(),
+			1,
+			&uboLayoutBinding
+	);
+	return device->createDescriptorSetLayoutUnique(descriptor_set_layout_create_info);
 }
 
 magmatic::Framebuffers magmatic::LogicalDevice::createFramebuffers(
@@ -539,6 +544,50 @@ magmatic::Buffer magmatic::LogicalDevice::createIndexBuffer(const std::vector<ui
 		uniformBuffers.emplace_back(Buffer(std::move(bufferAndMemory.first), std::move(bufferAndMemory.second)));
 	}
 	return uniformBuffers;
+}
+
+magmatic::DescriptorSets magmatic::LogicalDevice::createDescriptorSets(const SwapChain& swapChain, const vk::UniqueDescriptorSetLayout& descriptorSetLayout, const std::vector<Buffer>& uniformBuffers) const {
+	auto size = static_cast<uint32_t>(swapChain.images_.size());
+	vk::DescriptorPoolSize poolSize(
+			vk::DescriptorType::eUniformBuffer,
+			size
+			);
+	vk::DescriptorPoolCreateInfo poolInfo(
+			vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet,
+			size,
+			1,
+			&poolSize
+			);
+	vk::UniqueDescriptorPool descriptorPool = device->createDescriptorPoolUnique(poolInfo);
+
+	std::vector<vk::DescriptorSetLayout> layouts(size, descriptorSetLayout.get());
+	vk::DescriptorSetAllocateInfo allocInfo(
+			descriptorPool.get(),
+			size,
+			layouts.data()
+			);
+	DescriptorSets descriptorSets(device->allocateDescriptorSets(allocInfo), std::move(descriptorPool));
+
+	for(size_t i = 0; i < swapChain.images_.size(); i++) {
+		vk::DescriptorBufferInfo bufferInfo(
+				uniformBuffers[i].buffer.get(),
+				0,
+				sizeof(UniformBufferObject)
+				);
+		vk::WriteDescriptorSet descriptorWrite(
+				descriptorSets.sets[i],
+				0,
+				0,
+				1,
+				vk::DescriptorType::eUniformBuffer,
+				nullptr,
+				&bufferInfo,
+				nullptr
+				);
+		device->updateDescriptorSets(1, &descriptorWrite, 0, nullptr);
+	}
+
+	return descriptorSets;
 }
 
 std::vector<magmatic::CommandBuffer> magmatic::LogicalDevice::createCommandBuffers(const CommandPool& pool, size_t count) const

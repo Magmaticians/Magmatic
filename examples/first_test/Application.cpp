@@ -1,3 +1,4 @@
+#define GLM_FORCE_RADIANS
 #include <cctype>
 #include <algorithm>
 #include <spdlog/spdlog.h>
@@ -19,13 +20,16 @@ vertShader(logicalDevice.createShader("./examples/first_test/vert.spv", vk::Shad
 fragShader(logicalDevice.createShader("./examples/first_test/frag.spv", vk::ShaderStageFlagBits::eFragment)),
 swapChain(logicalDevice.createSwapchain(surface, window.getSize().first, window.getSize().second)),
 renderPass(logicalDevice.createRenderPass(surface)),
-pipeline(logicalDevice.createPipeline(swapChain.extent.width, swapChain.extent.height, {vertShader, fragShader}, renderPass)),
+descriptorSetLayout(logicalDevice.createDescriptorSetLayout()),
+pipeline(logicalDevice.createPipeline(swapChain.extent.width, swapChain.extent.height, {vertShader, fragShader}, renderPass, pipelineLayout)),
+pipelineLayout(logicalDevice.createPipelineLayout(descriptorSetLayout)),
 framebuffers(logicalDevice.createFramebuffers(renderPass, swapChain)),
 commandPool(logicalDevice.createCommandPool(magmatic::QueueType::GraphicalQueue)),
 vertexBuffer(logicalDevice.createVertexBuffer(vertices, commandPool)),
 indexBuffer(logicalDevice.createIndexBuffer(indices, commandPool)),
 uniformBuffers(logicalDevice.createUniformBuffers(swapChain)),
 commandBuffers(logicalDevice.createCommandBuffers(commandPool, framebuffers.getSize())),
+descriptorSets(logicalDevice.createDescriptorSets(swapChain, descriptorSetLayout, uniformBuffers)),
 fences(logicalDevice.createFences(MAX_FRAMES_IN_FLIGHT)),
 imageAcquiredSemaphores(logicalDevice.createSemaphores(magmatic::SemaphoreType::ImageAvailableSemaphore, MAX_FRAMES_IN_FLIGHT)),
 renderFinishedSemaphores(logicalDevice.createSemaphores(magmatic::SemaphoreType::RenderFinishedSemaphore, MAX_FRAMES_IN_FLIGHT)){
@@ -53,6 +57,7 @@ void Application::run() {
 		commandBufferHandle->bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline.pipeline.get());
 		commandBufferHandle->bindVertexBuffers(0, 1, vertexBuffers, offsets);
 		commandBufferHandle->bindIndexBuffer(indexBuffer.buffer.get(), 0, vk::IndexType::eUint32);
+		commandBufferHandle->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, pipelineLayout.get(), 0, 1, &descriptorSets.sets[i], 0, nullptr);
 		commandBufferHandle->drawIndexed(static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
 		commandBufferHandle->endRenderPass();
 		commandBuffers[i].endRecording();
@@ -72,7 +77,7 @@ void Application::updateUniformBuffer(uint32_t currentBuffer) {
 	auto currentTime = std::chrono::high_resolution_clock::now();
 	float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
 	ubo.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-	ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f));
+	ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 	ubo.proj = glm::perspective(glm::radians(45.0f), swapChain.extent.width/(float) swapChain.extent.height, 0.1f, 10.0f);
 	ubo.proj[1][1] *= -1;
 

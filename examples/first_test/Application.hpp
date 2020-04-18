@@ -17,26 +17,11 @@ class Application {
 			{{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
 			{{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
 	};
-    /** Square */
+	const std::vector<uint32_t> triangleIndices = {
+			0, 1, 2
+	};
+	/** Square */
 	const std::vector<magmatic::Vertex> squareVertices = {
-			{{-0.8f, -0.8f}, {1.0f, 0.0f, 0.0f}},
-			{{0.8f, -0.8f}, {0.0f, 1.0f, 0.0f}},
-			{{-0.8f, 0.8f}, {0.0f, 0.0f, 1.0f}},
-			{{-0.8f, 0.8f}, {0.0f, 0.0f, 1.0f}},
-			{{0.8f, -0.8f}, {0.0f, 1.0f, 0.0f}},
-			{{0.8f, 0.8f}, {1.0f, 0.0f, 0.0f}}
-	};
-	/** Hourglass */
-	const std::vector<magmatic::Vertex> hourglassVertices = {
-			{{-0.5f, -0.8f}, {0.2f, 0.2f, 1.0f}},
-			{{0.5f, -0.8f}, {0.2f, 0.2f, 1.0f}},
-			{{0.0f, 0.0f}, {1.0f, 1.0f, 1.0f}},
-			{{0.0f, 0.0f}, {1.0f, 1.0f, 1.0f}},
-			{{0.5f, 0.8f}, {1.0f, 1.0f, 0.0f}},
-			{{-0.5f, 0.8f}, {1.0f, 1.0f, 0.0f}}
-	};
-	/** Square with index buffer */
-	const std::vector<magmatic::Vertex> indexedSquareVertices = {
 			{{-0.8f, -0.8f}, {1.0f, 0.0f, 0.0f}},
 			{{0.8f, -0.8f}, {0.0f, 1.0f, 0.0f}},
 			{{-0.8f, 0.8f}, {0.0f, 0.0f, 1.0f}},
@@ -44,6 +29,17 @@ class Application {
 	};
 	const std::vector<uint32_t> squareIndices = {
 			0, 1, 2, 1, 3, 2
+	};
+	/** Hourglass */
+	const std::vector<magmatic::Vertex> hourglassVertices = {
+			{{0.0f, 0.0f}, {1.0f, 1.0f, 1.0f}},
+			{{-0.5f, -0.8f}, {0.2f, 0.2f, 1.0f}},
+			{{0.5f, -0.8f}, {0.2f, 0.2f, 1.0f}},
+			{{0.5f, 0.8f}, {1.0f, 1.0f, 0.0f}},
+			{{-0.5f, 0.8f}, {1.0f, 1.0f, 0.0f}}
+	};
+	const std::vector<uint32_t> hourglassIndices = {
+			0, 1, 2, 0, 3, 4
 	};
 
 	const std::vector<magmatic::Vertex> vertices;
@@ -63,6 +59,7 @@ class Application {
 	const magmatic::CommandPool commandPool;
 	const magmatic::Buffer vertexBuffer;
 	const magmatic::Buffer indexBuffer;
+	const std::vector<magmatic::Buffer> uniformBuffers;
 	std::vector<magmatic::CommandBuffer> commandBuffers;
 	const std::vector<vk::UniqueFence> fences;
 	const magmatic::Semaphores imageAcquiredSemaphores;
@@ -78,6 +75,8 @@ private:
 	static constexpr size_t MAX_FRAMES_IN_FLIGHT = 3;
 
 	size_t currentFrame = 0;
+
+	void updateUniformBuffer(uint32_t currentBuffer);
 
 	[[nodiscard]] std::vector<magmatic::Vertex> getVertexConfig(const std::string &mode) const;
 

@@ -2,6 +2,9 @@
 #include <algorithm>
 #include <spdlog/spdlog.h>
 #include <vulkan/vulkan.hpp>
+#include <UniformBufferObject.hpp>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 #include "Application.hpp"
 
 Application::Application(const std::string& mode):
@@ -21,6 +24,7 @@ framebuffers(logicalDevice.createFramebuffers(renderPass, swapChain)),
 commandPool(logicalDevice.createCommandPool(magmatic::QueueType::GraphicalQueue)),
 vertexBuffer(logicalDevice.createVertexBuffer(vertices, commandPool)),
 indexBuffer(logicalDevice.createIndexBuffer(indices, commandPool)),
+uniformBuffers(logicalDevice.createUniformBuffers(swapChain)),
 commandBuffers(logicalDevice.createCommandBuffers(commandPool, framebuffers.getSize())),
 fences(logicalDevice.createFences(MAX_FRAMES_IN_FLIGHT)),
 imageAcquiredSemaphores(logicalDevice.createSemaphores(magmatic::SemaphoreType::ImageAvailableSemaphore, MAX_FRAMES_IN_FLIGHT)),
@@ -62,6 +66,19 @@ void Application::run() {
 	logicalDevice.waitIdle();
 }
 
+void Application::updateUniformBuffer(uint32_t currentBuffer) {
+	static auto startTime = std::chrono::high_resolution_clock::now();
+	magmatic::UniformBufferObject ubo = {};
+	auto currentTime = std::chrono::high_resolution_clock::now();
+	float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
+	ubo.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+	ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f));
+	ubo.proj = glm::perspective(glm::radians(45.0f), swapChain.extent.width/(float) swapChain.extent.height, 0.1f, 10.0f);
+	ubo.proj[1][1] *= -1;
+
+	logicalDevice.copyBufferMemory(uniformBuffers[currentBuffer].memory, sizeof(ubo), ubo);
+}
+
 void Application::drawFrame() {
 	logicalDevice.waitForFences(fences[currentFrame], fenceTimeout);
 	uint32_t currentBuffer = logicalDevice.acquireNextImageKHR(swapChain, imageAcquiredSemaphores, currentFrame, fenceTimeout);
@@ -70,6 +87,7 @@ void Application::drawFrame() {
 	}
 	imagesInFlight[currentBuffer] = currentFrame;
 	logicalDevice.resetFences(fences[currentFrame]);
+	updateUniformBuffer(currentBuffer);
 	logicalDevice.submitToGraphicsQueue(imageAcquiredSemaphores, renderFinishedSemaphores, commandBuffers[currentBuffer], fences[currentFrame], currentFrame);
 	logicalDevice.presentKHR(renderFinishedSemaphores, currentFrame, swapChain, currentBuffer);
 	currentFrame = (currentFrame+1)%MAX_FRAMES_IN_FLIGHT;
@@ -88,8 +106,6 @@ std::vector<magmatic::Vertex> Application::getVertexConfig(const std::string& mo
 		res.insert(res.end(), squareVertices.begin(), squareVertices.end());
 		res.insert(res.end(), hourglassVertices.begin(), hourglassVertices.end());
 		return res;
-	} else if (mode == "indexed square"){
-		return indexedSquareVertices;
 	} else {
 		spdlog::error("Mode {} not implemented", mode);
 		throw std::runtime_error("Mode '" + mode + "' is not yet implemented");
@@ -97,8 +113,20 @@ std::vector<magmatic::Vertex> Application::getVertexConfig(const std::string& mo
 }
 
 std::vector<uint32_t> Application::getIndexConfig(const std::string& mode) const {
-	if (mode == "indexed square"){
+	if(mode == "square") {
 		return squareIndices;
+	} else if(mode == "triangle") {
+		return triangleIndices;
+	} else if(mode == "hourglass") {
+		return hourglassIndices;
+	} else if(mode == "hourglass on square") {
+		std::vector<uint32_t> res;
+		res.reserve(hourglassIndices.size() + squareIndices.size());
+		res.insert(res.end(), squareIndices.begin(),squareIndices.end());
+		for(uint32_t index : hourglassIndices) {
+			res.emplace_back(index + static_cast<uint32_t>(squareVertices.size()));
+		}
+		return res;
 	} else {
 		spdlog::error("Mode {} not implemented", mode);
 		throw std::runtime_error("Mode '" + mode + "' is not yet implemented");

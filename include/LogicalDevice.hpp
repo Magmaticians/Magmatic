@@ -27,7 +27,7 @@ namespace magmatic
 	private:
 		static constexpr const char* DEFAULT_EXTENSIONS[] =
 				{
-					VK_KHR_SWAPCHAIN_EXTENSION_NAME
+						VK_KHR_SWAPCHAIN_EXTENSION_NAME
 				};
 
 		vk::UniqueDevice device;
@@ -44,29 +44,31 @@ namespace magmatic
 		explicit LogicalDevice(
 				const PhysicalDevice& physical_device,
 				const Surface& surface,
-                const std::vector<std::string>& extensions={}
-				);
+				const std::vector<std::string>& extensions = {}
+		);
 
 		LogicalDevice(const LogicalDevice&) = delete;
+
 		LogicalDevice& operator=(LogicalDevice&) = delete;
 
 		[[nodiscard]] SwapChain createSwapchain(
 				const Surface& surface,
 				uint32_t window_width, uint32_t window_height
-				) const;
+		) const;
 
 		[[nodiscard]] Shader createShader(
 				const std::filesystem::path& file_path,
 				vk::ShaderStageFlagBits type
-				) const;
+		) const;
 
 		[[nodiscard]] RenderPass createRenderPass(
-		        const Surface& surface
-		        ) const;
+				const Surface& surface
+		) const;
 
 		[[nodiscard]] vk::UniqueDescriptorSetLayout createDescriptorSetLayout() const;
 
-		[[nodiscard]] vk::UniquePipelineLayout createPipelineLayout(const vk::UniqueDescriptorSetLayout& descriptorSetLayout) const;
+		[[nodiscard]] vk::UniquePipelineLayout
+		createPipelineLayout(const vk::UniqueDescriptorSetLayout& descriptorSetLayout) const;
 
 		[[nodiscard]] Pipeline createPipeline(
 				uint32_t extent_width, uint32_t extent_height,
@@ -79,34 +81,55 @@ namespace magmatic
 
 		[[nodiscard]] CommandPool createCommandPool(QueueType type) const;
 
-		void copyBuffer(const vk::UniqueBuffer& srcBuffer, const vk::UniqueBuffer& dstBuffer, vk::DeviceSize size, const CommandPool& commandPool) const;
-		[[nodiscard]] std::pair<vk::UniqueBuffer, vk::UniqueDeviceMemory> createBuffer(vk::DeviceSize size, const vk::BufferUsageFlags& usageFlags, const vk::MemoryPropertyFlags& memoryFlags) const;
-		[[nodiscard]] Buffer createVertexBuffer(const std::vector<Vertex>& vertices, const CommandPool& commandPool) const;
-		[[nodiscard]] Buffer createIndexBuffer(const std::vector<uint32_t>& indices, const CommandPool& commandPool) const;
+		void copyBuffer(const vk::UniqueBuffer& srcBuffer, const vk::UniqueBuffer& dstBuffer, vk::DeviceSize size,
+		                const CommandPool& commandPool) const;
+
+		[[nodiscard]] std::pair<vk::UniqueBuffer, vk::UniqueDeviceMemory>
+		createBuffer(vk::DeviceSize size, const vk::BufferUsageFlags& usageFlags,
+		             const vk::MemoryPropertyFlags& memoryFlags) const;
+
+		[[nodiscard]] Buffer
+		createVertexBuffer(const std::vector<Vertex>& vertices, const CommandPool& commandPool) const;
+
+		[[nodiscard]] Buffer
+		createIndexBuffer(const std::vector<uint32_t>& indices, const CommandPool& commandPool) const;
+
 		[[nodiscard]] std::vector<Buffer> createUniformBuffers(const SwapChain& swapChain) const;
 
 		template<typename T>
 		void copyBufferMemory(const vk::UniqueDeviceMemory& memory, size_t size, const T& dataToCopy) const;
+
 		template<typename T, typename A>
 		[[nodiscard]] Buffer createStagingBuffer(const std::vector<T, A>& dataToCopy) const;
 
-		[[nodiscard]] DescriptorSets createDescriptorSets(const SwapChain& swapChain, const vk::UniqueDescriptorSetLayout& descriptorSetLayout, const std::vector<Buffer>& uniformBuffers) const;
+		[[nodiscard]] DescriptorSets
+		createDescriptorSets(const SwapChain& swapChain, const vk::UniqueDescriptorSetLayout& descriptorSetLayout,
+		                     const std::vector<Buffer>& uniformBuffers) const;
 
 		[[nodiscard]] CommandBuffer createCommandBuffer(const CommandPool& pool) const;
+
 		[[nodiscard]] std::vector<CommandBuffer> createCommandBuffers(const CommandPool& pool, size_t count) const;
 
 		[[nodiscard]] Semaphores createSemaphores(SemaphoreType type, size_t count) const;
 
 		[[nodiscard]] std::vector<vk::UniqueFence> createFences(size_t count) const;
 
-		[[nodiscard]] uint32_t acquireNextImageKHR(const SwapChain& swapChain, const Semaphores& imageAcquiredSemaphores, size_t index, uint64_t timeout) const;
+		[[nodiscard]] vk::Result acquireNextImageKHR(
+				const SwapChain& swapChain, const Semaphores& imageAcquiredSemaphores,
+				size_t index, uint32_t& imageIndex,
+				uint64_t timeout
+				) const;
 
-		void submitToGraphicsQueue(const Semaphores& imageAcquiredSemaphores, const Semaphores& renderFinishedSemaphores, const CommandBuffer& commandBuffer, const vk::UniqueFence& fences, size_t index) const;
+		void
+		submitToGraphicsQueue(const Semaphores& imageAcquiredSemaphores, const Semaphores& renderFinishedSemaphores,
+		                      const CommandBuffer& commandBuffer, const vk::UniqueFence& fences, size_t index) const;
 
 		void waitForFences(const vk::UniqueFence& fence, uint64_t timeout) const;
+
 		void resetFences(const vk::UniqueFence& fence) const;
 
-		void presentKHR(const Semaphores& renderFinishedSemaphores, size_t index, const SwapChain& swapChain, uint32_t currentBuffer) const;
+		void presentKHR(const Semaphores& renderFinishedSemaphores, size_t index, const SwapChain& swapChain,
+		                uint32_t currentBuffer) const;
 
 		void waitIdle() const;
 	private:

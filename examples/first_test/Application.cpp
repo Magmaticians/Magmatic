@@ -86,7 +86,14 @@ void Application::updateUniformBuffer(uint32_t currentBuffer) {
 
 void Application::drawFrame() {
 	logicalDevice.waitForFences(fences[currentFrame], fenceTimeout);
-	uint32_t currentBuffer = logicalDevice.acquireNextImageKHR(swapChain, imageAcquiredSemaphores, currentFrame, fenceTimeout);
+	uint32_t currentBuffer;
+	auto state = logicalDevice.acquireNextImageKHR(swapChain, imageAcquiredSemaphores, currentFrame, currentBuffer, 0);
+	if(state == vk::Result::eNotReady)
+	{
+		std::this_thread::yield();
+		return;
+	}
+
 	if(imagesInFlight[currentBuffer] != -1) {
 		logicalDevice.waitForFences(fences[imagesInFlight[currentBuffer]], fenceTimeout);
 	}

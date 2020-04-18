@@ -643,10 +643,19 @@ std::vector<vk::UniqueFence> magmatic::LogicalDevice::createFences(size_t count)
 	return fences;
 }
 
-uint32_t magmatic::LogicalDevice::acquireNextImageKHR(const SwapChain& swapChain, const Semaphores& imageAcquiredSemaphores, size_t index, uint64_t timeout) const {
-	uint32_t imageIndex;
-	device->acquireNextImageKHR(swapChain.swapchain_.get(), timeout, imageAcquiredSemaphores.semaphores[index].get(), nullptr, &imageIndex);
-	return imageIndex;
+vk::Result magmatic::LogicalDevice::acquireNextImageKHR(
+		const SwapChain& swapChain, const Semaphores& imageAcquiredSemaphores,
+		size_t index, uint32_t& imageIndex,
+		uint64_t timeout = UINT64_MAX
+				) const
+{
+	return device->acquireNextImageKHR(
+			swapChain.swapchain_.get(),
+			timeout,
+			imageAcquiredSemaphores.semaphores[index].get(),
+			nullptr,
+			&imageIndex
+			);
 }
 
 void magmatic::LogicalDevice::submitToGraphicsQueue(const Semaphores& imageAcquiredSemaphores, const Semaphores& renderFinishedSemaphores, const CommandBuffer& commandBuffer, const vk::UniqueFence& fence, size_t index) const {

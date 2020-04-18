@@ -54,6 +54,8 @@ class Application {
 	magmatic::Shader fragShader;
 	const magmatic::SwapChain swapChain;
 	const magmatic::RenderPass renderPass;
+	const vk::UniqueDescriptorSetLayout descriptorSetLayout;
+	const vk::UniquePipelineLayout pipelineLayout;
 	const magmatic::Pipeline pipeline;
 	const magmatic::Framebuffers framebuffers;
 	const magmatic::CommandPool commandPool;
@@ -61,12 +63,13 @@ class Application {
 	const magmatic::Buffer indexBuffer;
 	const std::vector<magmatic::Buffer> uniformBuffers;
 	std::vector<magmatic::CommandBuffer> commandBuffers;
+	const magmatic::DescriptorSets descriptorSets;
 	const std::vector<vk::UniqueFence> fences;
 	const magmatic::Semaphores imageAcquiredSemaphores;
 	const magmatic::Semaphores renderFinishedSemaphores;
 	std::vector<int> imagesInFlight;
 public:
-    Application(const std::string& mode);
+    explicit Application(const std::string& mode);
 
     void run();
 

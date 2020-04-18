@@ -77,9 +77,12 @@ namespace magmatic
 		[[nodiscard]] std::pair<vk::UniqueBuffer, vk::UniqueDeviceMemory> createBuffer(vk::DeviceSize size, const vk::BufferUsageFlags& usageFlags, const vk::MemoryPropertyFlags& memoryFlags) const;
 		[[nodiscard]] Buffer createVertexBuffer(const std::vector<Vertex>& vertices, const CommandPool& commandPool) const;
 		[[nodiscard]] Buffer createIndexBuffer(const std::vector<uint32_t>& indices, const CommandPool& commandPool) const;
+		[[nodiscard]] std::vector<Buffer> createUniformBuffers(const SwapChain& swapChain) const;
 
+		template<typename T>
+		void copyBufferMemory(const vk::UniqueDeviceMemory& memory, size_t size, const T& dataToCopy) const;
 		template<typename T, typename A>
-		[[nodiscard]] Buffer createStagingBuffer(const std::vector<T, A>& vertices) const;
+		[[nodiscard]] Buffer createStagingBuffer(const std::vector<T, A>& dataToCopy) const;
 
 		[[nodiscard]] CommandBuffer createCommandBuffer(const CommandPool& pool) const;
 		[[nodiscard]] std::vector<CommandBuffer> createCommandBuffers(const CommandPool& pool, size_t count) const;
@@ -106,19 +109,28 @@ namespace magmatic
 	};
 }
 
+template<typename T>
+void magmatic::LogicalDevice::copyBufferMemory(const vk::UniqueDeviceMemory& memory, size_t size, const T& dataToCopy) const {
+	void* data;
+	device->mapMemory(memory.get(), 0, size, vk::MemoryMapFlags(), &data);
+	memcpy(data, &dataToCopy, size);
+	device->unmapMemory(memory.get());
+}
+
 template<typename T, typename A>
-magmatic::Buffer magmatic::LogicalDevice::createStagingBuffer(const std::vector<T, A>& vertices) const{
-	vk::DeviceSize bufferSize = sizeof(T)*vertices.size();
+magmatic::Buffer magmatic::LogicalDevice::createStagingBuffer(const std::vector<T, A>& dataToCopy) const{
+	vk::DeviceSize bufferSize = sizeof(T) * dataToCopy.size();
 	auto bufferAndMemory = createBuffer(bufferSize, vk::BufferUsageFlagBits::eTransferSrc, vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent);
 	vk::UniqueBuffer stagingBuffer = std::move(bufferAndMemory.first);
 	vk::UniqueDeviceMemory stagingMemory = std::move(bufferAndMemory.second);
 
 	void* data;
 	device->mapMemory(stagingMemory.get(), 0, bufferSize, vk::MemoryMapFlags(), &data);
-	memcpy(data, vertices.data(), (size_t) bufferSize);
+	memcpy(data, dataToCopy.data(), (size_t) bufferSize);
 	device->unmapMemory(stagingMemory.get());
 
 	return Buffer(std::move(stagingBuffer), std::move(stagingMemory));
 }
+
 
 #endif //MAGMATIC_LOGICALDEVICE_HPP

@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <Vertex.hpp>
 #include <utils.hpp>
+#include <UniformBufferObject.hpp>
 
 magmatic::LogicalDevice::LogicalDevice(
 		const magmatic::PhysicalDevice& physical_device,
@@ -309,11 +310,19 @@ magmatic::Pipeline magmatic::LogicalDevice::createPipeline(
             0,
             nullptr);
 
-    vk::DescriptorSetLayoutCreateInfo descriptor_set_layout_create_info(
-            vk::DescriptorSetLayoutCreateFlags(),
-            0,
-            nullptr
-            );
+	vk::DescriptorSetLayoutBinding uboLayoutBinding(
+			0,
+			vk::DescriptorType::eUniformBuffer,
+			1,
+			vk::ShaderStageFlagBits::eVertex,
+			nullptr
+	);
+	vk::DescriptorSetLayoutCreateInfo descriptor_set_layout_create_info(
+			vk::DescriptorSetLayoutCreateFlags(),
+			1,
+			&uboLayoutBinding
+	);
+
     vk::UniqueDescriptorSetLayout descriptor_set_layout = device->createDescriptorSetLayoutUnique(descriptor_set_layout_create_info);
     vk::PipelineLayoutCreateInfo pipeline_layout_info(
             vk::PipelineLayoutCreateFlags(),
@@ -508,29 +517,29 @@ magmatic::Buffer magmatic::LogicalDevice::createIndexBuffer(const std::vector<ui
 
 	vk::DeviceSize bufferSize = sizeof(indices[0]) * indices.size();
 	auto bufferAndMemory = createBuffer(bufferSize, vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eIndexBuffer, vk::MemoryPropertyFlagBits::eDeviceLocal);
-	vk::UniqueBuffer vertexBuffer = std::move(bufferAndMemory.first);
-	vk::UniqueDeviceMemory vertexMemory = std::move(bufferAndMemory.second);
+	vk::UniqueBuffer indexBuffer = std::move(bufferAndMemory.first);
+	vk::UniqueDeviceMemory indexMemory = std::move(bufferAndMemory.second);
 
-	copyBuffer(stagingBuffer.buffer, vertexBuffer, bufferSize, commandPool);
+	copyBuffer(stagingBuffer.buffer, indexBuffer, bufferSize, commandPool);
 
-	return Buffer(std::move(vertexBuffer), std::move(vertexMemory));
+	return Buffer(std::move(indexBuffer), std::move(indexMemory));
 }
 
-/*TODO: Delete
-magmatic::Buffer magmatic::LogicalDevice::createStagingBuffer(const std::vector<Vertex>& vertices) const{
-	vk::DeviceSize bufferSize = sizeof(vertices[0])*vertices.size();
-	auto bufferAndMemory = createBuffer(bufferSize, vk::BufferUsageFlagBits::eTransferSrc, vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent);
-	vk::UniqueBuffer stagingBuffer = std::move(bufferAndMemory.first);
-	vk::UniqueDeviceMemory stagingMemory = std::move(bufferAndMemory.second);
+[[nodiscard]] std::vector<magmatic::Buffer> magmatic::LogicalDevice::createUniformBuffers(const SwapChain& swapChain) const {
+	std::vector<magmatic::Buffer> uniformBuffers;
+	vk::DeviceSize bufferSize = sizeof(UniformBufferObject);
 
-	void* data;
-	device->mapMemory(stagingMemory.get(), 0, bufferSize, vk::MemoryMapFlags(), &data);
-	memcpy(data, vertices.data(), (size_t) bufferSize);
-	device->unmapMemory(stagingMemory.get());
+	uniformBuffers.reserve(swapChain.images_.size());
 
-	return Buffer(std::move(stagingBuffer), std::move(stagingMemory));
+	for(size_t i = 0; i < swapChain.images_.size(); i++) {
+		auto bufferAndMemory = createBuffer(
+				bufferSize,
+				vk::BufferUsageFlagBits::eUniformBuffer,
+				vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent);
+		uniformBuffers.emplace_back(Buffer(std::move(bufferAndMemory.first), std::move(bufferAndMemory.second)));
+	}
+	return uniformBuffers;
 }
- */
 
 std::vector<magmatic::CommandBuffer> magmatic::LogicalDevice::createCommandBuffers(const CommandPool& pool, size_t count) const
 {

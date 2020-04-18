@@ -4,7 +4,7 @@
 int main() {
 	spdlog::info("Starting first test");
 
-    Application application("indexed square");
+    Application application("hourglass on square");
     application.run();
     return 0;
 }

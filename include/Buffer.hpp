@@ -15,6 +15,9 @@ namespace magmatic {
 	public:
 		Buffer(const Buffer&) = delete;
 		Buffer& operator=(Buffer&) = delete;
+
+		Buffer(Buffer&& rhs) noexcept : buffer(std::move(rhs.buffer)), memory(std::move(rhs.memory)) {};
+		Buffer& operator=(Buffer&& rhs) noexcept;
 	};
 }
 

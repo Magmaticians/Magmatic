@@ -18,6 +18,7 @@ target_sources(magmatic-render
 		Vertex.hpp
         Buffer.hpp
 		utils.hpp
+		UniformBufferObject.hpp
 		)
 
 add_subdirectory(sound)

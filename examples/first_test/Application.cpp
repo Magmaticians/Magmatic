@@ -1,5 +1,4 @@
 #define GLM_FORCE_RADIANS
-#include <cctype>
 #include <algorithm>
 #include <spdlog/spdlog.h>
 #include <vulkan/vulkan.hpp>

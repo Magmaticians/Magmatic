@@ -23,7 +23,7 @@ namespace magmatic::render
 		CommandBuffer(CommandBuffer&& rhs) noexcept : queue(rhs.queue), command_buffer(std::move(rhs.command_buffer)) {};
 		CommandBuffer& operator=(CommandBuffer&& rhs) noexcept;
 
-		const vk::UniqueCommandBuffer& beginRecording(vk::CommandBufferUsageFlags usage = vk::CommandBufferUsageFlagBits::eOneTimeSubmit);
+		const vk::UniqueCommandBuffer& beginRecording(const vk::CommandBufferUsageFlags& usage = vk::CommandBufferUsageFlagBits::eOneTimeSubmit);
 		void endRecording();
 
 	private:

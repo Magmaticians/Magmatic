@@ -1,7 +1,8 @@
 #include <tabulate/table.hpp>
 #include <fmt/format.h>
-#include "graphics/Instance.hpp"
+#include "render/Instance.hpp"
 #include "sound/SoundDevice.hpp"
+#include <vulkan/vulkan.hpp>
 
 std::string decodeAPIVersion(uint32_t api_version)
 {

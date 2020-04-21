@@ -1,6 +1,6 @@
 #include <tabulate/table.hpp>
 #include <fmt/format.h>
-#include "Instance.hpp"
+#include "graphics/Instance.hpp"
 #include "sound/SoundDevice.hpp"
 
 std::string decodeAPIVersion(uint32_t api_version)
@@ -31,7 +31,7 @@ std::string toBoolalphaString(T val)
 	return fmt::format("{}", static_cast<bool>(val));
 }
 
-tabulate::Table getDeviceSummary(const magmatic::PhysicalDevice& phys_device)
+tabulate::Table getDeviceSummary(const magmatic::render::PhysicalDevice& phys_device)
 {
 	tabulate::Table device_summary;
 	tabulate::Table device_details;
@@ -107,7 +107,7 @@ tabulate::Table getDeviceSummary(const magmatic::PhysicalDevice& phys_device)
 	return device_summary;
 }
 
-void printDevicesSummary(const std::vector<magmatic::PhysicalDevice>& devices)
+void printDevicesSummary(const std::vector<magmatic::render::PhysicalDevice>& devices)
 {
 	tabulate::Table devices_summary;
 	devices_summary.add_row({"Physical devices: ", std::to_string(devices.size())});
@@ -151,7 +151,7 @@ void printSoundDevicesSummary()
 }
 
 int main() {
-	magmatic::Instance instance("Device enumeration");
+	magmatic::render::Instance instance("Device enumeration");
 
 	auto physical_devices = instance.enumeratePhysicalDevices();
 

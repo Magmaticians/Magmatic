@@ -1,18 +1,19 @@
 #ifndef MAGMATIC_APPLICATION_H
 #define MAGMATIC_APPLICATION_H
 
-#include <Vertex.hpp>
-#include "Window.hpp"
-#include "Instance.hpp"
-#include "Surface.hpp"
-#include "PhysicalDevice.hpp"
-#include "LogicalDevice.hpp"
-#include "SwapChain.hpp"
+#include "render/Vertex.hpp"
+#include "render/Window.hpp"
+#include "render/Instance.hpp"
+#include "render/Surface.hpp"
+#include "render/PhysicalDevice.hpp"
+#include "render/LogicalDevice.hpp"
+#include "render/SwapChain.hpp"
+#include "render/Buffer.hpp"
 
 class Application {
     static constexpr const char* DEFAULT_NAME{"Test application"};
     /** Triangle */
-	const std::vector<magmatic::Vertex> triangleVertices = {
+	const std::vector<magmatic::render::Vertex> triangleVertices = {
 			{{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
 			{{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
 			{{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
@@ -21,7 +22,7 @@ class Application {
 			0, 1, 2
 	};
 	/** Square */
-	const std::vector<magmatic::Vertex> squareVertices = {
+	const std::vector<magmatic::render::Vertex> squareVertices = {
 			{{-0.8f, -0.8f}, {1.0f, 0.0f, 0.0f}},
 			{{0.8f, -0.8f}, {0.0f, 1.0f, 0.0f}},
 			{{-0.8f, 0.8f}, {0.0f, 0.0f, 1.0f}},
@@ -31,7 +32,7 @@ class Application {
 			0, 1, 2, 1, 3, 2
 	};
 	/** Hourglass */
-	const std::vector<magmatic::Vertex> hourglassVertices = {
+	const std::vector<magmatic::render::Vertex> hourglassVertices = {
 			{{0.0f, 0.0f}, {1.0f, 1.0f, 1.0f}},
 			{{-0.5f, -0.8f}, {0.2f, 0.2f, 1.0f}},
 			{{0.5f, -0.8f}, {0.2f, 0.2f, 1.0f}},
@@ -42,31 +43,31 @@ class Application {
 			0, 1, 2, 0, 3, 4
 	};
 
-	const std::vector<magmatic::Vertex> vertices;
+	const std::vector<magmatic::render::Vertex> vertices;
 	const std::vector<uint32_t> indices;
 
-    const magmatic::Window window;
-    const magmatic::Instance instance;
-    const magmatic::Surface surface;
-	const magmatic::PhysicalDevice physicalDevice;
-	const magmatic::LogicalDevice logicalDevice;
-	magmatic::Shader vertShader;
-	magmatic::Shader fragShader;
-	const magmatic::SwapChain swapChain;
-	const magmatic::RenderPass renderPass;
+    const magmatic::render::Window window;
+    const magmatic::render::Instance instance;
+    const magmatic::render::Surface surface;
+	const magmatic::render::PhysicalDevice physicalDevice;
+	const magmatic::render::LogicalDevice logicalDevice;
+	magmatic::render::Shader vertShader;
+	magmatic::render::Shader fragShader;
+	const magmatic::render::SwapChain swapChain;
+	const magmatic::render::RenderPass renderPass;
 	const vk::UniqueDescriptorSetLayout descriptorSetLayout;
 	const vk::UniquePipelineLayout pipelineLayout;
-	const magmatic::Pipeline pipeline;
-	const magmatic::Framebuffers framebuffers;
-	const magmatic::CommandPool commandPool;
-	const magmatic::Buffer vertexBuffer;
-	const magmatic::Buffer indexBuffer;
-	const std::vector<magmatic::Buffer> uniformBuffers;
-	std::vector<magmatic::CommandBuffer> commandBuffers;
-	const magmatic::DescriptorSets descriptorSets;
+	const magmatic::render::Pipeline pipeline;
+	const magmatic::render::Framebuffers framebuffers;
+	const magmatic::render::CommandPool commandPool;
+	const magmatic::render::Buffer vertexBuffer;
+	const magmatic::render::Buffer indexBuffer;
+	const std::vector<magmatic::render::Buffer> uniformBuffers;
+	std::vector<magmatic::render::CommandBuffer> commandBuffers;
+	const magmatic::render::DescriptorSets descriptorSets;
 	const std::vector<vk::UniqueFence> fences;
-	const magmatic::Semaphores imageAcquiredSemaphores;
-	const magmatic::Semaphores renderFinishedSemaphores;
+	const magmatic::render::Semaphores imageAcquiredSemaphores;
+	const magmatic::render::Semaphores renderFinishedSemaphores;
 	std::vector<int> imagesInFlight;
 public:
     explicit Application(const std::string& mode);
@@ -81,7 +82,7 @@ private:
 
 	void updateUniformBuffer(uint32_t currentBuffer);
 
-	[[nodiscard]] std::vector<magmatic::Vertex> getVertexConfig(const std::string &mode) const;
+	[[nodiscard]] std::vector<magmatic::render::Vertex> getVertexConfig(const std::string &mode) const;
 
 	[[nodiscard]] std::vector<uint32_t> getIndexConfig(const std::string& mode) const;
 	void drawFrame();

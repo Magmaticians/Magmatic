@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <spdlog/spdlog.h>
 #include <vulkan/vulkan.hpp>
-#include <UniformBufferObject.hpp>
+#include "render/UniformBufferObject.hpp"
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include "Application.hpp"
@@ -11,11 +11,11 @@
 Application::Application(const std::string& mode):
 vertices(std::move(getVertexConfig(mode))),
 indices(std::move(getIndexConfig(mode))),
-window(magmatic::Window(DEFAULT_NAME)),
-instance(magmatic::Instance(DEFAULT_NAME, window.getRequiredExtensions())),
+window(magmatic::render::Window(DEFAULT_NAME)),
+instance(magmatic::render::Instance(DEFAULT_NAME, window.getRequiredExtensions())),
 surface(instance.createSurface(window)),
-physicalDevice(magmatic::PhysicalDevice(instance.getBestDevice())),
-logicalDevice(magmatic::LogicalDevice(physicalDevice, surface)),
+physicalDevice(magmatic::render::PhysicalDevice(instance.getBestDevice())),
+logicalDevice(magmatic::render::LogicalDevice(physicalDevice, surface)),
 vertShader(logicalDevice.createShader("./examples/first_test/vert.spv", vk::ShaderStageFlagBits::eVertex)),
 fragShader(logicalDevice.createShader("./examples/first_test/frag.spv", vk::ShaderStageFlagBits::eFragment)),
 swapChain(logicalDevice.createSwapchain(surface, window.getSize().first, window.getSize().second)),
@@ -24,15 +24,15 @@ descriptorSetLayout(logicalDevice.createDescriptorSetLayout()),
 pipeline(logicalDevice.createPipeline(swapChain.extent.width, swapChain.extent.height, {vertShader, fragShader}, renderPass, pipelineLayout)),
 pipelineLayout(logicalDevice.createPipelineLayout(descriptorSetLayout)),
 framebuffers(logicalDevice.createFramebuffers(renderPass, swapChain)),
-commandPool(logicalDevice.createCommandPool(magmatic::QueueType::GraphicalQueue)),
+commandPool(logicalDevice.createCommandPool(magmatic::render::QueueType::GraphicalQueue)),
 vertexBuffer(logicalDevice.createVertexBuffer(vertices, commandPool)),
 indexBuffer(logicalDevice.createIndexBuffer(indices, commandPool)),
 uniformBuffers(logicalDevice.createUniformBuffers(swapChain)),
 commandBuffers(logicalDevice.createCommandBuffers(commandPool, framebuffers.getSize())),
 descriptorSets(logicalDevice.createDescriptorSets(swapChain, descriptorSetLayout, uniformBuffers)),
 fences(logicalDevice.createFences(MAX_FRAMES_IN_FLIGHT)),
-imageAcquiredSemaphores(logicalDevice.createSemaphores(magmatic::SemaphoreType::ImageAvailableSemaphore, MAX_FRAMES_IN_FLIGHT)),
-renderFinishedSemaphores(logicalDevice.createSemaphores(magmatic::SemaphoreType::RenderFinishedSemaphore, MAX_FRAMES_IN_FLIGHT)){
+imageAcquiredSemaphores(logicalDevice.createSemaphores(magmatic::render::SemaphoreType::ImageAvailableSemaphore, MAX_FRAMES_IN_FLIGHT)),
+renderFinishedSemaphores(logicalDevice.createSemaphores(magmatic::render::SemaphoreType::RenderFinishedSemaphore, MAX_FRAMES_IN_FLIGHT)){
 	spdlog::info("Application constructor called and finished work");
 }
 
@@ -73,7 +73,7 @@ void Application::run() {
 
 void Application::updateUniformBuffer(uint32_t currentBuffer) {
 	static auto startTime = std::chrono::high_resolution_clock::now();
-	magmatic::UniformBufferObject ubo = {};
+	magmatic::render::UniformBufferObject ubo = {};
 	auto currentTime = std::chrono::high_resolution_clock::now();
 	float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
 	ubo.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
@@ -105,7 +105,7 @@ void Application::drawFrame() {
 	currentFrame = (currentFrame+1)%MAX_FRAMES_IN_FLIGHT;
 }
 
-std::vector<magmatic::Vertex> Application::getVertexConfig(const std::string& mode) const {
+std::vector<magmatic::render::Vertex> Application::getVertexConfig(const std::string& mode) const {
 	if(mode == "square") {
 		return squareVertices;
 	} else if(mode == "triangle") {
@@ -113,7 +113,7 @@ std::vector<magmatic::Vertex> Application::getVertexConfig(const std::string& mo
 	} else if(mode == "hourglass") {
 		return hourglassVertices;
 	} else if(mode == "hourglass on square") {
-		std::vector<magmatic::Vertex> res;
+		std::vector<magmatic::render::Vertex> res;
 		res.reserve(hourglassVertices.size() + squareVertices.size());
 		res.insert(res.end(), squareVertices.begin(), squareVertices.end());
 		res.insert(res.end(), hourglassVertices.begin(), hourglassVertices.end());

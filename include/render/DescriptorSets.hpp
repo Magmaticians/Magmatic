@@ -18,7 +18,12 @@ namespace magmatic::render
 		DescriptorSets& operator=(DescriptorSets&) = delete;
 
 		DescriptorSets(DescriptorSets&& rhs) noexcept : sets(std::move(rhs.sets)), descriptorPool(std::move(rhs.descriptorPool)) {};
-		DescriptorSets& operator=(DescriptorSets&& rhs) noexcept;
+		DescriptorSets& operator=(DescriptorSets&& rhs) noexcept
+		{
+			sets = std::move(rhs.sets);
+			descriptorPool = std::move(rhs.descriptorPool);
+			return *this;
+		};
 
 		[[nodiscard]] size_t getSize() const { return sets.size(); }
 	};

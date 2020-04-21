@@ -22,7 +22,7 @@ magmatic::sound::SoundSource::~SoundSource()
 	alDeleteSources(1, &source);
 }
 
-void magmatic::sound::SoundSource::setSound(std::shared_ptr<SoundBuffer> buffer) noexcept
+void magmatic::sound::SoundSource::setSound(const std::shared_ptr<SoundBuffer>& buffer) noexcept
 {
 	#if !defined(NDEBUG)
 	if(!buffer)

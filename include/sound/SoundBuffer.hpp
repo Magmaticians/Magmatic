@@ -8,7 +8,7 @@ namespace magmatic::sound
 	class SoundBuffer
 	{
 		friend class SoundLoader;
-		SoundBuffer(ALuint buffer_ID) noexcept : buffer_ID(buffer_ID) {};
+		explicit SoundBuffer(ALuint buffer_ID) noexcept : buffer_ID(buffer_ID) {};
 
 	public:
 		~SoundBuffer();

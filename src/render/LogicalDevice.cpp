@@ -7,7 +7,6 @@
 #include <set>
 #include <fstream>
 #include <functional>
-#include <algorithm>
 
 
 magmatic::render::LogicalDevice::LogicalDevice(
@@ -424,9 +423,9 @@ magmatic::render::Framebuffers magmatic::render::LogicalDevice::createFramebuffe
 	std::vector<vk::UniqueFramebuffer> framebuffers;
 	framebuffers.reserve(swapchain.image_views_.size());
 
-	const vk::ImageView* attachment;
 	for(const auto& view: swapchain.image_views_)
 	{
+		const vk::ImageView* attachment;
 		attachment = &view.get();
 		auto framebuffer = device->createFramebufferUnique(
 				vk::FramebufferCreateInfo(

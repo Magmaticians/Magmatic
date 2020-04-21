@@ -12,14 +12,19 @@ namespace magmatic::render
 		vk::UniqueBuffer buffer;
 		vk::UniqueDeviceMemory memory;
 
-		explicit Buffer(vk::UniqueBuffer buffer, vk::UniqueDeviceMemory vertexMemory) : buffer(std::move(buffer)), memory(std::move(vertexMemory)) {}
+		explicit Buffer(vk::UniqueBuffer buffer, vk::UniqueDeviceMemory memory) : buffer(std::move(buffer)), memory(std::move(memory)) {}
 
 	public:
 		Buffer(const Buffer&) = delete;
 		Buffer& operator=(Buffer&) = delete;
 
 		Buffer(Buffer&& rhs) noexcept : buffer(std::move(rhs.buffer)), memory(std::move(rhs.memory)) {};
-		Buffer& operator=(Buffer&& rhs) noexcept;
+		Buffer& operator=(Buffer&& rhs) noexcept
+		{
+			buffer = std::move(rhs.buffer);
+			memory = std::move(rhs.memory);
+			return *this;
+		}
 	};
 }
 

@@ -37,30 +37,31 @@ std::shared_ptr<magmatic::sound::SoundBuffer> magmatic::sound::SoundLoaderOpus::
 	const auto format = channel_count == 1 ? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16;
 	size_t sample_read = 0;
 
-	int16_t * buffer = new int16_t[pcm_length*channel_count];
+	auto buffer = new int16_t[pcm_length*channel_count];
 
 	ALuint buffer_ID;
 	alGenBuffers(1, &buffer_ID);
-	if (auto error = alGetError(); error != AL_NO_ERROR)
+	if (error = alGetError(); error != AL_NO_ERROR)
 	{
+		delete[] buffer;
 		spdlog::error("Magmatic: Failed to create sound buffer");
 		throw std::runtime_error("Failed to create sound buffer");
 	}
 
 	while(sample_read < pcm_length)
 	{
-		size_t temp_readed = op_read(ogg_file, buffer + sample_read * channel_count, pcm_length * channel_count, 0);
-		if(temp_readed < 0)
+		ogg_int64_t temp_read = op_read(ogg_file, buffer + sample_read * channel_count, pcm_length * channel_count, nullptr);
+		if(temp_read < 0)
 		{
 			spdlog::error("Magmatic: Error while decoding opus file");
 			throw std::runtime_error("Error while decoding opus file");
 		}
-		sample_read += temp_readed;
+		sample_read += temp_read;
 	}
 	op_free(ogg_file);
 
 	alBufferData(buffer_ID, format, buffer, sample_read * channel_count * sizeof(int16_t), 48000);
-	if (auto error = alGetError(); error != AL_NO_ERROR)
+	if (error = alGetError(); error != AL_NO_ERROR)
 	{
 		spdlog::error("Magmatic: Failed to transfer audio to buffer");
 		throw std::runtime_error("Failed to transfer audio to buffer");

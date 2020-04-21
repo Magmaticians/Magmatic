@@ -8,7 +8,7 @@ magmatic::render::CommandBuffer& magmatic::render::CommandBuffer::operator=(magm
 	return *this;
 }
 
-const vk::UniqueCommandBuffer& magmatic::render::CommandBuffer::beginRecording(vk::CommandBufferUsageFlags usage)
+const vk::UniqueCommandBuffer& magmatic::render::CommandBuffer::beginRecording(const vk::CommandBufferUsageFlags& usage)
 {
 	if(recording)
 	{

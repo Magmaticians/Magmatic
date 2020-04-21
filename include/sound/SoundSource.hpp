@@ -22,7 +22,7 @@ namespace magmatic::sound
 		std::shared_ptr<SoundBuffer> curr_buffer { nullptr };
 
 	public:
-		SoundSource(glm::vec3 pos = {0, 0, 0});
+		explicit SoundSource(glm::vec3 pos = {0, 0, 0});
 		~SoundSource();
 
 		SoundSource(const SoundSource&) = delete;
@@ -32,7 +32,7 @@ namespace magmatic::sound
 		void setVelocity(glm::vec3 vec) const noexcept;
 		void setGain(float gain) const noexcept;
 
-		void setSound(std::shared_ptr<SoundBuffer> buffer) noexcept;
+		void setSound(const std::shared_ptr<SoundBuffer>& buffer) noexcept;
 		void play() const noexcept;
 		void play(std::shared_ptr<SoundBuffer> buffer) noexcept ;
 		void pause() const noexcept;
@@ -40,7 +40,7 @@ namespace magmatic::sound
 
 		void wait() const noexcept;
 
-		State state() const noexcept;
+		[[nodiscard]] State state() const noexcept;
 
 	};
 }

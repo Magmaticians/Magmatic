@@ -3,19 +3,19 @@
 vk::SurfaceFormatKHR
 magmatic::render::SwapChain::chooseSwapSurfaceFormat(const std::vector<vk::SurfaceFormatKHR>& formats)
 {
-	if(formats.empty())
+	if (formats.empty())
 	{
 		throw std::invalid_argument("Provided empty formats vector");
 	}
-	if(
-			const auto preferred_format = std::find_if(
-					formats.begin(),
-					formats.end(),
-					[](const vk::SurfaceFormatKHR& surface_format)
-					{
-						return surface_format.format == vk::Format::eB8G8R8A8Srgb
-						&& surface_format.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear;
-					});
+	if (
+		const auto preferred_format = std::find_if(
+				formats.begin(),
+				formats.end(),
+				[](const vk::SurfaceFormatKHR& surface_format)
+				{
+					return surface_format.format == vk::Format::eB8G8R8A8Srgb
+					       && surface_format.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear;
+				});
 			preferred_format != formats.begin())
 	{
 		return *preferred_format;

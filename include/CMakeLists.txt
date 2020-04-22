@@ -1,25 +1,2 @@
-target_sources(magmatic-render
-		PUBLIC
-		render/Window.hpp
-		render/Instance.hpp
-		render/PhysicalDevice.hpp
-		render/LogicalDevice.hpp
-		render/Surface.hpp
-		render/SwapChain.hpp
-		render/Shader.hpp
-		render/Pipeline.hpp
-		render/RenderPass.hpp
-		render/Framebuffers.hpp
-		render/CommandPool.hpp
-		render/CommandBuffer.hpp
-		render/QueueType.hpp
-		render/Semaphores.hpp
-		render/SemaphoreType.hpp
-		render/Vertex.hpp
-		render/Buffer.hpp
-		render/utils.hpp
-		render/UniformBufferObject.hpp
-		render/DescriptorSets.hpp
-		)
-
+add_subdirectory(render)
 add_subdirectory(sound)

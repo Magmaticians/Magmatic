@@ -8,7 +8,6 @@
 namespace magmatic::render {
 	struct Vertex {
 		glm::vec2 position;
-		glm::vec3 color;
 
 		static constexpr uint32_t binding = 0;
 
@@ -23,7 +22,6 @@ namespace magmatic::render {
 		static std::array<vk::VertexInputAttributeDescription, 2> getAttributeDescriptions() {
 			return {
 					vk::VertexInputAttributeDescription(0, binding, vk::Format::eR32G32Sfloat, offsetof(Vertex, position)),
-					vk::VertexInputAttributeDescription(1, binding, vk::Format::eR32G32B32Sfloat, offsetof(Vertex, color))
 			};
 		}
 	};

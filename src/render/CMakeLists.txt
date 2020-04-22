@@ -1,0 +1,15 @@
+target_sources(
+		magmatic-render
+		PRIVATE
+		Window.cpp
+		Instance.cpp
+		PhysicalDevice.cpp
+		LogicalDevice.cpp
+		Surface.cpp
+		SwapChain.cpp
+		Shader.cpp
+		Pipeline.cpp
+		RenderPass.cpp
+		CommandBuffer.cpp
+		utils.cpp
+)

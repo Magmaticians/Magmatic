@@ -70,13 +70,6 @@ namespace magmatic::render
 		[[nodiscard]] vk::UniquePipelineLayout
 		createPipelineLayout(const vk::UniqueDescriptorSetLayout& descriptorSetLayout) const;
 
-		[[nodiscard]] Pipeline createPipeline(
-				uint32_t extent_width, uint32_t extent_height,
-				std::vector<std::reference_wrapper<Shader>> shaderStages,
-				const RenderPass& renderPass,
-				const vk::UniquePipelineLayout& pipelineLayout
-		) const;
-
 		[[nodiscard]] Framebuffers createFramebuffers(const RenderPass& render_pass, const SwapChain& swapchain) const;
 
 		[[nodiscard]] CommandPool createCommandPool(QueueType type) const;
@@ -132,6 +125,14 @@ namespace magmatic::render
 		                uint32_t currentBuffer) const;
 
 		void waitIdle() const;
+
+		template<typename VertexType>
+		[[nodiscard]] Pipeline createPipeline(
+				uint32_t extent_width, uint32_t extent_height,
+				std::vector<std::reference_wrapper<Shader>> shaderStages,
+				const RenderPass& renderPass,
+				const vk::UniquePipelineLayout& pipelineLayout
+		) const;
 	private:
 		static std::optional<std::pair<size_t, size_t>> chooseGraphicPresentQueue(
 				const std::vector<size_t>& graphics,
@@ -163,5 +164,125 @@ magmatic::render::Buffer magmatic::render::LogicalDevice::createStagingBuffer(co
 	return Buffer(std::move(stagingBuffer), std::move(stagingMemory));
 }
 
+template<typename VertexType>
+magmatic::render::Pipeline magmatic::render::LogicalDevice::createPipeline(
+		uint32_t extent_width, uint32_t extent_height,
+		std::vector<std::reference_wrapper<Shader>> shaderStages,
+		const magmatic::render::RenderPass& renderPass,
+		const vk::UniquePipelineLayout& pipelineLayout
+) const
+{
+	auto bindingDescription = VertexType::getBindingDescription();
+	auto attributeDescriptions = VertexType::getAttributeDescriptions();
+
+	vk::PipelineVertexInputStateCreateInfo vertex_input_state_create_info(
+			vk::PipelineVertexInputStateCreateFlags(),
+			1,
+			&bindingDescription,
+			static_cast<uint32_t>(attributeDescriptions.size()),
+			attributeDescriptions.data()
+	);
+
+	vk::PipelineInputAssemblyStateCreateInfo input_assembly_state_create_info(
+			vk::PipelineInputAssemblyStateCreateFlags(),
+			vk::PrimitiveTopology::eTriangleList,
+			false
+	);
+
+	vk::PipelineShaderStageCreateInfo shaderStageInfos[2] = {
+			shaderStages[0].get().getPipelineShaderStageCreateInfo(),
+			shaderStages[1].get().getPipelineShaderStageCreateInfo()
+	};
+
+	vk::Viewport viewport(
+			0.0f, 0.0f,
+			static_cast<float>(extent_width), static_cast<float>(extent_height),
+			1.0f, 1.0f
+	);
+
+	vk::Rect2D scissors({0,0}, {extent_width, extent_height});
+
+	vk::PipelineViewportStateCreateInfo viewport_state_create_info(
+			vk::PipelineViewportStateCreateFlags(),
+			1, &viewport,
+			1, &scissors
+	);
+
+	vk::PipelineRasterizationStateCreateInfo rasterization_state_create_info(
+			vk::PipelineRasterizationStateCreateFlags(),
+			false,
+			false,
+			vk::PolygonMode::eFill,
+			vk::CullModeFlagBits::eBack,
+			vk::FrontFace::eCounterClockwise,
+			false,
+			0.0f,
+			0.0f,
+			0.0f,
+			1.0f
+	);
+
+	vk::PipelineMultisampleStateCreateInfo multisampling(
+			vk::PipelineMultisampleStateCreateFlags(),
+			vk::SampleCountFlagBits::e1
+	);
+
+	vk::StencilOpState stencilOpState(vk::StencilOp::eKeep, vk::StencilOp::eKeep, vk::StencilOp::eKeep, vk::CompareOp::eAlways);
+	vk::PipelineDepthStencilStateCreateInfo depth_stencil_state(
+			vk::PipelineDepthStencilStateCreateFlags(),
+			true,
+			true,
+			vk::CompareOp::eLessOrEqual,
+			false,
+			false,
+			stencilOpState,
+			stencilOpState
+	);
+
+	vk::ColorComponentFlags colorComponentFlags(vk::ColorComponentFlagBits::eR | vk::ColorComponentFlagBits::eG | vk::ColorComponentFlagBits::eB | vk::ColorComponentFlagBits::eA);
+	vk::PipelineColorBlendAttachmentState pipeline_color_blend_attachment_state(
+			false,
+			vk::BlendFactor::eZero,
+			vk::BlendFactor::eZero,
+			vk::BlendOp::eAdd,
+			vk::BlendFactor::eZero,
+			vk::BlendFactor::eZero,
+			vk::BlendOp::eAdd,
+			colorComponentFlags
+	);
+
+	vk::PipelineColorBlendStateCreateInfo color_blending(
+			vk::PipelineColorBlendStateCreateFlags(),
+			false,
+			vk::LogicOp::eNoOp,
+			1, &pipeline_color_blend_attachment_state,
+			{ {1.0f, 1.0f, 1.0f, 1.0f} }
+	);
+
+	vk::PipelineDynamicStateCreateInfo dynamic_states(
+			vk::PipelineDynamicStateCreateFlags(),
+			0,
+			nullptr);
+
+	vk::GraphicsPipelineCreateInfo pipeline_create_info(
+			vk::PipelineCreateFlags(),
+			2,
+			shaderStageInfos,
+			&vertex_input_state_create_info,
+			&input_assembly_state_create_info,
+			nullptr,
+			&viewport_state_create_info,
+			&rasterization_state_create_info,
+			&multisampling,
+			&depth_stencil_state,
+			&color_blending,
+			&dynamic_states,
+			pipelineLayout.get(),
+			renderPass.renderPass.get()
+	);
+
+	vk::UniquePipeline pipeline = device->createGraphicsPipelineUnique(nullptr, pipeline_create_info);
+	return Pipeline(std::move(pipeline));
+}
 
 #endif //MAGMATIC_LOGICALDEVICE_HPP

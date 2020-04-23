@@ -21,4 +21,5 @@ target_sources(magmatic-render
 		UniformBufferObject.hpp
 		DescriptorSets.hpp
 		Model.hpp
+		TexturedVertex.hpp
 		)

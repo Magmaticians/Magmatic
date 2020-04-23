@@ -6,6 +6,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include "Application.hpp"
+#include "render/Vertex.hpp"
 
 Application::Application(const std::string& mode):
 vertices(std::move(getVertexConfig(mode))),
@@ -20,7 +21,7 @@ fragShader(logicalDevice.createShader("./examples/first_test/frag.spv", vk::Shad
 swapChain(logicalDevice.createSwapchain(surface, window.getSize().first, window.getSize().second)),
 renderPass(logicalDevice.createRenderPass(surface)),
 descriptorSetLayout(logicalDevice.createDescriptorSetLayout()),
-pipeline(logicalDevice.createPipeline(swapChain.extent.width, swapChain.extent.height, {vertShader, fragShader}, renderPass, pipelineLayout)),
+pipeline(logicalDevice.createPipeline<magmatic::render::Vertex>(swapChain.extent.width, swapChain.extent.height, {vertShader, fragShader}, renderPass, pipelineLayout)),
 pipelineLayout(logicalDevice.createPipelineLayout(descriptorSetLayout)),
 framebuffers(logicalDevice.createFramebuffers(renderPass, swapChain)),
 commandPool(logicalDevice.createCommandPool(magmatic::render::QueueType::GraphicalQueue)),

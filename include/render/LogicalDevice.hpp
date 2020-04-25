@@ -16,6 +16,8 @@
 #include "Buffer.hpp"
 #include "Vertex.hpp"
 #include "DescriptorSets.hpp"
+#include "Image.hpp"
+#include "Texture.hpp"
 #include <vulkan/vulkan.hpp>
 #include <filesystem>
 #include <optional>
@@ -77,8 +79,15 @@ namespace magmatic::render
 		void copyBuffer(const vk::UniqueBuffer& srcBuffer, const vk::UniqueBuffer& dstBuffer, vk::DeviceSize size,
 		                const CommandPool& commandPool) const;
 
+		void copuBuffertoImage(
+				const vk::UniqueBuffer& src,
+				const vk::UniqueImage& dst,
+				uint32_t width, uint32_t height,
+				const CommandPool& pool
+				) const;
+
 		[[nodiscard]] std::pair<vk::UniqueBuffer, vk::UniqueDeviceMemory>
-		createBuffer(vk::DeviceSize size, const vk::BufferUsageFlags& usageFlags,
+		createBuffer(vk::DeviceSize size, vk::BufferUsageFlags usageFlags,
 		             const vk::MemoryPropertyFlags& memoryFlags) const;
 
 		[[nodiscard]] Buffer
@@ -93,7 +102,7 @@ namespace magmatic::render
 		void copyBufferMemory(const vk::UniqueDeviceMemory& memory, size_t size, const T& dataToCopy) const;
 
 		template<typename T, typename A>
-		[[nodiscard]] Buffer createStagingBuffer(const std::vector<T, A>& dataToCopy) const;
+		[[nodiscard]] Buffer createStagingBuffer(const std::vector<T, A>& data_to_copy) const;
 
 		[[nodiscard]] DescriptorSets
 		createDescriptorSets(const SwapChain& swapChain, const vk::UniqueDescriptorSetLayout& descriptorSetLayout,
@@ -107,15 +116,20 @@ namespace magmatic::render
 
 		[[nodiscard]] std::vector<vk::UniqueFence> createFences(size_t count) const;
 
+		[[nodiscard]] Texture createTexture(const Image& image, const CommandPool& command_pool) const;
+
 		[[nodiscard]] vk::Result acquireNextImageKHR(
 				const SwapChain& swapChain, const Semaphores& imageAcquiredSemaphores,
 				size_t index, uint32_t& imageIndex,
 				uint64_t timeout
 				) const;
 
-		void
-		submitToGraphicsQueue(const Semaphores& imageAcquiredSemaphores, const Semaphores& renderFinishedSemaphores,
-		                      const CommandBuffer& commandBuffer, const vk::UniqueFence& fences, size_t index) const;
+		void submitToGraphicsQueue(
+				const Semaphores& imageAcquiredSemaphores,
+				const Semaphores& renderFinishedSemaphores,
+				const CommandBuffer& commandBuffer,
+				const vk::UniqueFence& fences, size_t index
+				) const;
 
 		void waitForFences(const vk::UniqueFence& fence, uint64_t timeout) const;
 
@@ -133,11 +147,22 @@ namespace magmatic::render
 				const RenderPass& renderPass,
 				const vk::UniquePipelineLayout& pipelineLayout
 		) const;
+
+		void transitionImageLayout(
+				const vk::UniqueImage& image,
+				vk::Format format,
+				vk::ImageLayout old_layout,
+				vk::ImageLayout new_layout,
+				const CommandPool& commandPool
+		) const;
 	private:
 		static std::optional<std::pair<size_t, size_t>> chooseGraphicPresentQueue(
 				const std::vector<size_t>& graphics,
 				const std::vector<size_t>& presents
 				);
+
+		template<typename T>
+		Buffer createStagingBuffer(const T* data_to_copy, size_t data_size) const;
 	};
 }
 
@@ -149,19 +174,27 @@ void magmatic::render::LogicalDevice::copyBufferMemory(const vk::UniqueDeviceMem
 	device->unmapMemory(memory.get());
 }
 
-template<typename T, typename A>
-magmatic::render::Buffer magmatic::render::LogicalDevice::createStagingBuffer(const std::vector<T, A>& dataToCopy) const{
-	vk::DeviceSize bufferSize = sizeof(T) * dataToCopy.size();
-	auto bufferAndMemory = createBuffer(bufferSize, vk::BufferUsageFlagBits::eTransferSrc, vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent);
-	vk::UniqueBuffer stagingBuffer = std::move(bufferAndMemory.first);
-	vk::UniqueDeviceMemory stagingMemory = std::move(bufferAndMemory.second);
+template <typename T>
+magmatic::render::Buffer magmatic::render::LogicalDevice::createStagingBuffer(const T* data_to_copy, size_t data_size) const
+{
+	vk::DeviceSize buffer_size = data_size;
+	auto [staging_buffer, staging_memory] = createBuffer(
+			buffer_size,
+			vk::BufferUsageFlagBits::eTransferSrc,
+			vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent
+			);
 
 	void* data;
-	device->mapMemory(stagingMemory.get(), 0, bufferSize, vk::MemoryMapFlags(), &data);
-	memcpy(data, dataToCopy.data(), (size_t) bufferSize);
-	device->unmapMemory(stagingMemory.get());
+	device->mapMemory(staging_memory.get(), 0, buffer_size, vk::MemoryMapFlags(), &data);
+	memcpy(data, data_to_copy, static_cast<size_t>(buffer_size));
+	device->unmapMemory(staging_memory.get());
 
-	return Buffer(std::move(stagingBuffer), std::move(stagingMemory));
+	return Buffer(std::move(staging_buffer), std::move(staging_memory));
+}
+
+template<typename T, typename A>
+magmatic::render::Buffer magmatic::render::LogicalDevice::createStagingBuffer(const std::vector<T, A>& data_to_copy) const{
+	return createStagingBuffer(data_to_copy.data(), data_to_copy.size() * sizeof(T));
 }
 
 template<typename VertexType>

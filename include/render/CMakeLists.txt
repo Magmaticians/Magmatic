@@ -22,4 +22,6 @@ target_sources(magmatic-render
 		DescriptorSets.hpp
 		Model.hpp
 		TexturedVertex.hpp
+		Texture.hpp
+		Image.hpp
 		)

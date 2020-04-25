@@ -344,9 +344,14 @@ magmatic::render::CommandPool magmatic::render::LogicalDevice::createCommandPool
 	return CommandPool(std::move(command_pool), type);
 }
 
-void magmatic::render::LogicalDevice::copyBuffer(const vk::UniqueBuffer& srcBuffer, const vk::UniqueBuffer& dstBuffer, vk::DeviceSize size, const CommandPool& commandPool) const {
+void magmatic::render::LogicalDevice::copyBuffer(
+		const vk::UniqueBuffer& srcBuffer,
+		const vk::UniqueBuffer& dstBuffer,
+		vk::DeviceSize size,
+		const CommandPool& commandPool
+		) const {
 	CommandBuffer commandBuffer = createCommandBuffer(commandPool);
-	auto& commandBufferHandle = commandBuffer.beginRecording(vk::CommandBufferUsageFlagBits::eOneTimeSubmit);
+	auto& commandBufferHandle = commandBuffer.beginRecording();
 	vk::BufferCopy copyRegion(
 			0,
 			0,
@@ -355,14 +360,10 @@ void magmatic::render::LogicalDevice::copyBuffer(const vk::UniqueBuffer& srcBuff
 	commandBufferHandle->copyBuffer(srcBuffer.get(), dstBuffer.get(), 1, &copyRegion);
 	commandBuffer.endRecording();
 
-	vk::SubmitInfo submitInfo;
-	submitInfo.commandBufferCount = 1;
-	submitInfo.pCommandBuffers = &commandBufferHandle.get();
-	graphics_queue.submit(1, &submitInfo, nullptr);
-	graphics_queue.waitIdle();
+	commandBuffer.submitWait();
 }
 
-std::pair<vk::UniqueBuffer, vk::UniqueDeviceMemory> magmatic::render::LogicalDevice::createBuffer(vk::DeviceSize size, const vk::BufferUsageFlags& usageFlags, const vk::MemoryPropertyFlags& memoryFlags) const {
+std::pair<vk::UniqueBuffer, vk::UniqueDeviceMemory> magmatic::render::LogicalDevice::createBuffer(vk::DeviceSize size, vk::BufferUsageFlags usageFlags, const vk::MemoryPropertyFlags& memoryFlags) const {
 	std::pair<vk::UniqueBuffer, vk::UniqueDeviceMemory> res;
 	vk::BufferCreateInfo bufferCreateInfo(
 			vk::BufferCreateFlags(),
@@ -577,4 +578,159 @@ void magmatic::render::LogicalDevice::presentKHR(const Semaphores& renderFinishe
 
 void magmatic::render::LogicalDevice::waitIdle() const {
 	device->waitIdle();
+}
+
+void magmatic::render::LogicalDevice::copuBuffertoImage(
+		const vk::UniqueBuffer& src,
+		const vk::UniqueImage& dst,
+		uint32_t width, uint32_t height,
+		const CommandPool& pool
+		) const
+{
+	auto command_buffer = createCommandBuffer(pool);
+	const auto& cmd = command_buffer.beginRecording();
+
+	vk::BufferImageCopy region {
+		0,
+		0,
+		0,
+		{
+			vk::ImageAspectFlagBits::eColor,
+			0,
+			0,
+			1
+		},
+		{0,0,0},
+		{
+			width,
+			height,
+			1
+		}
+	};
+
+	cmd->copyBufferToImage(
+			src.get(),
+			dst.get(),
+			vk::ImageLayout::eTransferDstOptimal,
+			1,
+			&region
+			);
+
+	command_buffer.endRecording();
+	command_buffer.submitWait();
+}
+
+magmatic::render::Texture magmatic::render::LogicalDevice::createTexture(
+		const magmatic::render::Image& image,
+		const CommandPool& command_pool
+		) const
+{
+	auto buffer = createStagingBuffer(image.getPixels().get(), image.getDataSize());
+
+	const auto size = image.size();
+	const auto width = static_cast<uint32_t>(size.first);
+	const auto height = static_cast<uint32_t>(size.second);
+
+	vk::ImageCreateInfo image_info {
+		vk::ImageCreateFlags(),
+		vk::ImageType::e2D,
+		vk::Format::eR8G8B8A8Srgb,
+		{width, height, 1},
+		1,
+		1,
+		vk::SampleCountFlagBits::e1,
+		vk::ImageTiling::eOptimal,
+		vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled,
+		vk::SharingMode::eExclusive
+	};
+
+	auto unique_image = device->createImageUnique(image_info);
+
+	auto memory_requirements = device->getImageMemoryRequirements(unique_image.get());
+	vk::MemoryAllocateInfo allocate_info {
+			memory_requirements.size,
+			magmatic::render::utils::findMemoryType(
+					memory_requirements.memoryTypeBits,
+					vk::MemoryPropertyFlagBits::eDeviceLocal,
+					physical_dev
+					)
+	};
+
+	auto memory = device->allocateMemoryUnique(allocate_info);
+	device->bindImageMemory(unique_image.get(), memory.get(), 0);
+
+	transitionImageLayout(
+			unique_image,
+			vk::Format::eR8G8B8A8Srgb,
+			vk::ImageLayout::eUndefined,
+			vk::ImageLayout::eTransferDstOptimal,
+			command_pool
+			);
+	copuBuffertoImage(buffer.buffer, unique_image, width, height, command_pool);
+	transitionImageLayout(
+			unique_image,
+			vk::Format::eR8G8B8A8Srgb,
+			vk::ImageLayout::eTransferDstOptimal,
+			vk::ImageLayout::eShaderReadOnlyOptimal,
+			command_pool
+			);
+	return Texture(std::move(unique_image), std::move(memory));
+}
+
+void magmatic::render::LogicalDevice::transitionImageLayout(
+		const vk::UniqueImage& image,
+		vk::Format format,
+		vk::ImageLayout old_layout,
+		vk::ImageLayout new_layout,
+		const CommandPool& command_pool
+		) const
+{
+	auto command_buffer = createCommandBuffer(command_pool);
+	const auto& cmd =  command_buffer.beginRecording();
+
+	vk::ImageMemoryBarrier barrier;
+	barrier.oldLayout = old_layout;
+	barrier.newLayout = new_layout;
+	barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+	barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+	barrier.image = image.get();
+	barrier.subresourceRange = {
+			vk::ImageAspectFlagBits::eColor,
+			0,
+			1,
+			0,
+			1
+	};
+
+	vk::PipelineStageFlags src_stage;
+	vk::PipelineStageFlags dst_stage;
+
+	if (old_layout == vk::ImageLayout::eUndefined && new_layout == vk::ImageLayout::eTransferDstOptimal)
+	{
+		barrier.dstAccessMask = vk::AccessFlagBits::eTransferWrite;
+
+		src_stage = vk::PipelineStageFlagBits::eTopOfPipe;
+		dst_stage = vk::PipelineStageFlagBits::eTransfer;
+	}
+	else if (old_layout == vk::ImageLayout::eTransferDstOptimal && new_layout == vk::ImageLayout::eShaderReadOnlyOptimal)
+	{
+		barrier.srcAccessMask = vk::AccessFlagBits::eTransferWrite;
+		barrier.dstAccessMask = vk::AccessFlagBits::eShaderRead;
+
+		src_stage = vk::PipelineStageFlagBits::eTransfer;
+		dst_stage = vk::PipelineStageFlagBits::eFragmentShader;
+	} else {
+		spdlog::error("Magmatic: Unsupported transition");
+		throw std::invalid_argument("Unsupported transition");
+	}
+
+	cmd->pipelineBarrier(
+			src_stage,
+			dst_stage,
+			{},
+			nullptr, nullptr,
+			barrier
+			);
+	command_buffer.endRecording();
+	command_buffer.submitWait();
 }

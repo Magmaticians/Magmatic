@@ -1,5 +1,6 @@
 #include "render/CommandBuffer.hpp"
 #include <spdlog/spdlog.h>
+#include <limits>
 
 magmatic::render::CommandBuffer& magmatic::render::CommandBuffer::operator=(magmatic::render::CommandBuffer&& rhs) noexcept
 {
@@ -32,4 +33,17 @@ void magmatic::render::CommandBuffer::endRecording()
 	}
 	command_buffer->end();
 	recording = false;
+}
+
+void magmatic::render::CommandBuffer::submitWait()
+{
+	auto logical_device = command_buffer.getOwner();
+	auto fence = logical_device.createFenceUnique(vk::FenceCreateInfo());
+
+	vk::SubmitInfo submit_info;
+	submit_info.commandBufferCount = 1;
+	submit_info.pCommandBuffers = &command_buffer.get();
+
+	queue.submit(submit_info, fence.get());
+	logical_device.waitForFences(1, &fence.get(), true, std::numeric_limits<uint64_t>::max());
 }

@@ -26,6 +26,8 @@ namespace magmatic::render
 		const vk::UniqueCommandBuffer& beginRecording(const vk::CommandBufferUsageFlags& usage = vk::CommandBufferUsageFlagBits::eOneTimeSubmit);
 		void endRecording();
 
+		void submitWait();
+
 	private:
 
 		CommandBuffer(vk::UniqueCommandBuffer& buffer, vk::Queue queue) noexcept

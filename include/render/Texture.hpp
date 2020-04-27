@@ -11,10 +11,12 @@ namespace magmatic::render
 	public:
 		friend class LogicalDevice;
 		const vk::UniqueImage image;
+		const vk::UniqueImageView image_view;
 		const vk::UniqueDeviceMemory image_memory;
 
 	private:
-		Texture(vk::UniqueImage image, vk::UniqueDeviceMemory memory): image(std::move(image)), image_memory(std::move(memory)) {};
+		Texture(vk::UniqueImage image, vk::UniqueImageView view, vk::UniqueDeviceMemory memory)
+		: image(std::move(image)), image_view(std::move(view)), image_memory(std::move(memory)) {};
 	};
 }
 

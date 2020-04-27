@@ -63,13 +63,13 @@ vk::Extent2D magmatic::render::SwapChain::chooseSwapExtent(
 
 magmatic::render::SwapChain::SwapChain(
 		vk::UniqueSwapchainKHR swapchain,
-		const vk::UniqueDevice& device,
 		const vk::Format& format,
         vk::Extent2D extent
 		)
 :swapchain_(std::move(swapchain)), extent(extent)
 {
-	images_ = device->getSwapchainImagesKHR(swapchain_.get());
+	const auto device = swapchain.getOwner();
+	images_ = device.getSwapchainImagesKHR(swapchain_.get());
 	image_views_.reserve(images_.size());
 
 	vk::ComponentMapping component_mapping(
@@ -89,9 +89,9 @@ magmatic::render::SwapChain::SwapChain(
 				component_mapping,
 				subresource_range
 				);
-		image_views_.emplace_back(device->createImageViewUnique(image_view_create_info));
+		image_views_.emplace_back(device.createImageViewUnique(image_view_create_info));
 	}
 
 	vk::FenceCreateInfo fence_create_info{vk::FenceCreateFlags()};
-	fence = device->createFenceUnique(fence_create_info);
+	fence = device.createFenceUnique(fence_create_info);
 }

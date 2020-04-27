@@ -68,7 +68,9 @@ namespace magmatic::render
 				const Surface& surface
 		) const;
 
-		[[nodiscard]] vk::UniqueDescriptorSetLayout createDescriptorSetLayout() const;
+		[[nodiscard]] vk::UniqueDescriptorSetLayout createDescriptorSetLayout(
+				const std::vector<vk::DescriptorSetLayoutBinding>& bindings
+		) const;
 
 		[[nodiscard]] vk::UniquePipelineLayout
 		createPipelineLayout(const vk::UniqueDescriptorSetLayout& descriptorSetLayout) const;

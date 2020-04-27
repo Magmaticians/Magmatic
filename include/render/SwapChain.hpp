@@ -20,7 +20,6 @@ namespace magmatic::render
 
 		SwapChain(
 				vk::UniqueSwapchainKHR swapchain,
-				const vk::UniqueDevice& device,
 				const vk::Format& format,
 				vk::Extent2D extent
 		);

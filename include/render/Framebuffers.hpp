@@ -16,7 +16,7 @@ namespace magmatic::render
 		Framebuffers(Framebuffers&) = delete;
 		Framebuffers& operator=(Framebuffers&) = delete;
 
-		[[nodiscard]] size_t getSize() const { return framebuffers.size(); }
+		[[nodiscard]] size_t size() const { return framebuffers.size(); }
 	};
 }
 

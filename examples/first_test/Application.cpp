@@ -28,7 +28,7 @@ commandPool(logicalDevice.createCommandPool(magmatic::render::QueueType::Graphic
 vertexBuffer(logicalDevice.createVertexBuffer(vertices, commandPool)),
 indexBuffer(logicalDevice.createIndexBuffer(indices, commandPool)),
 uniformBuffers(logicalDevice.createUniformBuffers(swapChain)),
-commandBuffers(logicalDevice.createCommandBuffers(commandPool, framebuffers.getSize())),
+commandBuffers(logicalDevice.createCommandBuffers(commandPool, framebuffers.size())),
 descriptorSets(logicalDevice.createDescriptorSets(swapChain, descriptorSetLayout, uniformBuffers)),
 fences(logicalDevice.createFences(MAX_FRAMES_IN_FLIGHT)),
 imageAcquiredSemaphores(logicalDevice.createSemaphores(magmatic::render::SemaphoreType::ImageAvailableSemaphore, MAX_FRAMES_IN_FLIGHT)),

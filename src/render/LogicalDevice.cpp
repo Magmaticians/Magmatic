@@ -87,6 +87,16 @@ magmatic::render::LogicalDevice::LogicalDevice(
 		queue_create_infos.emplace_back(info);
 	}
 
+	vk::PhysicalDeviceFeatures optimal_features;
+	if(!physical_device.device_features.samplerAnisotropy)
+	{
+		spdlog::warn("Magmatic: Anisotropic filtering not available");
+	}
+	else
+	{
+		optimal_features.samplerAnisotropy = true;
+	}
+
 	const vk::DeviceCreateInfo device_create_info(
 			vk::DeviceCreateFlags(),
 			static_cast<uint32_t>(queue_create_infos.size()),
@@ -94,7 +104,8 @@ magmatic::render::LogicalDevice::LogicalDevice(
 			0,
 			nullptr,
 			static_cast<uint32_t>(enabled_extensions.size()),
-			enabled_extensions.data()
+			enabled_extensions.data(),
+			&optimal_features
 	);
 
 	device = physical_device.device.createDeviceUnique(device_create_info);
@@ -177,7 +188,7 @@ magmatic::render::SwapChain magmatic::render::LogicalDevice::createSwapchain(
 
 	vk::UniqueSwapchainKHR swapchain = device->createSwapchainKHRUnique(swapchain_create_info);
 
-	return SwapChain(std::move(swapchain), device, surface_format.format, extent);
+	return SwapChain(std::move(swapchain), surface_format.format, extent);
 }
 
 magmatic::render::Shader magmatic::render::LogicalDevice::createShader(const std::filesystem::path& file_path, vk::ShaderStageFlagBits type) const
@@ -674,7 +685,24 @@ magmatic::render::Texture magmatic::render::LogicalDevice::createTexture(
 			vk::ImageLayout::eShaderReadOnlyOptimal,
 			command_pool
 			);
-	return Texture(std::move(unique_image), std::move(memory));
+
+	//todo: consider extracting, duplicate in creating swapchain image views
+	vk::ImageViewCreateInfo image_view_info = {
+			vk::ImageViewCreateFlags(),
+			unique_image.get(),
+			vk::ImageViewType::e2D,
+			vk::Format::eR8G8B8A8Srgb,
+			{},
+			vk::ImageSubresourceRange {
+				vk::ImageAspectFlagBits::eColor,
+				0,
+				1,
+				0,
+				1
+			}
+	};
+	auto image_view = device->createImageViewUnique(image_view_info);
+	return Texture(std::move(unique_image), std::move(image_view), std::move(memory));
 }
 
 void magmatic::render::LogicalDevice::transitionImageLayout(
@@ -733,4 +761,31 @@ void magmatic::render::LogicalDevice::transitionImageLayout(
 			);
 	command_buffer.endRecording();
 	command_buffer.submitWait();
+}
+
+magmatic::render::Sampler magmatic::render::LogicalDevice::createSampler(
+		vk::Filter filter,
+		float anisotropy_samples,
+		bool normalized_coordinates
+		) const
+{
+	vk::SamplerCreateInfo sampler_create_info = {
+			vk::SamplerCreateFlags(),
+			filter,
+			filter,
+			vk::SamplerMipmapMode::eLinear,
+			vk::SamplerAddressMode::eRepeat,
+			vk::SamplerAddressMode::eRepeat,
+			vk::SamplerAddressMode::eRepeat,
+			 0.0f,
+			 anisotropy_samples > 1.0f,
+			anisotropy_samples,
+			false,
+			vk::CompareOp::eAlways,
+			0.0f,
+			0.0f,
+			vk::BorderColor::eIntOpaqueWhite,
+			normalized_coordinates
+	};
+	return Sampler(std::move(device->createSamplerUnique(sampler_create_info)));
 }

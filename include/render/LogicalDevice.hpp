@@ -18,6 +18,7 @@
 #include "DescriptorSets.hpp"
 #include "Image.hpp"
 #include "Texture.hpp"
+#include "Sampler.hpp"
 #include <vulkan/vulkan.hpp>
 #include <filesystem>
 #include <optional>
@@ -154,6 +155,13 @@ namespace magmatic::render
 				vk::ImageLayout old_layout,
 				vk::ImageLayout new_layout,
 				const CommandPool& commandPool
+		) const;
+
+		[[nodiscard]] Sampler createSampler(
+				vk::Filter filter = vk::Filter::eNearest,
+				float anisotropy_samples = 1.0f,
+				bool normalized_coordinates = true
+
 		) const;
 	private:
 		static std::optional<std::pair<size_t, size_t>> chooseGraphicPresentQueue(

@@ -24,4 +24,5 @@ target_sources(magmatic-render
 		TexturedVertex.hpp
 		Texture.hpp
 		Image.hpp
+		Sampler.hpp
 		)

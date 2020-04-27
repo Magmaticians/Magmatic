@@ -25,7 +25,7 @@ namespace magmatic::render
 			return *this;
 		};
 
-		[[nodiscard]] size_t getSize() const { return sets.size(); }
+		[[nodiscard]] size_t size() const { return sets.size(); }
 	};
 }
 

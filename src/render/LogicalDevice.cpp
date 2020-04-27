@@ -290,18 +290,13 @@ magmatic::render::RenderPass magmatic::render::LogicalDevice::createRenderPass(c
     return RenderPass(std::move(renderPass));
 }
 
-vk::UniqueDescriptorSetLayout magmatic::render::LogicalDevice::createDescriptorSetLayout() const{
-	vk::DescriptorSetLayoutBinding uboLayoutBinding(
-			0,
-			vk::DescriptorType::eUniformBuffer,
-			1,
-			vk::ShaderStageFlagBits::eVertex,
-			nullptr
-	);
+vk::UniqueDescriptorSetLayout magmatic::render::LogicalDevice::createDescriptorSetLayout(
+		const std::vector<vk::DescriptorSetLayoutBinding>& bindings
+		) const{
 	vk::DescriptorSetLayoutCreateInfo descriptor_set_layout_create_info(
 			vk::DescriptorSetLayoutCreateFlags(),
-			1,
-			&uboLayoutBinding
+			bindings.size(),
+			bindings.data()
 	);
 	return device->createDescriptorSetLayoutUnique(descriptor_set_layout_create_info);
 }
@@ -450,6 +445,7 @@ magmatic::render::DescriptorSets magmatic::render::LogicalDevice::createDescript
 			vk::DescriptorType::eUniformBuffer,
 			size
 			);
+
 	vk::DescriptorPoolCreateInfo poolInfo(
 			vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet,
 			size,

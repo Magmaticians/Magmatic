@@ -43,6 +43,16 @@ class Application {
 			0, 1, 2, 0, 3, 4
 	};
 
+	const std::vector<vk::DescriptorSetLayoutBinding> bindings = {
+			{
+			0,
+			vk::DescriptorType::eUniformBuffer,
+			1,
+			vk::ShaderStageFlagBits::eVertex,
+			nullptr
+			}
+	};
+
 	const std::vector<magmatic::render::Vertex> vertices;
 	const std::vector<uint32_t> indices;
 

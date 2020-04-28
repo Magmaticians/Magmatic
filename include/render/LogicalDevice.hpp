@@ -19,6 +19,7 @@
 #include "Image.hpp"
 #include "Texture.hpp"
 #include "Sampler.hpp"
+#include "DescriptorWriteUpdate.hpp"
 #include <vulkan/vulkan.hpp>
 #include <filesystem>
 #include <optional>
@@ -110,6 +111,11 @@ namespace magmatic::render
 		[[nodiscard]] DescriptorSets
 		createDescriptorSets(const SwapChain& swapChain, const vk::UniqueDescriptorSetLayout& descriptorSetLayout,
 		                     const std::vector<Buffer>& uniformBuffers) const;
+
+		void updateDescriptorSet(
+				const vk::DescriptorSet& dset,
+				const std::vector<DescriptorWriteUpdate>& write_info
+				) const;
 
 		[[nodiscard]] CommandBuffer createCommandBuffer(const CommandPool& pool) const;
 

@@ -13,4 +13,5 @@ target_sources(
 		CommandBuffer.cpp
 		utils.cpp
 		Image.cpp
+		DescriptorWriteUpdate.cpp
 )

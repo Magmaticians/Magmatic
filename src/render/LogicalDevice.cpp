@@ -7,6 +7,7 @@
 #include <set>
 #include <fstream>
 #include <functional>
+#include <render/DescriptorWriteUpdate.hpp>
 
 
 magmatic::render::LogicalDevice::LogicalDevice(
@@ -460,28 +461,23 @@ magmatic::render::DescriptorSets magmatic::render::LogicalDevice::createDescript
 			size,
 			layouts.data()
 			);
-	DescriptorSets descriptorSets(device->allocateDescriptorSets(allocInfo), std::move(descriptorPool));
+	return DescriptorSets(device->allocateDescriptorSets(allocInfo), std::move(descriptorPool));
+}
 
-	for(size_t i = 0; i < swapChain.images_.size(); i++) {
-		vk::DescriptorBufferInfo bufferInfo(
-				uniformBuffers[i].buffer.get(),
-				0,
-				sizeof(UniformBufferObject)
-				);
-		vk::WriteDescriptorSet descriptorWrite(
-				descriptorSets.sets[i],
-				0,
-				0,
-				1,
-				vk::DescriptorType::eUniformBuffer,
-				nullptr,
-				&bufferInfo,
-				nullptr
-				);
-		device->updateDescriptorSets(1, &descriptorWrite, 0, nullptr);
-	}
-
-	return descriptorSets;
+void magmatic::render::LogicalDevice::updateDescriptorSet(
+		const vk::DescriptorSet& dset,
+		const std::vector<DescriptorWriteUpdate>& write_info
+		) const
+{
+	std::vector<vk::WriteDescriptorSet> write_ops;
+	write_ops.reserve(write_info.size());
+	std::transform(
+			write_info.begin(),
+			write_info.end(),
+			std::back_inserter(write_ops),
+			[&dset](const auto& info){return info.toWriteInfo(dset);}
+			);
+	device->updateDescriptorSets(write_ops.size(), write_ops.data(), 0, nullptr);
 }
 
 std::vector<magmatic::render::CommandBuffer> magmatic::render::LogicalDevice::createCommandBuffers(const CommandPool& pool, size_t count) const

@@ -56,9 +56,9 @@ void Application::run() {
 		updates.emplace_back(write_update);
 
 		updates.emplace_back(texture.getWriteInfo(1, 0));
-		updates.emplace_back(sampler.getWriteInfo(1, 0));
+		updates.emplace_back(sampler.getWriteInfo(2, 0));
 
-		logicalDevice.updateDescriptorSet(descriptorSets.sets[i], {write_update});
+		logicalDevice.updateDescriptorSet(descriptorSets.sets[i], updates);
 	}
 
 

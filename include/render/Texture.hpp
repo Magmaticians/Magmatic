@@ -19,7 +19,7 @@ namespace magmatic::render
 		{
 			DescriptorWriteUpdate update;
 			update.type = DescriptorWriteUpdate::eImage;
-			update.dst_binding = dst_array_elem;
+			update.dst_binding = dst_binding;
 			update.dst_array_elem = dst_array_elem;
 			update.data_info = vk::DescriptorImageInfo {
 					{},

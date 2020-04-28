@@ -437,25 +437,37 @@ magmatic::render::Buffer magmatic::render::LogicalDevice::createIndexBuffer(cons
 }
 
 magmatic::render::DescriptorSets magmatic::render::LogicalDevice::createDescriptorSets(
-		const SwapChain& swapChain,
-		const vk::UniqueDescriptorSetLayout& descriptorSetLayout,
-		const std::vector<magmatic::render::Buffer>& uniformBuffers
+		size_t count,
+		const vk::UniqueDescriptorSetLayout& descriptor_set_layout,
+		std::vector<vk::DescriptorType> types
 		) const {
-	auto size = static_cast<uint32_t>(swapChain.images_.size());
-	vk::DescriptorPoolSize poolSize(
-			vk::DescriptorType::eUniformBuffer,
-			size
-			);
+	auto size = static_cast<uint32_t>(count);
+	std::vector<vk::DescriptorPoolSize> sizes;
+	sizes.reserve(types.size());
+
+	std::transform(
+			types.begin(),
+			types.end(),
+			std::back_inserter(sizes),
+			[size](vk::DescriptorType type)
+			{
+				return vk::DescriptorPoolSize
+						{
+								type,
+								size
+						};
+			}
+	);
 
 	vk::DescriptorPoolCreateInfo poolInfo(
 			vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet,
 			size,
-			1,
-			&poolSize
+			sizes.size(),
+			sizes.data()
 			);
 	vk::UniqueDescriptorPool descriptorPool = device->createDescriptorPoolUnique(poolInfo);
 
-	std::vector<vk::DescriptorSetLayout> layouts(size, descriptorSetLayout.get());
+	std::vector<vk::DescriptorSetLayout> layouts(size, descriptor_set_layout.get());
 	vk::DescriptorSetAllocateInfo allocInfo(
 			descriptorPool.get(),
 			size,
@@ -765,10 +777,10 @@ magmatic::render::Sampler magmatic::render::LogicalDevice::createSampler(
 			vk::SamplerCreateFlags(),
 			filter,
 			filter,
-			vk::SamplerMipmapMode::eLinear,
-			vk::SamplerAddressMode::eRepeat,
-			vk::SamplerAddressMode::eRepeat,
-			vk::SamplerAddressMode::eRepeat,
+			vk::SamplerMipmapMode::eNearest,
+			vk::SamplerAddressMode::eClampToEdge,
+			vk::SamplerAddressMode::eClampToEdge,
+			vk::SamplerAddressMode::eClampToEdge,
 			 0.0f,
 			 anisotropy_samples > 1.0f,
 			anisotropy_samples,

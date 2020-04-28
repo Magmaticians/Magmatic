@@ -34,7 +34,7 @@ const std::unique_ptr<stbi_uc, magmatic::render::Image::stbi_ucDeleter>& magmati
 
 size_t magmatic::render::Image::getDataSize() const noexcept
 {
-	return width * height * channels;
+	return width * height * 4;
 }
 
 void magmatic::render::Image::stbi_ucDeleter::operator()(stbi_uc* pointer) noexcept

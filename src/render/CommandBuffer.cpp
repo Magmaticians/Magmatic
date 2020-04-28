@@ -1,3 +1,4 @@
+#define NOMINMAX
 #include "render/CommandBuffer.hpp"
 #include <spdlog/spdlog.h>
 #include <limits>

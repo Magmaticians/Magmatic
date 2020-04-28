@@ -37,6 +37,9 @@ namespace magmatic::render
 
 		[[nodiscard]] SwapChainSupportDetails getSwapChainSupportDetails(const Surface& surface) const;
 
+		[[nodiscard]] vk::FormatProperties getFormatProperties(const vk::Format& format) const {
+			return device.getFormatProperties(format);
+		}
 	};
 }
 

@@ -7,6 +7,10 @@ Magmatic is multiplatform graphics and audio engine made by [Magmaticians](https
 - [Michał Jakubek](https://github.com/XertDev)
 - [Michał Węgrzyn](https://github.com/mwegrzyn2311)
 
+### Possibilities presentation
+
+Coming soon...
+
 ## Requirements
 
 ###### Language

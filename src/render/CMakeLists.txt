@@ -12,5 +12,5 @@ target_sources(
 		RenderPass.cpp
 		CommandBuffer.cpp
 		utils.cpp
-		Image.cpp
+		Bitmap.cpp
 )

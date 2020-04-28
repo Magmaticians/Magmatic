@@ -1,41 +1,22 @@
 #ifndef MAGMATIC_IMAGE_HPP
 #define MAGMATIC_IMAGE_HPP
 
-#include <filesystem>
-#include <memory>
+#include <vulkan/vulkan.hpp>
 
+namespace magmatic::render {
+	class Image {
+		friend class LogicalDevice;
 
-typedef unsigned char stbi_uc;
+		vk::UniqueImage image;
+		vk::UniqueDeviceMemory memory;
 
-namespace magmatic::render
-{
-	class Image
-	{
-	public:
-		struct stbi_ucDeleter
-		{
-			void operator()(stbi_uc* pointer) noexcept;
-		};
-
-	private:
-		int width;
-		int height;
-		int channels;
-		std::unique_ptr<stbi_uc, stbi_ucDeleter> pixels;
-
+		explicit Image(vk::UniqueImage image, vk::UniqueDeviceMemory memory) :
+				image(std::move(image)), memory(std::move(memory)) {}
 	public:
 
-		explicit Image(const std::filesystem::path& file_path);
-
-		Image(const Image&) = delete;
-		Image& operator=(const Image&) = delete;
-
-		[[nodiscard]] std::pair<int, int> size() const noexcept;
-		[[nodiscard]] int getChannel() const noexcept;
-		[[nodiscard]] const std::unique_ptr<stbi_uc, stbi_ucDeleter>& getPixels() const noexcept;
-		[[nodiscard]] size_t getDataSize() const noexcept;
+		Image(Image&) = delete;
+		Image &operator=(Image &) = delete;
 	};
 }
-
 
 #endif //MAGMATIC_IMAGE_HPP

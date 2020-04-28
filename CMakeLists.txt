@@ -36,7 +36,7 @@ add_executable(device_enumeration "")
 add_executable(sound_test "")
 add_dependencies(examples main-test device_enumeration sound_test)
 
-target_compile_definitions(magmatic-render PRIVATE SPDLOG_FMT_EXTERNAL=1)
+target_compile_definitions(magmatic-render PRIVATE SPDLOG_FMT_EXTERNAL=1 GLM_FORCE_DEPTH_ZERO_TO_ONE)
 target_include_directories(magmatic-render PUBLIC Vulkan::Vulkan)
 target_link_libraries(magmatic-render PUBLIC glfw Vulkan::Vulkan spdlog::spdlog_header_only glm::glm)
 

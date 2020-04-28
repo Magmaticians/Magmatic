@@ -14,30 +14,36 @@ class Application {
     static constexpr const char* DEFAULT_NAME{"Test application"};
     /** Triangle */
 	const std::vector<magmatic::render::Vertex> triangleVertices = {
-			{{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
-			{{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
-			{{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
+			{{0.0f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}},
+			{{0.5f, 0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}},
+			{{-0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}},
 	};
 	const std::vector<uint32_t> triangleIndices = {
 			0, 1, 2
 	};
 	/** Square */
 	const std::vector<magmatic::render::Vertex> squareVertices = {
-			{{-0.8f, -0.8f}, {1.0f, 0.0f, 0.0f}},
-			{{0.8f, -0.8f}, {0.0f, 1.0f, 0.0f}},
-			{{-0.8f, 0.8f}, {0.0f, 0.0f, 1.0f}},
-			{{0.8f, 0.8f}, {1.0f, 1.0f, 1.0f}}
+			{{-0.8f, -0.8f, 0.0f}, {1.0f, 0.0f, 0.0f}},
+			{{0.8f, -0.8f, 0.0f}, {0.0f, 1.0f, 0.0f}},
+			{{-0.8f, 0.8f, 0.0f}, {0.0f, 0.0f, 1.0f}},
+			{{0.8f, 0.8f, 0.0f}, {1.0f, 1.0f, 1.0f}},
+
+			{{-0.8f, -0.8f, -0.5f}, {1.0f, 0.0f, 0.0f}},
+			{{0.8f, -0.8f, -0.5f}, {0.0f, 1.0f, 0.0f}},
+			{{-0.8f, 0.8f, -0.5f}, {0.0f, 0.0f, 1.0f}},
+			{{0.8f, 0.8f, -0.5f}, {1.0f, 1.0f, 1.0f}}
 	};
 	const std::vector<uint32_t> squareIndices = {
-			0, 1, 2, 1, 3, 2
+			0, 1, 2, 1, 3, 2,
+			4, 5, 6, 5, 7, 6,
 	};
 	/** Hourglass */
 	const std::vector<magmatic::render::Vertex> hourglassVertices = {
-			{{0.0f, 0.0f}, {1.0f, 1.0f, 1.0f}},
-			{{-0.5f, -0.8f}, {0.2f, 0.2f, 1.0f}},
-			{{0.5f, -0.8f}, {0.2f, 0.2f, 1.0f}},
-			{{0.5f, 0.8f}, {1.0f, 1.0f, 0.0f}},
-			{{-0.5f, 0.8f}, {1.0f, 1.0f, 0.0f}}
+			{{0.0f, 0.0f, 0.0f}, {1.0f, 1.0f, 1.0f}},
+			{{-0.5f, -0.8f, 0.0f}, {0.2f, 0.2f, 1.0f}},
+			{{0.5f, -0.8f, 0.0f}, {0.2f, 0.2f, 1.0f}},
+			{{0.5f, 0.8f, 0.0f}, {1.0f, 1.0f, 0.0f}},
+			{{-0.5f, 0.8f, 0.0f}, {1.0f, 1.0f, 0.0f}}
 	};
 	const std::vector<uint32_t> hourglassIndices = {
 			0, 1, 2, 0, 3, 4
@@ -64,12 +70,13 @@ class Application {
 	magmatic::render::Shader vertShader;
 	magmatic::render::Shader fragShader;
 	const magmatic::render::SwapChain swapChain;
+	const magmatic::render::CommandPool commandPool;
+	const magmatic::render::DepthResources depthResources;
 	const magmatic::render::RenderPass renderPass;
 	const vk::UniqueDescriptorSetLayout descriptorSetLayout;
 	const vk::UniquePipelineLayout pipelineLayout;
 	const magmatic::render::Pipeline pipeline;
 	const magmatic::render::Framebuffers framebuffers;
-	const magmatic::render::CommandPool commandPool;
 	const magmatic::render::Buffer vertexBuffer;
 	const magmatic::render::Buffer indexBuffer;
 	const std::vector<magmatic::render::Buffer> uniformBuffers;

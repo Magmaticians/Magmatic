@@ -39,14 +39,23 @@ class Application {
 	};
 	/** Hourglass */
 	const std::vector<magmatic::render::Vertex> hourglassVertices = {
-			{{0.0f, 0.0f, 0.0f}, {1.0f, 1.0f, 1.0f}},
-			{{-0.5f, -0.8f, 0.0f}, {0.2f, 0.2f, 1.0f}},
-			{{0.5f, -0.8f, 0.0f}, {0.2f, 0.2f, 1.0f}},
-			{{0.5f, 0.8f, 0.0f}, {1.0f, 1.0f, 0.0f}},
-			{{-0.5f, 0.8f, 0.0f}, {1.0f, 1.0f, 0.0f}}
+			{{-0.5f, -0.5f, -0.8f}, {0.8f, 0.8f, 1.0f}, {0.0f, 0.0f}},
+			{{-0.5f, 0.5f, -0.8f}, {0.8f, 0.8f, 1.0f}, {1.0f, 0.0f}},
+			{{0.5f, 0.5f, -0.8f}, {0.8f, 0.8f, 1.0f}, {0.0f, 1.0f}},
+			{{0.5f, -0.5f, -0.8f}, {0.8f, 0.8f, 1.0f}, {1.0f, 1.0f}},
+
+			{{0.0f, 0.0f, 0.0f}, {0.8f, 0.8f, 1.0f}, {0.0f, 0.0f}},
+
+			{{-0.5f, -0.5f, 0.8f}, {0.8f, 0.8f, 1.0f}, {1.0f, 1.0f}},
+			{{-0.5f, 0.5f, 0.8f}, {0.8f, 0.8f, 1.0f}, {0.0f, 1.0f}},
+			{{0.5f, 0.5f, 0.8f}, {0.8f, 0.8f, 1.0f}, {0.0f, 0.0f}},
+			{{0.5f, -0.5f, 0.8f}, {0.8f, 0.8f, 1.0f}, {1.0f, 0.0f}},
 	};
 	const std::vector<uint32_t> hourglassIndices = {
-			0, 1, 2, 0, 3, 4
+			0, 1, 2, 2, 3, 0,// lower base
+			1, 0, 4, 2, 1, 4, 3, 2, 4, 0, 3, 4,// Lower faces
+			5, 6, 4, 6, 7, 4, 7, 8, 4, 8, 5, 4,// Upper faces
+			7, 6, 5, 5, 8, 7// Upper base
 	};
 
 	const std::vector<vk::DescriptorSetLayoutBinding> bindings = {

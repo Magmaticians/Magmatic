@@ -19,12 +19,13 @@ logicalDevice(magmatic::render::LogicalDevice(physicalDevice, surface)),
 vertShader(logicalDevice.createShader("./examples/first_test/vert.spv", vk::ShaderStageFlagBits::eVertex)),
 fragShader(logicalDevice.createShader("./examples/first_test/frag.spv", vk::ShaderStageFlagBits::eFragment)),
 swapChain(logicalDevice.createSwapchain(surface, window.getSize().first, window.getSize().second)),
-renderPass(logicalDevice.createRenderPass(surface)),
+commandPool(logicalDevice.createCommandPool(magmatic::render::QueueType::GraphicalQueue)),
+depthResources(logicalDevice.createDepthResources(swapChain.extent, commandPool)),
+renderPass(logicalDevice.createRenderPass(surface, depthResources)),
 descriptorSetLayout(logicalDevice.createDescriptorSetLayout(bindings)),
 pipeline(logicalDevice.createPipeline<magmatic::render::Vertex>(swapChain.extent.width, swapChain.extent.height, {vertShader, fragShader}, renderPass, pipelineLayout)),
 pipelineLayout(logicalDevice.createPipelineLayout(descriptorSetLayout)),
-framebuffers(logicalDevice.createFramebuffers(renderPass, swapChain)),
-commandPool(logicalDevice.createCommandPool(magmatic::render::QueueType::GraphicalQueue)),
+framebuffers(logicalDevice.createFramebuffers(renderPass, swapChain, depthResources.imageView.get())),
 vertexBuffer(logicalDevice.createVertexBuffer(vertices, commandPool)),
 indexBuffer(logicalDevice.createIndexBuffer(indices, commandPool)),
 uniformBuffers(logicalDevice.createUniformBuffers(swapChain)),
@@ -45,14 +46,14 @@ void Application::run() {
 
 	for(size_t i = 0; i < commandBuffers.size(); i++) {
 		auto& commandBufferHandle = std::move(commandBuffers[i].beginRecording(vk::CommandBufferUsageFlagBits::eSimultaneousUse));
-		vk::ClearValue clearValues[2];
+		std::array<vk::ClearValue, 2> clearValues;
 		clearValues[0].color =  vk::ClearColorValue(std::array<float, 4>({0.2f, 0.2f, 0.2f, 1.0f}));
 		clearValues[1].depthStencil = vk::ClearDepthStencilValue(1.0f, 0);
 		vk::RenderPassBeginInfo beginInfo(renderPass.renderPass.get(),
 		                                  framebuffers.framebuffers[i].get(),
 		                                  vk::Rect2D(vk::Offset2D(0, 0), swapChain.extent),
-		                                  2,
-		                                  clearValues);
+		                                  static_cast<uint32_t>(clearValues.size()),
+		                                  clearValues.data());
 		commandBufferHandle->beginRenderPass(beginInfo, vk::SubpassContents::eInline);
 		commandBufferHandle->bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline.pipeline.get());
 		commandBufferHandle->bindVertexBuffers(0, 1, vertexBuffers, offsets);

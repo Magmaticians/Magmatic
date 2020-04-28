@@ -16,9 +16,12 @@
 #include "Buffer.hpp"
 #include "Vertex.hpp"
 #include "DescriptorSets.hpp"
-#include "Image.hpp"
+#include "Bitmap.hpp"
 #include "Texture.hpp"
 #include "Sampler.hpp"
+#include "DepthResources.hpp"
+#include "Image.hpp"
+
 #include <vulkan/vulkan.hpp>
 #include <filesystem>
 #include <optional>
@@ -54,6 +57,8 @@ namespace magmatic::render
 
 		LogicalDevice& operator=(LogicalDevice&) = delete;
 
+		[[nodiscard]] vk::UniqueImageView createImageView(const vk::Image& image, const vk::Format& format, const vk::ImageAspectFlags& aspectFlags, const vk::ComponentMapping& compMapping) const;
+
 		[[nodiscard]] SwapChain createSwapchain(
 				const Surface& surface,
 				uint32_t window_width, uint32_t window_height
@@ -65,7 +70,8 @@ namespace magmatic::render
 		) const;
 
 		[[nodiscard]] RenderPass createRenderPass(
-				const Surface& surface
+				const Surface& surface,
+				const DepthResources& depthResources
 		) const;
 
 		[[nodiscard]] vk::UniqueDescriptorSetLayout createDescriptorSetLayout(
@@ -75,14 +81,19 @@ namespace magmatic::render
 		[[nodiscard]] vk::UniquePipelineLayout
 		createPipelineLayout(const vk::UniqueDescriptorSetLayout& descriptorSetLayout) const;
 
-		[[nodiscard]] Framebuffers createFramebuffers(const RenderPass& render_pass, const SwapChain& swapchain) const;
+		[[nodiscard]] Framebuffers createFramebuffers(const RenderPass& render_pass, const SwapChain& swapchain, const vk::ImageView& depthImageView) const;
 
 		[[nodiscard]] CommandPool createCommandPool(QueueType type) const;
+
+		[[nodiscard]] Image createImage(vk::Extent2D extent, vk::Format format
+				, vk::ImageTiling tiling, const vk::ImageUsageFlags& usage, const vk::MemoryPropertyFlags& memProps) const;
+
+		[[nodiscard]] DepthResources createDepthResources(vk::Extent2D extent, const CommandPool& commandPool) const;
 
 		void copyBuffer(const vk::UniqueBuffer& srcBuffer, const vk::UniqueBuffer& dstBuffer, vk::DeviceSize size,
 		                const CommandPool& commandPool) const;
 
-		void copuBuffertoImage(
+		void copyBufferToImage(
 				const vk::UniqueBuffer& src,
 				const vk::UniqueImage& dst,
 				uint32_t width, uint32_t height,
@@ -119,7 +130,7 @@ namespace magmatic::render
 
 		[[nodiscard]] std::vector<vk::UniqueFence> createFences(size_t count) const;
 
-		[[nodiscard]] Texture createTexture(const Image& image, const CommandPool& command_pool) const;
+		[[nodiscard]] Texture createTexture(const Bitmap& bitmap, const CommandPool& command_pool) const;
 
 		[[nodiscard]] vk::Result acquireNextImageKHR(
 				const SwapChain& swapChain, const Semaphores& imageAcquiredSemaphores,
@@ -279,7 +290,9 @@ magmatic::render::Pipeline magmatic::render::LogicalDevice::createPipeline(
 			false,
 			false,
 			stencilOpState,
-			stencilOpState
+			stencilOpState,
+			0.0f,
+			1.0f
 	);
 
 	vk::ColorComponentFlags colorComponentFlags(vk::ColorComponentFlagBits::eR | vk::ColorComponentFlagBits::eG | vk::ColorComponentFlagBits::eB | vk::ColorComponentFlagBits::eA);

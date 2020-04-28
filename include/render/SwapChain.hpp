@@ -10,6 +10,17 @@ namespace magmatic::render
 	class SwapChain
 	{
 	friend class LogicalDevice;
+
+		explicit SwapChain(
+				vk::UniqueSwapchainKHR swapchain,
+				std::vector<vk::Image> images,
+				std::vector<vk::UniqueImageView> image_views,
+				vk::UniqueFence fence,
+				vk::Extent2D extent
+		) : swapchain_(std::move(swapchain)), images_(std::move(images)),
+		    image_views_(std::move(image_views)), fence(std::move(fence)),
+		    extent(extent) {}
+
 	public:
 		static vk::SurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector <vk::SurfaceFormatKHR>& formats);
 		static vk::PresentModeKHR chooseSwapPresentMode(const std::vector<vk::PresentModeKHR>& present_modes);
@@ -18,11 +29,6 @@ namespace magmatic::render
 				uint32_t window_width, uint32_t window_height
 				) noexcept;
 
-		SwapChain(
-				vk::UniqueSwapchainKHR swapchain,
-				const vk::Format& format,
-				vk::Extent2D extent
-		);
 
 		SwapChain(const SwapChain&) = delete;
 		SwapChain& operator=(const SwapChain&) = delete;

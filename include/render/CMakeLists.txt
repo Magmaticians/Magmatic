@@ -23,6 +23,8 @@ target_sources(magmatic-render
 		Model.hpp
 		TexturedVertex.hpp
 		Texture.hpp
-		Image.hpp
+		Bitmap.hpp
 		Sampler.hpp
+		DepthResources.hpp
+		Image.hpp
 		)

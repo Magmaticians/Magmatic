@@ -8,7 +8,6 @@
 #include <fstream>
 #include <functional>
 
-
 magmatic::render::LogicalDevice::LogicalDevice(
 		const magmatic::render::PhysicalDevice& physical_device,
 		const Surface& surface,
@@ -139,6 +138,25 @@ std::optional<std::pair<size_t, size_t>> magmatic::render::LogicalDevice::choose
 	return std::make_pair(graphics[0], presents[0]);
 }
 
+vk::UniqueImageView magmatic::render::LogicalDevice::createImageView(const vk::Image& image, const vk::Format& format, const vk::ImageAspectFlags& aspectFlags, const vk::ComponentMapping& compMapping) const {
+	vk::ImageViewCreateInfo image_view_info = {
+			vk::ImageViewCreateFlags(),
+			image,
+			vk::ImageViewType::e2D,
+			format,
+			compMapping,
+			vk::ImageSubresourceRange {
+					aspectFlags,
+					0,
+					1,
+					0,
+					1
+			}
+	};
+
+	return device->createImageViewUnique(image_view_info);
+}
+
 magmatic::render::SwapChain magmatic::render::LogicalDevice::createSwapchain(
 		const Surface& surface,
 		uint32_t window_width, uint32_t window_height
@@ -188,7 +206,27 @@ magmatic::render::SwapChain magmatic::render::LogicalDevice::createSwapchain(
 
 	vk::UniqueSwapchainKHR swapchain = device->createSwapchainKHRUnique(swapchain_create_info);
 
-	return SwapChain(std::move(swapchain), surface_format.format, extent);
+	std::vector<vk::Image> images = device->getSwapchainImagesKHR(swapchain.get());
+	std::vector<vk::UniqueImageView> image_views;
+	image_views.reserve(images.size());
+
+	vk::ComponentMapping component_mapping(
+			vk::ComponentSwizzle::eR,
+			vk::ComponentSwizzle::eG,
+			vk::ComponentSwizzle::eB,
+			vk::ComponentSwizzle::eA);
+
+
+	std::transform(images.begin(), images.end(), std::back_inserter(image_views),
+			[=](vk::Image image) { return createImageView(image,
+	                                               surface_format.format,
+	                                               vk::ImageAspectFlagBits::eColor,
+	                                               component_mapping);});
+
+	vk::FenceCreateInfo fence_create_info{vk::FenceCreateFlags()};
+	vk::UniqueFence fence = device->createFenceUnique(fence_create_info);
+
+	return SwapChain(std::move(swapchain), std::move(images), std::move(image_views), std::move(fence), extent);
 }
 
 magmatic::render::Shader magmatic::render::LogicalDevice::createShader(const std::filesystem::path& file_path, vk::ShaderStageFlagBits type) const
@@ -233,7 +271,7 @@ vk::UniquePipelineLayout magmatic::render::LogicalDevice::createPipelineLayout(c
 	return device->createPipelineLayoutUnique(pipeline_layout_info);
 }
 
-magmatic::render::RenderPass magmatic::render::LogicalDevice::createRenderPass(const Surface& surface) const {
+magmatic::render::RenderPass magmatic::render::LogicalDevice::createRenderPass(const Surface& surface, const DepthResources& depthResources) const {
 	const auto& support_details = physical_dev.getSwapChainSupportDetails(surface);
 	const auto surface_format = SwapChain::chooseSwapSurfaceFormat(support_details.formats);
 
@@ -254,6 +292,22 @@ magmatic::render::RenderPass magmatic::render::LogicalDevice::createRenderPass(c
 			vk::ImageLayout::eColorAttachmentOptimal
 	);
 
+	vk::AttachmentDescription depthAttachment(
+			vk::AttachmentDescriptionFlags(),
+			depthResources.format,
+			vk::SampleCountFlagBits::e1,
+			vk::AttachmentLoadOp::eClear,
+			vk::AttachmentStoreOp::eDontCare,
+			vk::AttachmentLoadOp::eDontCare,
+			vk::AttachmentStoreOp::eDontCare,
+			vk::ImageLayout::eUndefined,
+			vk::ImageLayout::eDepthStencilAttachmentOptimal);
+
+	vk::AttachmentReference depthAttachmentRef(
+			1,
+			vk::ImageLayout::eDepthStencilAttachmentOptimal
+	);
+
 	vk::SubpassDescription subpass(
 			vk::SubpassDescriptionFlags(),
 			vk::PipelineBindPoint::eGraphics,
@@ -262,7 +316,7 @@ magmatic::render::RenderPass magmatic::render::LogicalDevice::createRenderPass(c
 			1,
 			&color_attachment_reference,
 			nullptr,
-			nullptr
+			&depthAttachmentRef
 	);
 
 	vk::SubpassDependency dependency(
@@ -275,10 +329,11 @@ magmatic::render::RenderPass magmatic::render::LogicalDevice::createRenderPass(c
 			vk::DependencyFlags()
 			);
 
+	std::array<vk::AttachmentDescription, 2> attachments = {color_attachment, depthAttachment};
 	vk::RenderPassCreateInfo render_pass_info(
 			vk::RenderPassCreateFlags(),
-			1,
-			&color_attachment,
+			static_cast<uint32_t>(attachments.size()),
+			attachments.data(),
 			1,
 			&subpass,
 			1,
@@ -303,7 +358,8 @@ vk::UniqueDescriptorSetLayout magmatic::render::LogicalDevice::createDescriptorS
 
 magmatic::render::Framebuffers magmatic::render::LogicalDevice::createFramebuffers(
 		const magmatic::render::RenderPass& render_pass,
-		const magmatic::render::SwapChain& swapchain
+		const magmatic::render::SwapChain& swapchain,
+		const vk::ImageView& depthImageView
 		) const
 {
 	std::vector<vk::UniqueFramebuffer> framebuffers;
@@ -311,14 +367,13 @@ magmatic::render::Framebuffers magmatic::render::LogicalDevice::createFramebuffe
 
 	for(const auto& view: swapchain.image_views_)
 	{
-		const vk::ImageView* attachment;
-		attachment = &view.get();
+		std::array<vk::ImageView, 2> attachments = {view.get(), depthImageView};
 		auto framebuffer = device->createFramebufferUnique(
 				vk::FramebufferCreateInfo(
 						vk::FramebufferCreateFlags(),
 						render_pass.renderPass.get(),
-						1,
-						attachment,
+						static_cast<uint32_t>(attachments.size()),
+						attachments.data(),
 						swapchain.extent.width,
 						swapchain.extent.height,
 						1
@@ -348,6 +403,62 @@ magmatic::render::CommandPool magmatic::render::LogicalDevice::createCommandPool
 					queue_family_index
 			));
 	return CommandPool(std::move(command_pool), type);
+}
+
+magmatic::render::Image magmatic::render::LogicalDevice::createImage(vk::Extent2D extent, vk::Format format
+		, vk::ImageTiling tiling, const vk::ImageUsageFlags& usage, const vk::MemoryPropertyFlags& memProps) const {
+	vk::ImageCreateInfo image_info {
+			vk::ImageCreateFlags(),
+			vk::ImageType::e2D,
+			format,
+			{extent.width, extent.height, 1},
+			1,
+			1,
+			vk::SampleCountFlagBits::e1,
+			tiling,
+			usage,
+			vk::SharingMode::eExclusive
+	};
+
+	auto unique_image = device->createImageUnique(image_info);
+
+	auto memory_requirements = device->getImageMemoryRequirements(unique_image.get());
+	vk::MemoryAllocateInfo allocate_info {
+			memory_requirements.size,
+			magmatic::render::utils::findMemoryType(
+					memory_requirements.memoryTypeBits,
+					memProps,
+					physical_dev
+			)
+	};
+
+	auto memory = device->allocateMemoryUnique(allocate_info);
+	device->bindImageMemory(unique_image.get(), memory.get(), 0);
+	return Image(std::move(unique_image), std::move(memory));
+}
+
+magmatic::render::DepthResources magmatic::render::LogicalDevice::createDepthResources(vk::Extent2D extent, const CommandPool& commandPool) const {
+	vk::Format format = utils::findSupportedFormat(
+			{vk::Format::eD32Sfloat, vk::Format::eD32SfloatS8Uint, vk::Format::eD24UnormS8Uint},
+			vk::ImageTiling::eOptimal,
+			vk::FormatFeatureFlagBits::eDepthStencilAttachment,
+			physical_dev);
+
+	Image image = createImage(extent,
+			format,
+			vk::ImageTiling::eOptimal,
+			vk::ImageUsageFlagBits::eDepthStencilAttachment,
+			vk::MemoryPropertyFlagBits::eDeviceLocal);
+
+	vk::UniqueImageView imageView = createImageView(image.image.get(), format, vk::ImageAspectFlagBits::eDepth, {});
+
+	transitionImageLayout(image.image,
+			format,
+			vk::ImageLayout::eUndefined,
+			vk::ImageLayout::eDepthStencilAttachmentOptimal,
+			commandPool);
+
+	return DepthResources(std::move(image.image), std::move(image.memory), std::move(imageView), format);
 }
 
 void magmatic::render::LogicalDevice::copyBuffer(
@@ -587,7 +698,7 @@ void magmatic::render::LogicalDevice::waitIdle() const {
 	device->waitIdle();
 }
 
-void magmatic::render::LogicalDevice::copuBuffertoImage(
+void magmatic::render::LogicalDevice::copyBufferToImage(
 		const vk::UniqueBuffer& src,
 		const vk::UniqueImage& dst,
 		uint32_t width, uint32_t height,
@@ -628,77 +739,40 @@ void magmatic::render::LogicalDevice::copuBuffertoImage(
 }
 
 magmatic::render::Texture magmatic::render::LogicalDevice::createTexture(
-		const magmatic::render::Image& image,
+		const magmatic::render::Bitmap& bitmap,
 		const CommandPool& command_pool
 		) const
 {
-	auto buffer = createStagingBuffer(image.getPixels().get(), image.getDataSize());
+	auto buffer = createStagingBuffer(bitmap.getPixels().get(), bitmap.getDataSize());
 
-	const auto size = image.size();
+	const auto size = bitmap.size();
 	const auto width = static_cast<uint32_t>(size.first);
 	const auto height = static_cast<uint32_t>(size.second);
 
-	vk::ImageCreateInfo image_info {
-		vk::ImageCreateFlags(),
-		vk::ImageType::e2D,
-		vk::Format::eR8G8B8A8Srgb,
-		{width, height, 1},
-		1,
-		1,
-		vk::SampleCountFlagBits::e1,
-		vk::ImageTiling::eOptimal,
-		vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled,
-		vk::SharingMode::eExclusive
-	};
-
-	auto unique_image = device->createImageUnique(image_info);
-
-	auto memory_requirements = device->getImageMemoryRequirements(unique_image.get());
-	vk::MemoryAllocateInfo allocate_info {
-			memory_requirements.size,
-			magmatic::render::utils::findMemoryType(
-					memory_requirements.memoryTypeBits,
-					vk::MemoryPropertyFlagBits::eDeviceLocal,
-					physical_dev
-					)
-	};
-
-	auto memory = device->allocateMemoryUnique(allocate_info);
-	device->bindImageMemory(unique_image.get(), memory.get(), 0);
+	Image image = createImage(vk::Extent2D(width, height),
+			vk::Format::eR8G8B8A8Srgb,
+			vk::ImageTiling::eOptimal,
+			vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled,
+			vk::MemoryPropertyFlagBits::eDeviceLocal);
 
 	transitionImageLayout(
-			unique_image,
+			image.image,
 			vk::Format::eR8G8B8A8Srgb,
 			vk::ImageLayout::eUndefined,
 			vk::ImageLayout::eTransferDstOptimal,
 			command_pool
 			);
-	copuBuffertoImage(buffer.buffer, unique_image, width, height, command_pool);
+	copyBufferToImage(buffer.buffer, image.image, width, height, command_pool);
 	transitionImageLayout(
-			unique_image,
+			image.image,
 			vk::Format::eR8G8B8A8Srgb,
 			vk::ImageLayout::eTransferDstOptimal,
 			vk::ImageLayout::eShaderReadOnlyOptimal,
 			command_pool
 			);
 
-	//todo: consider extracting, duplicate in creating swapchain image views
-	vk::ImageViewCreateInfo image_view_info = {
-			vk::ImageViewCreateFlags(),
-			unique_image.get(),
-			vk::ImageViewType::e2D,
-			vk::Format::eR8G8B8A8Srgb,
-			{},
-			vk::ImageSubresourceRange {
-				vk::ImageAspectFlagBits::eColor,
-				0,
-				1,
-				0,
-				1
-			}
-	};
-	auto image_view = device->createImageViewUnique(image_view_info);
-	return Texture(std::move(unique_image), std::move(image_view), std::move(memory));
+	vk::UniqueImageView image_view = createImageView(image.image.get(), vk::Format::eR8G8B8A8Srgb, vk::ImageAspectFlagBits::eColor, {});
+	return Texture(std::move(image.image), std::move(image_view), std::move(image.memory));
 }
 
 void magmatic::render::LogicalDevice::transitionImageLayout(
@@ -729,6 +803,16 @@ void magmatic::render::LogicalDevice::transitionImageLayout(
 	vk::PipelineStageFlags src_stage;
 	vk::PipelineStageFlags dst_stage;
 
+	if (new_layout == vk::ImageLayout::eDepthStencilAttachmentOptimal) {
+		barrier.subresourceRange.aspectMask = vk::ImageAspectFlagBits::eDepth;
+
+		if (utils::hasStencilComponent(format)) {
+			barrier.subresourceRange.aspectMask |= vk::ImageAspectFlagBits::eStencil;
+		}
+	} else {
+		barrier.subresourceRange.aspectMask = vk::ImageAspectFlagBits::eColor;
+	}
+
 	if (old_layout == vk::ImageLayout::eUndefined && new_layout == vk::ImageLayout::eTransferDstOptimal)
 	{
 		barrier.dstAccessMask = vk::AccessFlagBits::eTransferWrite;
@@ -743,6 +827,11 @@ void magmatic::render::LogicalDevice::transitionImageLayout(
 
 		src_stage = vk::PipelineStageFlagBits::eTransfer;
 		dst_stage = vk::PipelineStageFlagBits::eFragmentShader;
+	} else if (old_layout == vk::ImageLayout::eUndefined && new_layout == vk::ImageLayout::eDepthStencilAttachmentOptimal) {
+		barrier.dstAccessMask = vk::AccessFlagBits::eDepthStencilAttachmentRead | vk::AccessFlagBits::eDepthStencilAttachmentWrite;
+
+		src_stage = vk::PipelineStageFlagBits::eTopOfPipe;
+		dst_stage = vk::PipelineStageFlagBits ::eEarlyFragmentTests;
 	} else {
 		spdlog::error("Magmatic: Unsupported transition");
 		throw std::invalid_argument("Unsupported transition");

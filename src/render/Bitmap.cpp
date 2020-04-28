@@ -34,7 +34,7 @@ const std::unique_ptr<stbi_uc, magmatic::render::Bitmap::stbi_ucDeleter>& magmat
 
 size_t magmatic::render::Bitmap::getDataSize() const noexcept
 {
-	return width * height * channels;
+	return width * height * 4;
 }
 
 void magmatic::render::Bitmap::stbi_ucDeleter::operator()(stbi_uc* pointer) noexcept

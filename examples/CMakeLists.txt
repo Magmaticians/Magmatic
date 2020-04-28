@@ -7,3 +7,4 @@ add_custom_target(copy-example-files ALL
 		)
 
 add_dependencies(sound_test copy-example-files)
+add_dependencies(main-test copy-example-files)

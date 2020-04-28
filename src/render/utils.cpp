@@ -22,8 +22,8 @@ vk::Format magmatic::render::utils::findSupportedFormat(const std::vector<vk::Fo
 		} else if(tiling == vk::ImageTiling::eOptimal && (props.optimalTilingFeatures & features) == features) {
 			return format;
 		}
-
-		spdlog::error("magmatic-render: Failed to find supported format!");
-		throw std::runtime_error("magmatic-render: Failed to find supported format!");
 	}
+
+	spdlog::error("magmatic-render: Failed to find supported format!");
+	throw std::runtime_error("magmatic-render: Failed to find supported format!");
 }

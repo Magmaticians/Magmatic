@@ -25,4 +25,5 @@ target_sources(magmatic-render
 		Texture.hpp
 		Image.hpp
 		Sampler.hpp
+		DescriptorWriteUpdate.hpp
 		)

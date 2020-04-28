@@ -37,6 +37,22 @@ renderFinishedSemaphores(logicalDevice.createSemaphores(magmatic::render::Semaph
 }
 
 void Application::run() {
+	for(size_t i = 0; i < uniformBuffers.size(); ++i)
+	{
+		magmatic::render::DescriptorWriteUpdate write_update;
+		write_update.type = magmatic::render::DescriptorWriteUpdate::eUniform;
+		write_update.dst_binding = 0;
+		write_update.dst_array_elem = 0;
+		vk::DescriptorBufferInfo info(
+				uniformBuffers[i].buffer.get(),
+				0,
+				sizeof(magmatic::render::UniformBufferObject)
+				);
+		write_update.data_info = info;
+		logicalDevice.updateDescriptorSet(descriptorSets.sets[i], {write_update});
+	}
+
+
 	currentFrame = 0;
 	imagesInFlight.resize(swapChain.images_.size(), -1);
 

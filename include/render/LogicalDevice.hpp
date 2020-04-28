@@ -260,7 +260,7 @@ magmatic::render::Pipeline magmatic::render::LogicalDevice::createPipeline(
 	vk::Viewport viewport(
 			0.0f, 0.0f,
 			static_cast<float>(extent_width), static_cast<float>(extent_height),
-			1.0f, 1.0f
+			0.0f, 1.0f
 	);
 
 	vk::Rect2D scissors({0,0}, {extent_width, extent_height});

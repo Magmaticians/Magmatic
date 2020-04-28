@@ -219,7 +219,7 @@ magmatic::render::SwapChain magmatic::render::LogicalDevice::createSwapchain(
 
 
 	std::transform(images.begin(), images.end(), std::back_inserter(image_views),
-			[=](vk::Image image) { return createImageView(image,
+			[=,this](vk::Image image) { return createImageView(image,
 	                                               surface_format.format,
 	                                               vk::ImageAspectFlagBits::eColor,
 	                                               component_mapping);});

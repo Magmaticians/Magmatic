@@ -50,7 +50,27 @@ class Application {
 			1,
 			vk::ShaderStageFlagBits::eVertex,
 			nullptr
+			},
+			{
+				1,
+				vk::DescriptorType::eSampledImage,
+				1,
+				vk::ShaderStageFlagBits::eFragment,
+				nullptr
+			},
+			{
+				2,
+				vk::DescriptorType::eSampler,
+				1,
+				vk::ShaderStageFlagBits::eFragment,
+				nullptr
 			}
+	};
+
+	const std::vector<vk::DescriptorType> descriptor_types = {
+			vk::DescriptorType::eUniformBuffer,
+			vk::DescriptorType::eSampledImage,
+			vk::DescriptorType::eSampler
 	};
 
 	const std::vector<magmatic::render::Vertex> vertices;
@@ -78,6 +98,8 @@ class Application {
 	const std::vector<vk::UniqueFence> fences;
 	const magmatic::render::Semaphores imageAcquiredSemaphores;
 	const magmatic::render::Semaphores renderFinishedSemaphores;
+	const magmatic::render::Texture texture;
+	const magmatic::render::Sampler sampler;
 	std::vector<int> imagesInFlight;
 public:
     explicit Application(const std::string& mode);

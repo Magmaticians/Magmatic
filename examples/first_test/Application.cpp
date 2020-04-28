@@ -29,16 +29,20 @@ vertexBuffer(logicalDevice.createVertexBuffer(vertices, commandPool)),
 indexBuffer(logicalDevice.createIndexBuffer(indices, commandPool)),
 uniformBuffers(logicalDevice.createUniformBuffers(swapChain)),
 commandBuffers(logicalDevice.createCommandBuffers(commandPool, framebuffers.size())),
-descriptorSets(logicalDevice.createDescriptorSets(swapChain, descriptorSetLayout, uniformBuffers)),
+descriptorSets(logicalDevice.createDescriptorSets(swapChain.images_.size(), descriptorSetLayout, descriptor_types)),
 fences(logicalDevice.createFences(MAX_FRAMES_IN_FLIGHT)),
 imageAcquiredSemaphores(logicalDevice.createSemaphores(magmatic::render::SemaphoreType::ImageAvailableSemaphore, MAX_FRAMES_IN_FLIGHT)),
-renderFinishedSemaphores(logicalDevice.createSemaphores(magmatic::render::SemaphoreType::RenderFinishedSemaphore, MAX_FRAMES_IN_FLIGHT)){
+renderFinishedSemaphores(logicalDevice.createSemaphores(magmatic::render::SemaphoreType::RenderFinishedSemaphore, MAX_FRAMES_IN_FLIGHT)),
+texture(logicalDevice.createTexture(magmatic::render::Image("examples/resources/statue.jpg"), commandPool)),
+sampler(logicalDevice.createSampler())
+{
 	spdlog::info("Application constructor called and finished work");
 }
 
 void Application::run() {
 	for(size_t i = 0; i < uniformBuffers.size(); ++i)
 	{
+		std::vector<magmatic::render::DescriptorWriteUpdate> updates;
 		magmatic::render::DescriptorWriteUpdate write_update;
 		write_update.type = magmatic::render::DescriptorWriteUpdate::eUniform;
 		write_update.dst_binding = 0;
@@ -49,6 +53,11 @@ void Application::run() {
 				sizeof(magmatic::render::UniformBufferObject)
 				);
 		write_update.data_info = info;
+		updates.emplace_back(write_update);
+
+		updates.emplace_back(texture.getWriteInfo(1, 0));
+		updates.emplace_back(sampler.getWriteInfo(1, 0));
+
 		logicalDevice.updateDescriptorSet(descriptorSets.sets[i], {write_update});
 	}
 

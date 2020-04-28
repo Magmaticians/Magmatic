@@ -27,4 +27,5 @@ target_sources(magmatic-render
 		Sampler.hpp
 		DepthResources.hpp
 		Image.hpp
+		DescriptorWriteUpdate.hpp
 		)

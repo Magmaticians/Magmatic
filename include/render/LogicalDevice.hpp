@@ -21,6 +21,7 @@
 #include "Sampler.hpp"
 #include "DepthResources.hpp"
 #include "Image.hpp"
+#include "DescriptorWriteUpdate.hpp"
 
 #include <vulkan/vulkan.hpp>
 #include <filesystem>
@@ -119,8 +120,16 @@ namespace magmatic::render
 		[[nodiscard]] Buffer createStagingBuffer(const std::vector<T, A>& data_to_copy) const;
 
 		[[nodiscard]] DescriptorSets
-		createDescriptorSets(const SwapChain& swapChain, const vk::UniqueDescriptorSetLayout& descriptorSetLayout,
-		                     const std::vector<Buffer>& uniformBuffers) const;
+		createDescriptorSets(
+				size_t count,
+				const vk::UniqueDescriptorSetLayout& descriptor_set_layout,
+				std::vector<vk::DescriptorType> types
+		) const;
+
+		void updateDescriptorSet(
+				const vk::DescriptorSet& dset,
+				const std::vector<DescriptorWriteUpdate>& write_info
+				) const;
 
 		[[nodiscard]] CommandBuffer createCommandBuffer(const CommandPool& pool) const;
 

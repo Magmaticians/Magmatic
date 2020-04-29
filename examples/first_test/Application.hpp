@@ -98,19 +98,19 @@ class Application {
 	const magmatic::render::LogicalDevice logicalDevice;
 	magmatic::render::Shader vertShader;
 	magmatic::render::Shader fragShader;
-	const magmatic::render::SwapChain swapChain;
+	magmatic::render::SwapChain swapChain;
 	const magmatic::render::CommandPool commandPool;
-	const magmatic::render::DepthResources depthResources;
-	const magmatic::render::RenderPass renderPass;
+	magmatic::render::DepthResources depthResources;
+	magmatic::render::RenderPass renderPass;
 	const vk::UniqueDescriptorSetLayout descriptorSetLayout;
 	const vk::UniquePipelineLayout pipelineLayout;
-	const magmatic::render::Pipeline pipeline;
-	const magmatic::render::Framebuffers framebuffers;
+	magmatic::render::Pipeline pipeline;
+	magmatic::render::Framebuffers framebuffers;
 	const magmatic::render::Buffer vertexBuffer;
 	const magmatic::render::Buffer indexBuffer;
-	const std::vector<magmatic::render::Buffer> uniformBuffers;
+	std::vector<magmatic::render::Buffer> uniformBuffers;
 	std::vector<magmatic::render::CommandBuffer> commandBuffers;
-	const magmatic::render::DescriptorSets descriptorSets;
+	magmatic::render::DescriptorSets descriptorSets;
 	const std::vector<vk::UniqueFence> fences;
 	const magmatic::render::Semaphores imageAcquiredSemaphores;
 	const magmatic::render::Semaphores renderFinishedSemaphores;
@@ -129,6 +129,8 @@ private:
 	size_t currentFrame = 0;
 
 	void updateUniformBuffer(uint32_t currentBuffer);
+
+	void recreateSwapChain();
 
 	[[nodiscard]] std::vector<magmatic::render::Vertex> getVertexConfig(const std::string &mode) const;
 

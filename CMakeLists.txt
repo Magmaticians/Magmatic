@@ -25,6 +25,8 @@ find_package(OpusFile REQUIRED)
 #Table display
 find_package(tabulate REQUIRED)
 
+find_package(TinyGLTF REQUIRED)
+
 include_directories("include")
 
 add_library(magmatic-render SHARED "")

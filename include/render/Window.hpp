@@ -43,6 +43,8 @@ namespace magmatic::render
 		void setSize(int width, int height);
 		[[nodiscard]] std::pair<int, int> getSize() const;
 
+		[[nodiscard]] std::pair<int, int> getFramebufferSize() const;
+
 		void hide() noexcept;
 		void minimize() noexcept;
 		void show() noexcept;
@@ -57,12 +59,10 @@ namespace magmatic::render
 		{
 			void operator()(GLFWwindow* pointer) noexcept;
 		};
-
 	private:
 
 		std::unique_ptr<GLFWwindow, GLFWWindowDeleter> window;
 	};
 }
-
 
 #endif //MAGMATIC_WINDOW_HPP

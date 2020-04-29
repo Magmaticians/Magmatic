@@ -29,11 +29,14 @@ namespace magmatic::render
 				uint32_t window_width, uint32_t window_height
 				) noexcept;
 
-
 		SwapChain(const SwapChain&) = delete;
 		SwapChain& operator=(const SwapChain&) = delete;
 
-		const vk::Extent2D extent;
+		SwapChain(SwapChain&& rhs) noexcept: extent(rhs.extent), images_(std::move(rhs.images_)), swapchain_(std::move(rhs.swapchain_)),
+		                                     image_views_(std::move(rhs.image_views_)), fence(std::move(rhs.fence)) {}
+		SwapChain& operator=(SwapChain&& rhs) noexcept;
+
+		vk::Extent2D extent;
 		std::vector<vk::Image> images_;
 
 	private:

@@ -36,7 +36,8 @@ namespace magmatic::render
 				{
 						VK_KHR_SWAPCHAIN_EXTENSION_NAME
 				};
-
+	// TODO: make private
+	public:
 		vk::UniqueDevice device;
 
 		vk::Queue graphics_queue;
@@ -158,8 +159,8 @@ namespace magmatic::render
 
 		void resetFences(const vk::UniqueFence& fence) const;
 
-		void presentKHR(const Semaphores& renderFinishedSemaphores, size_t index, const SwapChain& swapChain,
-		                uint32_t currentBuffer) const;
+		vk::Result presentKHR(const Semaphores& renderFinishedSemaphores, size_t index, const SwapChain& swapChain,
+		                            uint32_t currentBuffer) const;
 
 		void waitIdle() const;
 

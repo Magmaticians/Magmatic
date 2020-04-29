@@ -8,6 +8,7 @@
 #include "Application.hpp"
 #include "render/Vertex.hpp"
 
+//TODO: Check if Initializer List is in correct order
 Application::Application(const std::string& mode):
 vertices(std::move(getVertexConfig(mode))),
 indices(std::move(getIndexConfig(mode))),
@@ -15,7 +16,7 @@ window(magmatic::render::Window(DEFAULT_NAME)),
 instance(magmatic::render::Instance(DEFAULT_NAME, window.getRequiredExtensions())),
 surface(instance.createSurface(window)),
 physicalDevice(magmatic::render::PhysicalDevice(instance.getBestDevice())),
-logicalDevice(magmatic::render::LogicalDevice(physicalDevice, surface)),
+logicalDevice(physicalDevice, surface),
 vertShader(logicalDevice.createShader("./examples/first_test/vert.spv", vk::ShaderStageFlagBits::eVertex)),
 fragShader(logicalDevice.createShader("./examples/first_test/frag.spv", vk::ShaderStageFlagBits::eFragment)),
 swapChain(logicalDevice.createSwapchain(surface, window.getSize().first, window.getSize().second)),
@@ -23,8 +24,8 @@ commandPool(logicalDevice.createCommandPool(magmatic::render::QueueType::Graphic
 depthResources(logicalDevice.createDepthResources(swapChain.extent, commandPool)),
 renderPass(logicalDevice.createRenderPass(surface, depthResources)),
 descriptorSetLayout(logicalDevice.createDescriptorSetLayout(bindings)),
-pipeline(logicalDevice.createPipeline<magmatic::render::Vertex>(swapChain.extent.width, swapChain.extent.height, {vertShader, fragShader}, renderPass, pipelineLayout)),
 pipelineLayout(logicalDevice.createPipelineLayout(descriptorSetLayout)),
+pipeline(logicalDevice.createPipeline<magmatic::render::Vertex>(swapChain.extent.width, swapChain.extent.height, {vertShader, fragShader}, renderPass, pipelineLayout)),
 framebuffers(logicalDevice.createFramebuffers(renderPass, swapChain, depthResources.imageView.get())),
 vertexBuffer(logicalDevice.createVertexBuffer(vertices, commandPool)),
 indexBuffer(logicalDevice.createIndexBuffer(indices, commandPool)),
@@ -38,6 +39,27 @@ texture(logicalDevice.createTexture(magmatic::render::Bitmap("examples/resources
 sampler(logicalDevice.createSampler())
 {
 	spdlog::info("Application constructor called and finished work");
+}
+
+void Application::recreateSwapChain() {
+	spdlog::info("RecreatingSwapChain");
+	auto size = window.getFramebufferSize();
+	while(size.first == 0 || size.second == 0) {
+		size = window.getFramebufferSize();
+		glfwWaitEvents();
+	}
+
+	logicalDevice.waitIdle();
+
+	//logicalDevice.device->destroySwapchainKHR(swapChain.swapchain_.get(), nullptr);
+
+	swapChain = logicalDevice.createSwapchain(surface, window.getSize().first, window.getSize().second);
+	renderPass = logicalDevice.createRenderPass(surface, depthResources);
+	pipeline = logicalDevice.createPipeline<magmatic::render::Vertex>(swapChain.extent.width, swapChain.extent.height, {vertShader, fragShader}, renderPass, pipelineLayout);
+	depthResources = logicalDevice.createDepthResources(swapChain.extent, commandPool);
+	framebuffers = logicalDevice.createFramebuffers(renderPass, swapChain, depthResources.imageView.get());
+	descriptorSets = logicalDevice.createDescriptorSets(swapChain.images_.size(), descriptorSetLayout, descriptor_types);
+	commandBuffers = logicalDevice.createCommandBuffers(commandPool, framebuffers.size());
 }
 
 void Application::run() {
@@ -118,6 +140,14 @@ void Application::drawFrame() {
 	{
 		std::this_thread::yield();
 		return;
+	} else if(state == vk::Result::eErrorOutOfDateKHR) {
+		recreateSwapChain();
+		// TODO: check if needed
+		//  run();
+		return;
+	} else if(state != vk::Result::eSuccess && state != vk::Result::eSuboptimalKHR) {
+		spdlog::error("Failed to acquire swap chain image!");
+		throw std::runtime_error("Failed to acquire swap chain image!");
 	}
 
 	if(imagesInFlight[currentBuffer] != -1) {
@@ -127,7 +157,23 @@ void Application::drawFrame() {
 	logicalDevice.resetFences(fences[currentFrame]);
 	updateUniformBuffer(currentBuffer);
 	logicalDevice.submitToGraphicsQueue(imageAcquiredSemaphores, renderFinishedSemaphores, commandBuffers[currentBuffer], fences[currentFrame], currentFrame);
-	logicalDevice.presentKHR(renderFinishedSemaphores, currentFrame, swapChain, currentBuffer);
+	try {
+		state = logicalDevice.presentKHR(renderFinishedSemaphores, currentFrame, swapChain, currentBuffer);
+	} catch(vk::OutOfDateKHRError&) {
+		recreateSwapChain();
+		// TODO: check if needed
+		//  run();
+	}
+	if(state == vk::Result::eSuboptimalKHR) {
+		recreateSwapChain();
+		// TODO: check if needed
+		//  run();
+		return;
+	} else if(state != vk::Result::eSuccess) {
+		spdlog::error("Failed to present swap chain image!");
+		throw std::runtime_error("Failed to present swap chain image!");
+	}
+
 	currentFrame = (currentFrame+1)%MAX_FRAMES_IN_FLIGHT;
 }
 

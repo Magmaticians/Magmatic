@@ -692,8 +692,8 @@ void magmatic::render::LogicalDevice::resetFences(const vk::UniqueFence& fence) 
 	device->resetFences(1, &fence.get());
 }
 
-void magmatic::render::LogicalDevice::presentKHR(const Semaphores& renderFinishedSemaphores, size_t index, const SwapChain& swapChain, uint32_t currentBuffer) const {
-	present_queue.presentKHR(vk::PresentInfoKHR(
+vk::Result magmatic::render::LogicalDevice::presentKHR(const Semaphores& renderFinishedSemaphores, size_t index, const SwapChain& swapChain, uint32_t currentBuffer) const {
+	return present_queue.presentKHR(vk::PresentInfoKHR(
 			1,
 			&renderFinishedSemaphores.semaphores[index].get(),
 			1,

@@ -60,3 +60,12 @@ vk::Extent2D magmatic::render::SwapChain::chooseSwapExtent(
 
 	return actual_extent;
 }
+
+magmatic::render::SwapChain& magmatic::render::SwapChain::operator=(SwapChain&& rhs) noexcept {
+	this->swapchain_ = std::move(rhs.swapchain_);
+	this->image_views_ = std::move(rhs.image_views_);
+	this->extent = rhs.extent;
+	this->images_ = std::move(rhs.images_);
+	this->fence = std::move(rhs.fence);
+	return *this;
+}

@@ -20,10 +20,13 @@ namespace magmatic::render {
 		vk::UniqueImageView imageView;
 		vk::Format format;
 
-		DepthResources(DepthResources
-		&) = delete;
+		DepthResources(DepthResources&) = delete;
 
 		DepthResources &operator=(DepthResources &) = delete;
+
+		DepthResources(DepthResources&& rhs) noexcept: image(std::move(rhs.image)), memory(std::move(rhs.memory)),
+			imageView(std::move(rhs.imageView)), format(rhs.format) {}
+		DepthResources& operator=(DepthResources&& rhs) noexcept;
 	};
 }
 

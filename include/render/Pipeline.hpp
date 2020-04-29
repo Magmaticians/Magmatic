@@ -10,12 +10,15 @@ namespace magmatic::render
 	private:
 
 	public:
-	    const vk::UniquePipeline pipeline;
+	    vk::UniquePipeline pipeline;
 
         explicit Pipeline(vk::UniquePipeline pipeline);
 
         Pipeline(const Pipeline&) = delete;
         Pipeline& operator=(const Pipeline&) = delete;
+
+		Pipeline(Pipeline&& rhs) noexcept: pipeline(std::move(rhs.pipeline)) {}
+		Pipeline& operator=(Pipeline&& rhs) noexcept;
 	};
 }
 

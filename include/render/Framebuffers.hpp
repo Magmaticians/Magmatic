@@ -11,10 +11,13 @@ namespace magmatic::render
 
 		explicit Framebuffers(std::vector<vk::UniqueFramebuffer>& framebuffers) : framebuffers(std::move(framebuffers)) {};
 	public:
-		const std::vector<vk::UniqueFramebuffer> framebuffers;
+		std::vector<vk::UniqueFramebuffer> framebuffers;
 
 		Framebuffers(Framebuffers&) = delete;
 		Framebuffers& operator=(Framebuffers&) = delete;
+
+		Framebuffers(Framebuffers&& rhs) noexcept: framebuffers(std::move(rhs.framebuffers)) {}
+		Framebuffers& operator=(Framebuffers&& rhs) noexcept;
 
 		[[nodiscard]] size_t size() const { return framebuffers.size(); }
 	};

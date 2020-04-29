@@ -29,9 +29,10 @@ Coming soon...
 - glm - OpenGL mathematics (vectors, matrices) - 0.9.9.7
 - libflac - Library to handle FLAC audio files - 1.3.3
 - libogg - Multimedia container format - 1.3.4
-- libopusenc - Encoding .opus audio files - 0.2.1
 - libvorbis - Handling ogg vorbis audio files - 1.3.6-9eadecc-3
 - opus - Opus streams library - 1.3.1-2
 - opusfile - Decoding .opus streams
 - spdlog - Logging library - 1.4.2-1
+- stb - Image loader - 2020-02-08
 - tabulate - Creating tables in console - 2019-01-06
+- tinygltf - Model library - 2.2.0

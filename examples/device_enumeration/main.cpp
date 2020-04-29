@@ -152,6 +152,7 @@ void printSoundDevicesSummary()
 }
 
 int main() {
+	std::ios_base::sync_with_stdio(false);
 	magmatic::render::Instance instance("Device enumeration");
 
 	auto physical_devices = instance.enumeratePhysicalDevices();

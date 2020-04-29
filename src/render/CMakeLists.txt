@@ -14,4 +14,6 @@ target_sources(
 		utils.cpp
 		Bitmap.cpp
 		DescriptorWriteUpdate.cpp
+		DepthResources.cpp
+		Framebuffers.cpp
 )

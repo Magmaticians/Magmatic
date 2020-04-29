@@ -77,8 +77,16 @@ void magmatic::render::Window::focus() noexcept
 
 std::pair<int, int> magmatic::render::Window::getSize() const
 {
-	int width, height;
+	int width = 0, height = 0;
 	glfwGetWindowSize(window.get(), &width, &height);
+
+	return std::make_pair(width, height);
+}
+
+std::pair<int, int> magmatic::render::Window::getFramebufferSize() const
+{
+	int width = 0, height = 0;
+	glfwGetFramebufferSize(window.get(), &width, &height);
 
 	return std::make_pair(width, height);
 }

@@ -1,7 +1,3 @@
-//
-// Created by user on 13.04.2020.
-//
-
 #ifndef MAGMATIC_SEMAPHORETYPE_HPP
 #define MAGMATIC_SEMAPHORETYPE_HPP
 

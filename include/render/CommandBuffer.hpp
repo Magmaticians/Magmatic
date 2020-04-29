@@ -2,8 +2,6 @@
 #define MAGMATIC_COMMANDBUFFER_HPP
 
 #include <vulkan/vulkan.hpp>
-#include <atomic>
-#include <mutex>
 #include "Framebuffers.hpp"
 #include "RenderPass.hpp"
 #include "Pipeline.hpp"
@@ -15,12 +13,12 @@ namespace magmatic::render
 	class CommandBuffer
 	{
 	public:
-		friend class LogicalDevice;
+		explicit CommandBuffer(const CommandPool& pool, vk::CommandBufferLevel level = vk::CommandBufferLevel::ePrimary);
 
 		CommandBuffer(const CommandBuffer&) = delete;
 		CommandBuffer& operator=(CommandBuffer&) = delete;
 
-		CommandBuffer(CommandBuffer&& rhs) noexcept : queue(rhs.queue), command_buffer(std::move(rhs.command_buffer)) {};
+		CommandBuffer(CommandBuffer&& rhs) noexcept;
 		CommandBuffer& operator=(CommandBuffer&& rhs) noexcept;
 
 		const vk::UniqueCommandBuffer& beginRecording(const vk::CommandBufferUsageFlags& usage = vk::CommandBufferUsageFlagBits::eOneTimeSubmit);
@@ -28,11 +26,9 @@ namespace magmatic::render
 
 		void submitWait();
 
+		void submit(const Semaphores& imageAcquiredSemaphores, const Semaphores& renderFinishedSemaphores, const vk::UniqueFence& fence, size_t index) const;
+
 	private:
-
-		CommandBuffer(vk::UniqueCommandBuffer& buffer, vk::Queue queue) noexcept
-		: command_buffer(std::move(buffer)), queue(queue){};
-
 		vk::Queue queue;
 		vk::UniqueCommandBuffer command_buffer;
 

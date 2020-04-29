@@ -1,7 +1,75 @@
 #include "render/SwapChain.hpp"
+#include "render/Image.hpp"
 
-vk::SurfaceFormatKHR
-magmatic::render::SwapChain::chooseSwapSurfaceFormat(const std::vector<vk::SurfaceFormatKHR>& formats)
+magmatic::render::SwapChain::SwapChain(const LogicalDevice& l_device, const Surface& surface, uint32_t window_width, uint32_t window_height) {
+	const auto& handle = l_device.getHandle();
+	const auto& support_details = l_device.getPhysicalDevice().getSwapChainSupportDetails(surface);
+	const auto& capabilities = support_details.capabilities;
+
+	const auto surface_format = SwapChain::chooseSwapSurfaceFormat(support_details.formats);
+	extent = chooseSwapExtent(capabilities, window_width, window_height);
+	const auto present_mode = SwapChain::chooseSwapPresentMode(support_details.present_modes);
+
+	uint32_t image_count = support_details.capabilities.minImageCount + 1;
+
+	if(capabilities.maxImageCount > 0 && image_count > capabilities.maxImageCount)
+	{
+		image_count = capabilities.maxImageCount;
+	}
+
+	vk::SwapchainCreateInfoKHR swapchain_create_info(
+			vk::SwapchainCreateFlagsKHR(),
+			*surface.surface,
+			image_count,
+			surface_format.format,
+			surface_format.colorSpace,
+			extent,
+			1,
+			vk::ImageUsageFlagBits::eColorAttachment,
+			vk::SharingMode::eExclusive,
+			0,
+			nullptr,
+			capabilities.currentTransform,
+			vk::CompositeAlphaFlagBitsKHR::eOpaque,
+			present_mode,
+			true,
+			nullptr
+	);
+
+	if(!l_device.sameQueueFamily())
+	{
+		uint32_t family_indices[2] = {l_device.getGraphicsQueueIndex(), l_device.getPresentQueueIndex()};
+
+		swapchain_create_info.imageSharingMode = vk::SharingMode::eConcurrent;
+		swapchain_create_info.queueFamilyIndexCount = 2;
+		swapchain_create_info.pQueueFamilyIndices = family_indices;
+	}
+
+	swapchain_ = handle->createSwapchainKHRUnique(swapchain_create_info);
+
+	images_ = handle->getSwapchainImagesKHR(swapchain_.get());
+
+	image_views_.reserve(images_.size());
+
+	vk::ComponentMapping component_mapping(
+			vk::ComponentSwizzle::eR,
+			vk::ComponentSwizzle::eG,
+			vk::ComponentSwizzle::eB,
+			vk::ComponentSwizzle::eA);
+
+	for(const auto& image: images_) {
+		image_views_.emplace_back(Image::createImageView(l_device,
+		                                                image,
+		                                                surface_format.format,
+		                                                vk::ImageAspectFlagBits::eColor,
+		                                                component_mapping));
+	}
+
+	vk::FenceCreateInfo fence_create_info{vk::FenceCreateFlags()};
+	fence_ = handle->createFenceUnique(fence_create_info);
+}
+
+vk::SurfaceFormatKHR magmatic::render::SwapChain::chooseSwapSurfaceFormat(const std::vector<vk::SurfaceFormatKHR>& formats)
 {
 	if (formats.empty())
 	{
@@ -59,4 +127,25 @@ vk::Extent2D magmatic::render::SwapChain::chooseSwapExtent(
 	actual_extent.height = std::clamp(window_height, min_height, max_height);
 
 	return actual_extent;
+}
+
+void magmatic::render::SwapChain::presentKHR(const LogicalDevice& l_device, const Semaphores& renderFinishedSemaphores, size_t index, uint32_t currentBuffer) const {
+	l_device.getPresentQueue().presentKHR(vk::PresentInfoKHR(
+			1,
+			&renderFinishedSemaphores.semaphores[index].get(),
+			1,
+			&swapchain_.get(),
+			&currentBuffer
+	));
+}
+
+vk::Result magmatic::render::SwapChain::acquireNextImageKHR(const Semaphores& imageAcquiredSemaphores,
+		size_t index, uint32_t& imageIndex, uint64_t timeout) const {
+	return swapchain_.getOwner().acquireNextImageKHR(
+			swapchain_.get(),
+			timeout,
+			imageAcquiredSemaphores.semaphores[index].get(),
+			nullptr,
+			&imageIndex
+	);
 }

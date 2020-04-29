@@ -1,8 +1,13 @@
 #ifndef MAGMATIC_TEXTURE_HPP
 #define MAGMATIC_TEXTURE_HPP
 
+#include "render/Image.hpp"
+#include "render/LogicalDevice.hpp"
+#include "render/CommandPool.hpp"
+#include "render/DescriptorWriteUpdate.hpp"
+#include "CommandPool.hpp"
+#include "Bitmap.hpp"
 #include <vulkan/vulkan.hpp>
-#include "DescriptorWriteUpdate.hpp"
 
 
 namespace magmatic::render
@@ -10,28 +15,14 @@ namespace magmatic::render
 	class Texture
 	{
 	public:
-		friend class LogicalDevice;
-		const vk::UniqueImage image;
-		const vk::UniqueImageView image_view;
-		const vk::UniqueDeviceMemory image_memory;
+		Image image;
+		vk::UniqueImageView image_view;
 
-		[[nodiscard]] DescriptorWriteUpdate getWriteInfo(size_t dst_binding, size_t dst_array_elem) const
-		{
-			DescriptorWriteUpdate update;
-			update.type = DescriptorWriteUpdate::eImage;
-			update.dst_binding = dst_binding;
-			update.dst_array_elem = dst_array_elem;
-			update.data_info = vk::DescriptorImageInfo {
-					{},
-					image_view.get(),
-					vk::ImageLayout::eShaderReadOnlyOptimal
-			};
-			return update;
-		}
+		Texture(const LogicalDevice& l_device, const Bitmap& bitmap, const CommandPool& pool);
 
+		[[nodiscard]] DescriptorWriteUpdate getWriteInfo(size_t dst_binding, size_t dst_array_elem) const;
 	private:
-		Texture(vk::UniqueImage image, vk::UniqueImageView view, vk::UniqueDeviceMemory memory)
-		: image(std::move(image)), image_view(std::move(view)), image_memory(std::move(memory)) {};
+		[[nodiscard]] Image createImage(const LogicalDevice& l_device, const Bitmap& bitmap);
 	};
 }
 

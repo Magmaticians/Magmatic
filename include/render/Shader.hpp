@@ -1,18 +1,23 @@
 #ifndef MAGMATIC_SHADER_HPP
 #define MAGMATIC_SHADER_HPP
 
+#include "render/LogicalDevice.hpp"
 #include <vulkan/vulkan.hpp>
+#include <filesystem>
 
 namespace magmatic::render {
 
 	class Shader {
 	private:
-		const vk::UniqueShaderModule shader_module;
-		const vk::ShaderStageFlagBits type;
+		vk::UniqueShaderModule shader_module;
+		vk::ShaderStageFlagBits type;
 
 	public:
-		explicit Shader(vk::UniqueShaderModule module, vk::ShaderStageFlagBits type) noexcept
-				: shader_module(std::move(module)), type(type) {};
+		Shader(
+				const LogicalDevice& l_device,
+				const std::filesystem::path& file_path,
+				vk::ShaderStageFlagBits type
+				);
 
 		Shader(const Shader&) = delete;
 		Shader &operator=(const Shader&) = delete;

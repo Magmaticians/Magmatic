@@ -48,3 +48,32 @@ void magmatic::render::CommandBuffer::submitWait()
 	queue.submit(submit_info, fence.get());
 	logical_device.waitForFences(1, &fence.get(), true, std::numeric_limits<uint64_t>::max());
 }
+
+magmatic::render::CommandBuffer::CommandBuffer(magmatic::render::CommandBuffer&& rhs) noexcept
+: queue(rhs.queue), command_buffer(std::move(rhs.command_buffer)) {}
+
+magmatic::render::CommandBuffer::CommandBuffer(const magmatic::render::CommandPool& pool, vk::CommandBufferLevel level)
+:queue(pool.getQueue())
+{
+	vk::CommandBufferAllocateInfo command_buffer_info {
+		pool.getHandle().get(),
+		level,
+		1
+	};
+
+	const auto& l_device = pool.getHandle().getOwner();
+	command_buffer = std::move(l_device.allocateCommandBuffersUnique(command_buffer_info).front());
+}
+
+void magmatic::render::CommandBuffer::submit(const Semaphores& imageAcquiredSemaphores, const Semaphores& renderFinishedSemaphores, const vk::UniqueFence& fence, size_t index) const {
+	vk::PipelineStageFlags flags(vk::PipelineStageFlagBits::eColorAttachmentOutput);
+	vk::SubmitInfo submitInfo(
+			1,
+			&imageAcquiredSemaphores.semaphores[index].get(),
+			&flags,
+			1,
+			&command_buffer.get(),
+			1,
+			&renderFinishedSemaphores.semaphores[index].get());
+	queue.submit(submitInfo, fence.get());
+}

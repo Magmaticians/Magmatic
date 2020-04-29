@@ -3,27 +3,25 @@
 
 #include <vulkan/vulkan.hpp>
 #include "PhysicalDevice.hpp"
+#include "CommandPool.hpp"
+#include "Image.hpp"
 
 namespace magmatic::render {
 	class DepthResources {
-		friend class LogicalDevice;
-
-		explicit DepthResources(vk::UniqueImage image, vk::UniqueDeviceMemory memory, vk::UniqueImageView imageView, vk::Format format) :
-			image(std::move(image)),
-			memory(std::move(memory)),
-			imageView(std::move(imageView)),
-			format(format){};
 
 	public:
-		vk::UniqueImage image;
-		vk::UniqueDeviceMemory memory;
-		vk::UniqueImageView imageView;
 		vk::Format format;
+		Image image;
+		vk::UniqueImageView imageView;
 
-		DepthResources(DepthResources
-		&) = delete;
+		DepthResources(const LogicalDevice& l_device, vk::Extent2D extent, const CommandPool& commandPool);
 
-		DepthResources &operator=(DepthResources &) = delete;
+		DepthResources(DepthResources&) = delete;
+		DepthResources &operator=(DepthResources&) = delete;
+
+	private:
+		[[nodiscard]] vk::Format findDepthFormat(const LogicalDevice& l_device) const;
+		[[nodiscard]] magmatic::render::Image createDepthImage(const LogicalDevice& l_device, vk::Extent2D extent) const;
 	};
 }
 

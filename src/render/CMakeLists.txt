@@ -14,4 +14,16 @@ target_sources(
 		utils.cpp
 		Bitmap.cpp
 		DescriptorWriteUpdate.cpp
+		Image.cpp
+		CommandPool.cpp
+		DepthResources.cpp
+		Sampler.cpp
+		Texture.cpp
+		DescriptorSets.cpp
+		Buffer.cpp
+		VertexBuffer.cpp
+		Framebuffers.cpp
+		Semaphores.cpp
+		IndexBuffer.cpp
+		Fences.cpp
 )

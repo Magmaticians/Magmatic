@@ -5,8 +5,8 @@
 #include "render/UniformBufferObject.hpp"
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <render/Bitmap.hpp>
 #include "Application.hpp"
-#include "render/Vertex.hpp"
 
 Application::Application(const std::string& mode):
 vertices(std::move(getVertexConfig(mode))),
@@ -16,29 +16,42 @@ instance(magmatic::render::Instance(DEFAULT_NAME, window.getRequiredExtensions()
 surface(instance.createSurface(window)),
 physicalDevice(magmatic::render::PhysicalDevice(instance.getBestDevice())),
 logicalDevice(magmatic::render::LogicalDevice(physicalDevice, surface)),
-vertShader(logicalDevice.createShader("./examples/first_test/vert.spv", vk::ShaderStageFlagBits::eVertex)),
-fragShader(logicalDevice.createShader("./examples/first_test/frag.spv", vk::ShaderStageFlagBits::eFragment)),
-swapChain(logicalDevice.createSwapchain(surface, window.getSize().first, window.getSize().second)),
-commandPool(logicalDevice.createCommandPool(magmatic::render::QueueType::GraphicalQueue)),
-depthResources(logicalDevice.createDepthResources(swapChain.extent, commandPool)),
-renderPass(logicalDevice.createRenderPass(surface, depthResources)),
-descriptorSetLayout(logicalDevice.createDescriptorSetLayout(bindings)),
-pipeline(logicalDevice.createPipeline<magmatic::render::Vertex>(swapChain.extent.width, swapChain.extent.height, {vertShader, fragShader}, renderPass, pipelineLayout)),
-pipelineLayout(logicalDevice.createPipelineLayout(descriptorSetLayout)),
-framebuffers(logicalDevice.createFramebuffers(renderPass, swapChain, depthResources.imageView.get())),
-vertexBuffer(logicalDevice.createVertexBuffer(vertices, commandPool)),
-indexBuffer(logicalDevice.createIndexBuffer(indices, commandPool)),
-uniformBuffers(logicalDevice.createUniformBuffers(swapChain)),
-commandBuffers(logicalDevice.createCommandBuffers(commandPool, framebuffers.size())),
-descriptorSets(logicalDevice.createDescriptorSets(swapChain.images_.size(), descriptorSetLayout, descriptor_types)),
-fences(logicalDevice.createFences(MAX_FRAMES_IN_FLIGHT)),
-imageAcquiredSemaphores(logicalDevice.createSemaphores(magmatic::render::SemaphoreType::ImageAvailableSemaphore, MAX_FRAMES_IN_FLIGHT)),
-renderFinishedSemaphores(logicalDevice.createSemaphores(magmatic::render::SemaphoreType::RenderFinishedSemaphore, MAX_FRAMES_IN_FLIGHT)),
-texture(logicalDevice.createTexture(magmatic::render::Bitmap("examples/resources/statue.jpg"), commandPool)),
-sampler(logicalDevice.createSampler())
+vertShader(logicalDevice, "./examples/first_test/vert.spv", vk::ShaderStageFlagBits::eVertex),
+fragShader(logicalDevice, "./examples/first_test/frag.spv", vk::ShaderStageFlagBits::eFragment),
+swapChain(logicalDevice, surface, window.getSize().first, window.getSize().second),
+commandPool(logicalDevice, magmatic::render::QueueType::GraphicalQueue),
+depthResources(logicalDevice,swapChain.extent, commandPool),
+renderPass(logicalDevice, surface, depthResources),
+descriptorSets(logicalDevice, bindings, swapChain.images_.size(), descriptor_types),
+pipeline(logicalDevice, swapChain.extent.width, swapChain.extent.height, {vertShader, fragShader}, renderPass, descriptorSets.getDescriptorSetLayout()),
+framebuffers(logicalDevice, renderPass, swapChain, depthResources.imageView),
+vertexBuffer(logicalDevice, vertices, commandPool),
+indexBuffer(logicalDevice, indices, commandPool),
+fences(logicalDevice, MAX_FRAMES_IN_FLIGHT),
+imageAcquiredSemaphores(logicalDevice, magmatic::render::SemaphoreType::ImageAvailableSemaphore, MAX_FRAMES_IN_FLIGHT),
+renderFinishedSemaphores(logicalDevice, magmatic::render::SemaphoreType::RenderFinishedSemaphore, MAX_FRAMES_IN_FLIGHT),
+texture(logicalDevice, magmatic::render::Bitmap("examples/resources/statue.jpg"), commandPool),
+sampler(logicalDevice)
 {
+	/*uniformBuffers.reserve(MAX_FRAMES_IN_FLIGHT);
+	commandBuffers.reserve(MAX_FRAMES_IN_FLIGHT);
+	for(size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
+		uniformBuffers.emplace_back(std::move(magmatic::render::UniformBuffer<magmatic::render::UniformBufferObject>(logicalDevice, commandPool)));
+		commandBuffers.emplace_back(std::move(magmatic::render::CommandBuffer(commandPool)));
+	}*/
+	uniformBuffers.reserve(swapChain.images_.size());
+	commandBuffers.reserve(framebuffers.size());
+	for(size_t i = 0; i < swapChain.images_.size(); ++i) {
+		uniformBuffers.emplace_back(std::move(magmatic::render::UniformBuffer<magmatic::render::UniformBufferObject>(logicalDevice, commandPool)));
+	}
+	for(size_t i = 0; i < framebuffers.size(); ++i) {
+		commandBuffers.emplace_back(std::move(magmatic::render::CommandBuffer(commandPool)));
+	}
 	spdlog::info("Application constructor called and finished work");
 }
+
+// TODO: Change DescriptorSets to DescriptorSet and then change iniBuffers, comBuffers and descriptSets to vectors of size MAX_FRAMES_IN_FLIGHT and check if it works
+// Also remove stuff from run to drawFrame
 
 void Application::run() {
 	for(size_t i = 0; i < uniformBuffers.size(); ++i)
@@ -49,7 +62,7 @@ void Application::run() {
 		write_update.dst_binding = 0;
 		write_update.dst_array_elem = 0;
 		vk::DescriptorBufferInfo info(
-				uniformBuffers[i].buffer.get(),
+				uniformBuffers[i].getBuffer().get(),
 				0,
 				sizeof(magmatic::render::UniformBufferObject)
 				);
@@ -59,14 +72,14 @@ void Application::run() {
 		updates.emplace_back(texture.getWriteInfo(1, 0));
 		updates.emplace_back(sampler.getWriteInfo(2, 0));
 
-		logicalDevice.updateDescriptorSet(descriptorSets.sets[i], updates);
+		descriptorSets.updateDescriptorSet(i, updates);
 	}
 
 
 	currentFrame = 0;
 	imagesInFlight.resize(swapChain.images_.size(), -1);
 
-	vk::Buffer vertexBuffers[] = { vertexBuffer.buffer.get() };
+	vk::Buffer vertexBuffers[] = { vertexBuffer.getBuffer().get() };
 	vk::DeviceSize offsets[] = { 0 };
 
 	for(size_t i = 0; i < commandBuffers.size(); i++) {
@@ -75,15 +88,15 @@ void Application::run() {
 		clearValues[0].color =  vk::ClearColorValue(std::array<float, 4>({0.2f, 0.2f, 0.2f, 1.0f}));
 		clearValues[1].depthStencil = vk::ClearDepthStencilValue(1.0f, 0);
 		vk::RenderPassBeginInfo beginInfo(renderPass.renderPass.get(),
-		                                  framebuffers.framebuffers[i].get(),
+		                                  framebuffers[i].get(),
 		                                  vk::Rect2D(vk::Offset2D(0, 0), swapChain.extent),
 		                                  static_cast<uint32_t>(clearValues.size()),
 		                                  clearValues.data());
 		commandBufferHandle->beginRenderPass(beginInfo, vk::SubpassContents::eInline);
 		commandBufferHandle->bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline.pipeline.get());
 		commandBufferHandle->bindVertexBuffers(0, 1, vertexBuffers, offsets);
-		commandBufferHandle->bindIndexBuffer(indexBuffer.buffer.get(), 0, vk::IndexType::eUint32);
-		commandBufferHandle->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, pipelineLayout.get(), 0, 1, &descriptorSets.sets[i], 0, nullptr);
+		commandBufferHandle->bindIndexBuffer(indexBuffer.getBuffer().get(), 0, vk::IndexType::eUint32);
+		commandBufferHandle->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, pipeline.getPipelineLayout().get(), 0, 1, &descriptorSets.sets[i], 0, nullptr);
 		commandBufferHandle->drawIndexed(static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
 		commandBufferHandle->endRenderPass();
 		commandBuffers[i].endRecording();
@@ -107,13 +120,13 @@ void Application::updateUniformBuffer(uint32_t currentBuffer) {
 	ubo.proj = glm::perspective(glm::radians(45.0f), swapChain.extent.width/(float) swapChain.extent.height, 0.1f, 10.0f);
 	ubo.proj[1][1] *= -1;
 
-	logicalDevice.copyBufferMemory(uniformBuffers[currentBuffer].memory, sizeof(ubo), ubo);
+	uniformBuffers[currentBuffer].copyMemory(sizeof(ubo), ubo);
 }
 
 void Application::drawFrame() {
-	logicalDevice.waitForFences(fences[currentFrame], fenceTimeout);
+	fences.waitForFence(currentFrame, fenceTimeout);
 	uint32_t currentBuffer;
-	auto state = logicalDevice.acquireNextImageKHR(swapChain, imageAcquiredSemaphores, currentFrame, currentBuffer, 0);
+	auto state = swapChain.acquireNextImageKHR(imageAcquiredSemaphores, currentFrame, currentBuffer, 0);
 	if(state == vk::Result::eNotReady)
 	{
 		std::this_thread::yield();
@@ -121,13 +134,13 @@ void Application::drawFrame() {
 	}
 
 	if(imagesInFlight[currentBuffer] != -1) {
-		logicalDevice.waitForFences(fences[imagesInFlight[currentBuffer]], fenceTimeout);
+		fences.waitForFence(imagesInFlight[currentBuffer], fenceTimeout);
 	}
 	imagesInFlight[currentBuffer] = currentFrame;
-	logicalDevice.resetFences(fences[currentFrame]);
+	fences.resetFence(currentFrame);
 	updateUniformBuffer(currentBuffer);
-	logicalDevice.submitToGraphicsQueue(imageAcquiredSemaphores, renderFinishedSemaphores, commandBuffers[currentBuffer], fences[currentFrame], currentFrame);
-	logicalDevice.presentKHR(renderFinishedSemaphores, currentFrame, swapChain, currentBuffer);
+	commandBuffers[currentBuffer].submit(imageAcquiredSemaphores, renderFinishedSemaphores, fences[currentFrame], currentFrame);
+	swapChain.presentKHR(logicalDevice, renderFinishedSemaphores, currentFrame, currentBuffer);
 	currentFrame = (currentFrame+1)%MAX_FRAMES_IN_FLIGHT;
 }
 

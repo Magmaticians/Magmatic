@@ -3,23 +3,15 @@
 
 #include <vulkan/vulkan.hpp>
 #include <vector>
+#include "Surface.hpp"
+#include "LogicalDevice.hpp"
+#include "Semaphores.hpp"
 
 
 namespace magmatic::render
 {
 	class SwapChain
 	{
-	friend class LogicalDevice;
-
-		explicit SwapChain(
-				vk::UniqueSwapchainKHR swapchain,
-				std::vector<vk::Image> images,
-				std::vector<vk::UniqueImageView> image_views,
-				vk::UniqueFence fence,
-				vk::Extent2D extent
-		) : swapchain_(std::move(swapchain)), images_(std::move(images)),
-		    image_views_(std::move(image_views)), fence(std::move(fence)),
-		    extent(extent) {}
 
 	public:
 		static vk::SurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector <vk::SurfaceFormatKHR>& formats);
@@ -30,10 +22,21 @@ namespace magmatic::render
 				) noexcept;
 
 
+		explicit SwapChain(const LogicalDevice& l_device, const Surface& surface, uint32_t window_width, uint32_t window_height);
+
 		SwapChain(const SwapChain&) = delete;
 		SwapChain& operator=(const SwapChain&) = delete;
 
-		const vk::Extent2D extent;
+		void presentKHR(const LogicalDevice& l_device, const Semaphores& renderFinishedSemaphores, size_t index, uint32_t currentBuffer) const;
+
+		[[nodiscard]] const std::vector<vk::UniqueImageView>& getImageViews() const {
+			return image_views_;
+		}
+
+		vk::Result acquireNextImageKHR(const Semaphores& imageAcquiredSemaphores,
+				size_t index, uint32_t& imageIndex, uint64_t timeout = UINT64_MAX) const;
+
+		vk::Extent2D extent;
 		std::vector<vk::Image> images_;
 
 	private:
@@ -41,7 +44,7 @@ namespace magmatic::render
 
 		std::vector<vk::UniqueImageView> image_views_;
 
-		vk::UniqueFence fence;
+		vk::UniqueFence fence_;
 	};
 
 }

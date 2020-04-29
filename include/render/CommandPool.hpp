@@ -3,21 +3,25 @@
 
 #include <vulkan/vulkan.hpp>
 #include "QueueType.hpp"
-
+#include "render/LogicalDevice.hpp"
 
 namespace magmatic::render
 {
 	class CommandPool
 	{
-		friend class LogicalDevice;
-		const vk::UniqueCommandPool command_pool;
-		const QueueType type;
-
-		explicit CommandPool(vk::UniqueCommandPool pool, QueueType type) : command_pool(std::move(pool)), type(type){};
+	private:
+		vk::UniqueCommandPool command_pool;
+		QueueType type;
+		vk::Queue queue;
 
 	public:
+		explicit CommandPool(const LogicalDevice& l_device, QueueType type);
+
 		CommandPool(const CommandPool&) = delete;
 		CommandPool& operator=(CommandPool&) = delete;
+
+		[[nodiscard]] const vk::UniqueCommandPool& getHandle() const noexcept;
+		[[nodiscard]] const vk::Queue& getQueue() const noexcept;
 	};
 }
 

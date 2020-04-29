@@ -1,6 +1,19 @@
 #ifndef MAGMATIC_APPLICATION_H
 #define MAGMATIC_APPLICATION_H
 
+#include <render/Texture.hpp>
+#include <render/Sampler.hpp>
+#include <render/DescriptorSets.hpp>
+#include <render/Fences.hpp>
+#include <render/VertexBuffer.hpp>
+#include <render/IndexBuffer.hpp>
+#include <render/Shader.hpp>
+#include <render/DepthResources.hpp>
+#include <render/RenderPass.hpp>
+#include <render/Pipeline.hpp>
+#include <render/Framebuffers.hpp>
+#include <render/CommandBuffer.hpp>
+#include <render/UniformBuffer.hpp>
 #include "render/Vertex.hpp"
 #include "render/Window.hpp"
 #include "render/Instance.hpp"
@@ -9,6 +22,7 @@
 #include "render/LogicalDevice.hpp"
 #include "render/SwapChain.hpp"
 #include "render/Buffer.hpp"
+#include "render/UniformBufferObject.hpp"
 
 class Application {
     static constexpr const char* DEFAULT_NAME{"Test application"};
@@ -102,16 +116,14 @@ class Application {
 	const magmatic::render::CommandPool commandPool;
 	const magmatic::render::DepthResources depthResources;
 	const magmatic::render::RenderPass renderPass;
-	const vk::UniqueDescriptorSetLayout descriptorSetLayout;
-	const vk::UniquePipelineLayout pipelineLayout;
+	const magmatic::render::DescriptorSets descriptorSets;
 	const magmatic::render::Pipeline pipeline;
 	const magmatic::render::Framebuffers framebuffers;
-	const magmatic::render::Buffer vertexBuffer;
-	const magmatic::render::Buffer indexBuffer;
-	const std::vector<magmatic::render::Buffer> uniformBuffers;
+	const magmatic::render::VertexBuffer vertexBuffer;
+	const magmatic::render::IndexBuffer indexBuffer;
+	std::vector<magmatic::render::UniformBuffer<magmatic::render::UniformBufferObject>> uniformBuffers;
 	std::vector<magmatic::render::CommandBuffer> commandBuffers;
-	const magmatic::render::DescriptorSets descriptorSets;
-	const std::vector<vk::UniqueFence> fences;
+	const magmatic::render::Fences fences;
 	const magmatic::render::Semaphores imageAcquiredSemaphores;
 	const magmatic::render::Semaphores renderFinishedSemaphores;
 	const magmatic::render::Texture texture;

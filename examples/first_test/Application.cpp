@@ -40,6 +40,7 @@ sampler(logicalDevice)
 
 void Application::run() {
 	imagesInFlight.resize(MAX_FRAMES_IN_FLIGHT, -1);
+	currentBuffer = 0;
 	currentFrame = 0;
 
 	while(!window.shouldClose()) {
@@ -63,14 +64,14 @@ void Application::updateUniformBuffer(uint32_t currentBuffer) {
 	uniformBuffers[currentBuffer].copyMemory(sizeof(ubo), ubo);
 }
 
-void Application::updateDescriptorSet(size_t index) {
+void Application::updateDescriptorSet() {
 	std::vector<magmatic::render::DescriptorWriteUpdate> updates;
 	magmatic::render::DescriptorWriteUpdate write_update;
 	write_update.type = magmatic::render::DescriptorWriteUpdate::eUniform;
 	write_update.dst_binding = 0;
 	write_update.dst_array_elem = 0;
 	vk::DescriptorBufferInfo info(
-			uniformBuffers[index].getBuffer().get(),
+			uniformBuffers[currentFrame].getBuffer().get(),
 			0,
 			sizeof(magmatic::render::UniformBufferObject)
 	);
@@ -79,19 +80,19 @@ void Application::updateDescriptorSet(size_t index) {
 
 	updates.emplace_back(texture.getWriteInfo(1, 0));
 	updates.emplace_back(sampler.getWriteInfo(2, 0));
-	descriptorSets.updateDescriptorSet(index, updates);
+	descriptorSets.updateDescriptorSet(currentFrame, updates);
 }
 
-void Application::recordCommandBuffer(size_t index) {
+void Application::recordCommandBuffer() {
 	vk::Buffer vertexBuffers[] = { vertexBuffer.getBuffer().get() };
 	vk::DeviceSize offsets[] = { 0 };
 
-	auto& commandBufferHandle = std::move(commandBuffers[index].beginRecording());
+	auto& commandBufferHandle = std::move(commandBuffers[currentFrame].beginRecording());
 	std::array<vk::ClearValue, 2> clearValues;
 	clearValues[0].color =  vk::ClearColorValue(std::array<float, 4>({0.2f, 0.2f, 0.2f, 1.0f}));
 	clearValues[1].depthStencil = vk::ClearDepthStencilValue(1.0f, 0);
 	vk::RenderPassBeginInfo beginInfo(renderPass.renderPass.get(),
-	                                  framebuffers[index].get(),
+	                                  framebuffers[currentBuffer].get(),
 	                                  vk::Rect2D(vk::Offset2D(0, 0), swapChain.extent),
 	                                  static_cast<uint32_t>(clearValues.size()),
 	                                  clearValues.data());
@@ -99,20 +100,14 @@ void Application::recordCommandBuffer(size_t index) {
 	commandBufferHandle->bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline.pipeline.get());
 	commandBufferHandle->bindVertexBuffers(0, 1, vertexBuffers, offsets);
 	commandBufferHandle->bindIndexBuffer(indexBuffer.getBuffer().get(), 0, vk::IndexType::eUint32);
-	commandBufferHandle->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, pipeline.getPipelineLayout().get(), 0, 1, &descriptorSets[index].get(), 0, nullptr);
+	commandBufferHandle->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, pipeline.getPipelineLayout().get(), 0, 1, &descriptorSets[currentFrame].get(), 0, nullptr);
 	commandBufferHandle->drawIndexed(static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
 	commandBufferHandle->endRenderPass();
-	commandBuffers[index].endRecording();
+	commandBuffers[currentFrame].endRecording();
 
 }
 
 void Application::drawFrame() {
-
-	fences.waitForFence(currentFrame, fenceTimeout);
-	updateDescriptorSet(currentFrame);
-	recordCommandBuffer(currentFrame);
-
-	uint32_t currentBuffer;
 	auto state = swapChain.acquireNextImageKHR(imageAcquiredSemaphores, currentFrame, currentBuffer, 0);
 	if(state == vk::Result::eNotReady)
 	{
@@ -122,9 +117,12 @@ void Application::drawFrame() {
 
 	if(imagesInFlight[currentBuffer] != -1) {
 		fences.waitForFence(imagesInFlight[currentBuffer], fenceTimeout);
+		fences.resetFence(currentFrame);
 	}
 	imagesInFlight[currentBuffer] = currentFrame;
-	fences.resetFence(currentFrame);
+	updateDescriptorSet();
+	recordCommandBuffer();
+	
 	updateUniformBuffer(currentBuffer);
 	commandBuffers[currentBuffer].submit(imageAcquiredSemaphores, renderFinishedSemaphores, fences[currentFrame], currentFrame);
 	swapChain.presentKHR(logicalDevice, renderFinishedSemaphores, currentFrame, currentBuffer);

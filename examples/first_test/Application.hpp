@@ -139,14 +139,15 @@ private:
 	static constexpr size_t MAX_FRAMES_IN_FLIGHT = 3;
 
 	size_t currentFrame = 0;
+	uint32_t currentBuffer = 0;
 
 	void updateUniformBuffer(uint32_t currentBuffer);
 
 	[[nodiscard]] std::vector<magmatic::render::Vertex> getVertexConfig(const std::string &mode) const;
 
 	[[nodiscard]] std::vector<uint32_t> getIndexConfig(const std::string& mode) const;
-	void updateDescriptorSet(size_t index);
-	void recordCommandBuffer(size_t index);
+	void updateDescriptorSet();
+	void recordCommandBuffer();
 	void drawFrame();
 };
 

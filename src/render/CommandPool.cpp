@@ -16,7 +16,9 @@ magmatic::render::CommandPool::CommandPool(const LogicalDevice& l_device, QueueT
 	}
 	command_pool = handle->createCommandPoolUnique(
 			vk::CommandPoolCreateInfo(
-					vk::CommandPoolCreateFlags(),
+					vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
+					//TODO: make default parameter
+					// vk::CommandPoolCreateFlags(),
 					queue_family_index
 			));
 }

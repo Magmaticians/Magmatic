@@ -43,7 +43,7 @@ magmatic::render::DescriptorSets::DescriptorSets(const LogicalDevice& l_device, 
 			size,
 			layouts.data()
 	);
-	sets = std::move(handle->allocateDescriptorSets(allocInfo));
+	sets = std::move(handle->allocateDescriptorSetsUnique(allocInfo));
 }
 
 magmatic::render::DescriptorSets& magmatic::render::DescriptorSets::operator=(DescriptorSets&& rhs) noexcept {
@@ -60,7 +60,7 @@ void magmatic::render::DescriptorSets::updateDescriptorSet(size_t index, const s
 			write_info.begin(),
 			write_info.end(),
 			std::back_inserter(write_ops),
-			[this, index](const auto& info){return info.toWriteInfo(this->sets[index]);}
+			[this, index](const auto& info){return info.toWriteInfo(this->sets[index].get());}
 	);
 	handle.updateDescriptorSets(write_ops.size(), write_ops.data(), 0, nullptr);
 }

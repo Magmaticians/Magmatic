@@ -77,3 +77,12 @@ void magmatic::render::CommandBuffer::submit(const Semaphores& imageAcquiredSema
 			&renderFinishedSemaphores.semaphores[index].get());
 	queue.submit(submitInfo, fence.get());
 }
+
+std::vector<magmatic::render::CommandBuffer> magmatic::render::CommandBuffer::createCommandBuffers(size_t count, const CommandPool& pool, vk::CommandBufferLevel level) {
+	std::vector<CommandBuffer> res;
+	res.reserve(count);
+	for(size_t i = 0; i < count; i++) {
+		res.emplace_back(CommandBuffer(pool, level));
+	}
+	return res;
+}

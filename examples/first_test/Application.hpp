@@ -145,6 +145,8 @@ private:
 	[[nodiscard]] std::vector<magmatic::render::Vertex> getVertexConfig(const std::string &mode) const;
 
 	[[nodiscard]] std::vector<uint32_t> getIndexConfig(const std::string& mode) const;
+	void updateDescriptorSet(size_t index);
+	void recordCommandBuffer(size_t index);
 	void drawFrame();
 };
 

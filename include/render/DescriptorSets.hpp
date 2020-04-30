@@ -11,9 +11,9 @@ namespace magmatic::render
 	{
 
 		vk::UniqueDescriptorSetLayout descriptor_set_layout;
-	public:
 		vk::UniqueDescriptorPool descriptorPool;
-		std::vector<vk::DescriptorSet> sets;
+		std::vector<vk::UniqueDescriptorSet> sets;
+	public:
 
 		DescriptorSets(const LogicalDevice& l_device, const std::vector<vk::DescriptorSetLayoutBinding>& bindings, size_t count, std::vector<vk::DescriptorType> types);
 
@@ -27,6 +27,10 @@ namespace magmatic::render
 
 		[[nodiscard]] size_t size() const { return sets.size(); }
 		[[nodiscard]] const vk::UniqueDescriptorSetLayout& getDescriptorSetLayout() const { return descriptor_set_layout; }
+
+		const vk::UniqueDescriptorSet& operator[](size_t index) const {
+			return sets.at(index);
+		}
 	};
 }
 

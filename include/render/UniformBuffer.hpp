@@ -36,6 +36,9 @@ namespace magmatic::render
 		}
 
 		void copyMemory(size_t size, const T& dataToCopy);
+
+		[[nodiscard]] static std::vector<UniformBuffer> createUniformBuffers(size_t count, const LogicalDevice& l_device,
+		                                                       const CommandPool& pool);
 	};
 }
 
@@ -46,6 +49,17 @@ void magmatic::render::UniformBuffer<T>::copyMemory(size_t size, const T& dataTo
 	handle.mapMemory(memory.get(), 0, size, vk::MemoryMapFlags(), &data);
 	memcpy(data, &dataToCopy, size);
 	handle.unmapMemory(memory.get());
+}
+
+template<typename T>
+std::vector<magmatic::render::UniformBuffer<T>> magmatic::render::UniformBuffer<T>::createUniformBuffers(size_t count, const LogicalDevice& l_device,
+                                                                     const CommandPool& pool) {
+	std::vector<UniformBuffer<T>> res;
+	res.reserve(count);
+	for(size_t i = 0; i < count; i++) {
+		res.emplace_back(UniformBuffer<T>(l_device, pool));
+	}
+	return res;
 }
 
 #endif //MAGMATIC_UNIFORMBUFFER_HPP

@@ -20,9 +20,11 @@ vertShader(logicalDevice, "./examples/first_test/vert.spv", vk::ShaderStageFlagB
 fragShader(logicalDevice, "./examples/first_test/frag.spv", vk::ShaderStageFlagBits::eFragment),
 swapChain(logicalDevice, surface, window.getSize().first, window.getSize().second),
 commandPool(logicalDevice, magmatic::render::QueueType::GraphicalQueue),
+commandBuffers(magmatic::render::CommandBuffer::createCommandBuffers(MAX_FRAMES_IN_FLIGHT, commandPool)),
+uniformBuffers(magmatic::render::UniformBuffer<magmatic::render::UniformBufferObject>::createUniformBuffers(MAX_FRAMES_IN_FLIGHT, logicalDevice, commandPool)),
 depthResources(logicalDevice,swapChain.extent, commandPool),
 renderPass(logicalDevice, surface, depthResources),
-descriptorSets(logicalDevice, bindings, swapChain.images_.size(), descriptor_types),
+descriptorSets(logicalDevice, bindings, MAX_FRAMES_IN_FLIGHT, descriptor_types),
 pipeline(logicalDevice, swapChain.extent.width, swapChain.extent.height, {vertShader, fragShader}, renderPass, descriptorSets.getDescriptorSetLayout()),
 framebuffers(logicalDevice, renderPass, swapChain, depthResources.imageView),
 vertexBuffer(logicalDevice, vertices, commandPool),
@@ -33,74 +35,12 @@ renderFinishedSemaphores(logicalDevice, magmatic::render::SemaphoreType::RenderF
 texture(logicalDevice, magmatic::render::Bitmap("examples/resources/statue.jpg"), commandPool),
 sampler(logicalDevice)
 {
-	/*uniformBuffers.reserve(MAX_FRAMES_IN_FLIGHT);
-	commandBuffers.reserve(MAX_FRAMES_IN_FLIGHT);
-	for(size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
-		uniformBuffers.emplace_back(std::move(magmatic::render::UniformBuffer<magmatic::render::UniformBufferObject>(logicalDevice, commandPool)));
-		commandBuffers.emplace_back(std::move(magmatic::render::CommandBuffer(commandPool)));
-	}*/
-	uniformBuffers.reserve(swapChain.images_.size());
-	commandBuffers.reserve(framebuffers.size());
-	for(size_t i = 0; i < swapChain.images_.size(); ++i) {
-		uniformBuffers.emplace_back(std::move(magmatic::render::UniformBuffer<magmatic::render::UniformBufferObject>(logicalDevice, commandPool)));
-	}
-	for(size_t i = 0; i < framebuffers.size(); ++i) {
-		commandBuffers.emplace_back(std::move(magmatic::render::CommandBuffer(commandPool)));
-	}
 	spdlog::info("Application constructor called and finished work");
 }
 
-// TODO: Change DescriptorSets to DescriptorSet and then change iniBuffers, comBuffers and descriptSets to vectors of size MAX_FRAMES_IN_FLIGHT and check if it works
-// Also remove stuff from run to drawFrame
-
 void Application::run() {
-	for(size_t i = 0; i < uniformBuffers.size(); ++i)
-	{
-		std::vector<magmatic::render::DescriptorWriteUpdate> updates;
-		magmatic::render::DescriptorWriteUpdate write_update;
-		write_update.type = magmatic::render::DescriptorWriteUpdate::eUniform;
-		write_update.dst_binding = 0;
-		write_update.dst_array_elem = 0;
-		vk::DescriptorBufferInfo info(
-				uniformBuffers[i].getBuffer().get(),
-				0,
-				sizeof(magmatic::render::UniformBufferObject)
-				);
-		write_update.data_info = info;
-		updates.emplace_back(write_update);
-
-		updates.emplace_back(texture.getWriteInfo(1, 0));
-		updates.emplace_back(sampler.getWriteInfo(2, 0));
-
-		descriptorSets.updateDescriptorSet(i, updates);
-	}
-
-
+	imagesInFlight.resize(MAX_FRAMES_IN_FLIGHT, -1);
 	currentFrame = 0;
-	imagesInFlight.resize(swapChain.images_.size(), -1);
-
-	vk::Buffer vertexBuffers[] = { vertexBuffer.getBuffer().get() };
-	vk::DeviceSize offsets[] = { 0 };
-
-	for(size_t i = 0; i < commandBuffers.size(); i++) {
-		auto& commandBufferHandle = std::move(commandBuffers[i].beginRecording(vk::CommandBufferUsageFlagBits::eSimultaneousUse));
-		std::array<vk::ClearValue, 2> clearValues;
-		clearValues[0].color =  vk::ClearColorValue(std::array<float, 4>({0.2f, 0.2f, 0.2f, 1.0f}));
-		clearValues[1].depthStencil = vk::ClearDepthStencilValue(1.0f, 0);
-		vk::RenderPassBeginInfo beginInfo(renderPass.renderPass.get(),
-		                                  framebuffers[i].get(),
-		                                  vk::Rect2D(vk::Offset2D(0, 0), swapChain.extent),
-		                                  static_cast<uint32_t>(clearValues.size()),
-		                                  clearValues.data());
-		commandBufferHandle->beginRenderPass(beginInfo, vk::SubpassContents::eInline);
-		commandBufferHandle->bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline.pipeline.get());
-		commandBufferHandle->bindVertexBuffers(0, 1, vertexBuffers, offsets);
-		commandBufferHandle->bindIndexBuffer(indexBuffer.getBuffer().get(), 0, vk::IndexType::eUint32);
-		commandBufferHandle->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, pipeline.getPipelineLayout().get(), 0, 1, &descriptorSets.sets[i], 0, nullptr);
-		commandBufferHandle->drawIndexed(static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
-		commandBufferHandle->endRenderPass();
-		commandBuffers[i].endRecording();
-	}
 
 	while(!window.shouldClose()) {
 		glfwPollEvents();
@@ -123,8 +63,55 @@ void Application::updateUniformBuffer(uint32_t currentBuffer) {
 	uniformBuffers[currentBuffer].copyMemory(sizeof(ubo), ubo);
 }
 
+void Application::updateDescriptorSet(size_t index) {
+	std::vector<magmatic::render::DescriptorWriteUpdate> updates;
+	magmatic::render::DescriptorWriteUpdate write_update;
+	write_update.type = magmatic::render::DescriptorWriteUpdate::eUniform;
+	write_update.dst_binding = 0;
+	write_update.dst_array_elem = 0;
+	vk::DescriptorBufferInfo info(
+			uniformBuffers[index].getBuffer().get(),
+			0,
+			sizeof(magmatic::render::UniformBufferObject)
+	);
+	write_update.data_info = info;
+	updates.emplace_back(write_update);
+
+	updates.emplace_back(texture.getWriteInfo(1, 0));
+	updates.emplace_back(sampler.getWriteInfo(2, 0));
+	descriptorSets.updateDescriptorSet(index, updates);
+}
+
+void Application::recordCommandBuffer(size_t index) {
+	vk::Buffer vertexBuffers[] = { vertexBuffer.getBuffer().get() };
+	vk::DeviceSize offsets[] = { 0 };
+
+	auto& commandBufferHandle = std::move(commandBuffers[index].beginRecording());
+	std::array<vk::ClearValue, 2> clearValues;
+	clearValues[0].color =  vk::ClearColorValue(std::array<float, 4>({0.2f, 0.2f, 0.2f, 1.0f}));
+	clearValues[1].depthStencil = vk::ClearDepthStencilValue(1.0f, 0);
+	vk::RenderPassBeginInfo beginInfo(renderPass.renderPass.get(),
+	                                  framebuffers[index].get(),
+	                                  vk::Rect2D(vk::Offset2D(0, 0), swapChain.extent),
+	                                  static_cast<uint32_t>(clearValues.size()),
+	                                  clearValues.data());
+	commandBufferHandle->beginRenderPass(beginInfo, vk::SubpassContents::eInline);
+	commandBufferHandle->bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline.pipeline.get());
+	commandBufferHandle->bindVertexBuffers(0, 1, vertexBuffers, offsets);
+	commandBufferHandle->bindIndexBuffer(indexBuffer.getBuffer().get(), 0, vk::IndexType::eUint32);
+	commandBufferHandle->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, pipeline.getPipelineLayout().get(), 0, 1, &descriptorSets[index].get(), 0, nullptr);
+	commandBufferHandle->drawIndexed(static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
+	commandBufferHandle->endRenderPass();
+	commandBuffers[index].endRecording();
+
+}
+
 void Application::drawFrame() {
+
 	fences.waitForFence(currentFrame, fenceTimeout);
+	updateDescriptorSet(currentFrame);
+	recordCommandBuffer(currentFrame);
+
 	uint32_t currentBuffer;
 	auto state = swapChain.acquireNextImageKHR(imageAcquiredSemaphores, currentFrame, currentBuffer, 0);
 	if(state == vk::Result::eNotReady)

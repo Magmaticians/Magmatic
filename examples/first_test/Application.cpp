@@ -20,20 +20,20 @@ vertShader(logicalDevice, "./examples/first_test/vert.spv", vk::ShaderStageFlagB
 fragShader(logicalDevice, "./examples/first_test/frag.spv", vk::ShaderStageFlagBits::eFragment),
 swapChain(logicalDevice, surface, window.getSize().first, window.getSize().second),
 commandPool(logicalDevice, magmatic::render::QueueType::GraphicalQueue),
-commandBuffers(magmatic::render::CommandBuffer::createCommandBuffers(MAX_FRAMES_IN_FLIGHT, commandPool)),
-uniformBuffers(magmatic::render::UniformBuffer<magmatic::render::UniformBufferObject>::createUniformBuffers(MAX_FRAMES_IN_FLIGHT, logicalDevice, commandPool)),
 depthResources(logicalDevice,swapChain.extent, commandPool),
 renderPass(logicalDevice, surface, depthResources),
 descriptorSets(logicalDevice, bindings, MAX_FRAMES_IN_FLIGHT, descriptor_types),
 pipeline(logicalDevice, swapChain.extent.width, swapChain.extent.height, {vertShader, fragShader}, renderPass, descriptorSets.getDescriptorSetLayout()),
 framebuffers(logicalDevice, renderPass, swapChain, depthResources.imageView),
+texture(logicalDevice, magmatic::render::Bitmap("examples/resources/statue.jpg"), commandPool),
+sampler(logicalDevice),
 vertexBuffer(logicalDevice, vertices, commandPool),
 indexBuffer(logicalDevice, indices, commandPool),
+commandBuffers(magmatic::render::CommandBuffer::createCommandBuffers(MAX_FRAMES_IN_FLIGHT, commandPool)),
+uniformBuffers(magmatic::render::UniformBuffer<magmatic::render::UniformBufferObject>::createUniformBuffers(MAX_FRAMES_IN_FLIGHT, logicalDevice, commandPool)),
 fences(logicalDevice, MAX_FRAMES_IN_FLIGHT),
 imageAcquiredSemaphores(logicalDevice, magmatic::render::SemaphoreType::ImageAvailableSemaphore, MAX_FRAMES_IN_FLIGHT),
-renderFinishedSemaphores(logicalDevice, magmatic::render::SemaphoreType::RenderFinishedSemaphore, MAX_FRAMES_IN_FLIGHT),
-texture(logicalDevice, magmatic::render::Bitmap("examples/resources/statue.jpg"), commandPool),
-sampler(logicalDevice)
+renderFinishedSemaphores(logicalDevice, magmatic::render::SemaphoreType::RenderFinishedSemaphore, MAX_FRAMES_IN_FLIGHT)
 {
 	spdlog::info("Application constructor called and finished work");
 }
@@ -87,7 +87,7 @@ void Application::recordCommandBuffer() {
 	vk::Buffer vertexBuffers[] = { vertexBuffer.getBuffer().get() };
 	vk::DeviceSize offsets[] = { 0 };
 
-	auto& commandBufferHandle = std::move(commandBuffers[currentFrame].beginRecording());
+	const auto& commandBufferHandle = commandBuffers[currentFrame].beginRecording();
 	std::array<vk::ClearValue, 2> clearValues;
 	clearValues[0].color =  vk::ClearColorValue(std::array<float, 4>({0.2f, 0.2f, 0.2f, 1.0f}));
 	clearValues[1].depthStencil = vk::ClearDepthStencilValue(1.0f, 0);
@@ -122,7 +122,7 @@ void Application::drawFrame() {
 	imagesInFlight[currentBuffer] = currentFrame;
 	updateDescriptorSet();
 	recordCommandBuffer();
-	
+
 	updateUniformBuffer(currentBuffer);
 	commandBuffers[currentBuffer].submit(imageAcquiredSemaphores, renderFinishedSemaphores, fences[currentFrame], currentFrame);
 	swapChain.presentKHR(logicalDevice, renderFinishedSemaphores, currentFrame, currentBuffer);

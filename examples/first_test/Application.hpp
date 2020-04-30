@@ -112,13 +112,15 @@ class Application {
 	const magmatic::render::LogicalDevice logicalDevice;
 	magmatic::render::Shader vertShader;
 	magmatic::render::Shader fragShader;
-	const magmatic::render::SwapChain swapChain;
+	magmatic::render::SwapChain swapChain;
 	const magmatic::render::CommandPool commandPool;
-	const magmatic::render::DepthResources depthResources;
-	const magmatic::render::RenderPass renderPass;
-	const magmatic::render::DescriptorSets descriptorSets;
-	const magmatic::render::Pipeline pipeline;
-	const magmatic::render::Framebuffers framebuffers;
+	magmatic::render::DepthResources depthResources;
+	magmatic::render::RenderPass renderPass;
+	magmatic::render::DescriptorSets descriptorSets;
+	magmatic::render::Pipeline pipeline;
+	magmatic::render::Framebuffers framebuffers;
+	const magmatic::render::Texture texture;
+	const magmatic::render::Sampler sampler;
 	const magmatic::render::VertexBuffer vertexBuffer;
 	const magmatic::render::IndexBuffer indexBuffer;
 	std::vector<magmatic::render::UniformBuffer<magmatic::render::UniformBufferObject>> uniformBuffers;
@@ -126,8 +128,7 @@ class Application {
 	const magmatic::render::Fences fences;
 	const magmatic::render::Semaphores imageAcquiredSemaphores;
 	const magmatic::render::Semaphores renderFinishedSemaphores;
-	const magmatic::render::Texture texture;
-	const magmatic::render::Sampler sampler;
+
 	std::vector<int> imagesInFlight;
 public:
     explicit Application(const std::string& mode);
@@ -149,6 +150,7 @@ private:
 	void updateDescriptorSet();
 	void recordCommandBuffer();
 	void drawFrame();
+
 };
 
 

@@ -28,3 +28,11 @@ magmatic::render::DepthResources::DepthResources(const LogicalDevice& l_device, 
 	                      vk::ImageLayout::eDepthStencilAttachmentOptimal,
 	                      commandPool);
 }
+
+magmatic::render::DepthResources::DepthResources(DepthResources&& rhs) noexcept : format(rhs.format), image(std::move(rhs.image)), imageView(std::move(rhs.imageView)) {}
+magmatic::render::DepthResources& magmatic::render::DepthResources::operator=(DepthResources&& rhs) noexcept {
+	this->format = rhs.format;
+	this->image = std::move(rhs.image);
+	this->imageView = std::move(rhs.imageView);
+	return *this;
+}

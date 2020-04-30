@@ -38,6 +38,26 @@ renderFinishedSemaphores(logicalDevice, magmatic::render::SemaphoreType::RenderF
 	spdlog::info("Application constructor called and finished work");
 }
 
+void Application::recreateTheSwapChain() {
+	std::pair<int, int> size = window.getSize();
+	while(size.first == 0 || size.second == 0) {
+		size = window.getSize();
+		glfwWaitEvents();
+	}
+
+	logicalDevice.waitIdle();
+
+	// TODO: Check order
+	swapChain = std::move(magmatic::render::SwapChain(logicalDevice, surface, window.getSize().first, window.getSize().second));
+	renderPass = std::move(magmatic::render::RenderPass(logicalDevice, surface, depthResources));
+	pipeline = std::move(magmatic::render::Pipeline(logicalDevice, swapChain.extent.width, swapChain.extent.height, {vertShader, fragShader}, renderPass, descriptorSets.getDescriptorSetLayout()));
+	depthResources = std::move(magmatic::render::DepthResources(logicalDevice,swapChain.extent, commandPool));
+	framebuffers = std::move(magmatic::render::Framebuffers(logicalDevice, renderPass, swapChain, depthResources.imageView));
+	descriptorSets = std::move(magmatic::render::DescriptorSets(logicalDevice, bindings, MAX_FRAMES_IN_FLIGHT, descriptor_types));
+	magmatic::render::CommandBuffer::reCreateCommandBuffers(commandBuffers, commandPool);
+	magmatic::render::UniformBuffer<magmatic::render::UniformBufferObject>::reCreateUniformBuffers(uniformBuffers, logicalDevice, commandPool);
+}
+
 void Application::run() {
 	imagesInFlight.resize(MAX_FRAMES_IN_FLIGHT, -1);
 	currentBuffer = 0;

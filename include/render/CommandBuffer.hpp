@@ -28,7 +28,10 @@ namespace magmatic::render
 
 		void submit(const Semaphores& imageAcquiredSemaphores, const Semaphores& renderFinishedSemaphores, const vk::UniqueFence& fence, size_t index) const;
 
-		[[nodiscard]] static std::vector<CommandBuffer> createCommandBuffers(size_t count, const CommandPool& pool, vk::CommandBufferLevel level = vk::CommandBufferLevel::ePrimary);
+		[[nodiscard]] static std::vector<CommandBuffer> createCommandBuffers(size_t count, const CommandPool& pool,
+				vk::CommandBufferLevel level = vk::CommandBufferLevel::ePrimary);
+		static void reCreateCommandBuffers(std::vector<CommandBuffer>& oldBuffers, const CommandPool& pool,
+				vk::CommandBufferLevel level = vk::CommandBufferLevel::ePrimary);
 	private:
 		vk::Queue queue;
 		vk::UniqueCommandBuffer command_buffer;

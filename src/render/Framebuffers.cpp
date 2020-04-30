@@ -28,3 +28,9 @@ magmatic::render::Framebuffers::Framebuffers(
 		framebuffers.emplace_back(std::move(framebuffer));
 	}
 }
+
+magmatic::render::Framebuffers::Framebuffers(Framebuffers&& rhs) noexcept : framebuffers(std::move(rhs.framebuffers)) { }
+magmatic::render::Framebuffers& magmatic::render::Framebuffers::operator=(Framebuffers&& rhs) noexcept {
+	this->framebuffers = std::move(rhs.framebuffers);
+	return *this;
+}

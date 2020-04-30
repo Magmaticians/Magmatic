@@ -151,6 +151,7 @@ private:
 	void recordCommandBuffer();
 	void drawFrame();
 
+	void recreateTheSwapChain();
 };
 
 

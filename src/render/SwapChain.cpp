@@ -69,6 +69,18 @@ magmatic::render::SwapChain::SwapChain(const LogicalDevice& l_device, const Surf
 	fence_ = handle->createFenceUnique(fence_create_info);
 }
 
+magmatic::render::SwapChain::SwapChain(SwapChain&& rhs) noexcept : extent(rhs.extent), images_(std::move(rhs.images_)),
+	swapchain_(std::move(rhs.swapchain_)), image_views_(std::move(rhs.image_views_)), fence_(std::move(rhs.fence_)) {}
+magmatic::render::SwapChain& magmatic::render::SwapChain::operator=(SwapChain&&rhs) noexcept {
+	this->extent = rhs.extent;
+	this->images_ = std::move(rhs.images_);
+	this->swapchain_ = std::move(rhs.swapchain_);
+	this->image_views_ = std::move(rhs.image_views_);
+	this->fence_ = std::move(rhs.fence_);
+	return *this;
+}
+
+
 vk::SurfaceFormatKHR magmatic::render::SwapChain::chooseSwapSurfaceFormat(const std::vector<vk::SurfaceFormatKHR>& formats)
 {
 	if (formats.empty())

@@ -14,6 +14,9 @@ namespace magmatic::render {
 
         RenderPass(const RenderPass&) = delete;
         RenderPass& operator=(const RenderPass&) = delete;
+
+	    RenderPass(RenderPass&& rhs) noexcept;
+	    RenderPass& operator=(RenderPass&& rhs) noexcept;
     };
 }
 

@@ -74,3 +74,9 @@ magmatic::render::RenderPass::RenderPass(const LogicalDevice& l_device, const Su
 
 	renderPass = handle->createRenderPassUnique(render_pass_info);
 }
+
+magmatic::render::RenderPass::RenderPass(RenderPass&& rhs) noexcept : renderPass(std::move(rhs.renderPass)) { }
+magmatic::render::RenderPass& magmatic::render::RenderPass::operator=(RenderPass&& rhs) noexcept {
+	this->renderPass = std::move(rhs.renderPass);
+	return *this;
+}

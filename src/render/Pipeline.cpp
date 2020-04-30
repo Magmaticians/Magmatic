@@ -128,3 +128,10 @@ magmatic::render::Pipeline::Pipeline(const LogicalDevice& l_device,
 
 	pipeline = handle->createGraphicsPipelineUnique(nullptr, pipeline_create_info);
 }
+
+magmatic::render::Pipeline::Pipeline(Pipeline&& rhs) noexcept : layout(std::move(rhs.layout)), pipeline(std::move(rhs.pipeline)) { }
+magmatic::render::Pipeline& magmatic::render::Pipeline::operator=(Pipeline&& rhs) noexcept {
+	this->layout = std::move(rhs.layout);
+	this->pipeline = std::move(rhs.pipeline);
+	return *this;
+}

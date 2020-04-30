@@ -21,8 +21,11 @@ namespace magmatic::render
 				const vk::UniqueImageView& depthImageView
 		);
 
-		Framebuffers(Framebuffers&) = delete;
-		Framebuffers& operator=(Framebuffers&) = delete;
+		Framebuffers(const Framebuffers&) = delete;
+		Framebuffers& operator=(const Framebuffers&) = delete;
+
+		Framebuffers(Framebuffers&& rhs) noexcept;
+		Framebuffers& operator=(Framebuffers&& rhs) noexcept;
 
 		[[nodiscard]] size_t size() const { return framebuffers.size(); }
 		[[nodiscard]] const vk::UniqueFramebuffer& operator[](size_t index) const {

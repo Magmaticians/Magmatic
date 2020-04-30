@@ -3,6 +3,8 @@
 #include <spdlog/spdlog.h>
 #include <limits>
 
+magmatic::render::CommandBuffer::CommandBuffer(CommandBuffer&& rhs) noexcept
+		: queue(rhs.queue), command_buffer(std::move(rhs.command_buffer)) {}
 magmatic::render::CommandBuffer& magmatic::render::CommandBuffer::operator=(magmatic::render::CommandBuffer&& rhs) noexcept
 {
 	command_buffer = std::move(rhs.command_buffer);
@@ -49,9 +51,6 @@ void magmatic::render::CommandBuffer::submitWait()
 	logical_device.waitForFences(1, &fence.get(), true, std::numeric_limits<uint64_t>::max());
 }
 
-magmatic::render::CommandBuffer::CommandBuffer(magmatic::render::CommandBuffer&& rhs) noexcept
-: queue(rhs.queue), command_buffer(std::move(rhs.command_buffer)) {}
-
 magmatic::render::CommandBuffer::CommandBuffer(const magmatic::render::CommandPool& pool, vk::CommandBufferLevel level)
 :queue(pool.getQueue())
 {
@@ -85,4 +84,9 @@ std::vector<magmatic::render::CommandBuffer> magmatic::render::CommandBuffer::cr
 		res.emplace_back(CommandBuffer(pool, level));
 	}
 	return res;
+}
+void magmatic::render::CommandBuffer::reCreateCommandBuffers(std::vector<CommandBuffer>& oldBuffers, const CommandPool& pool, vk::CommandBufferLevel level) {
+	for(size_t i = 0; i < oldBuffers.size(); ++i) {
+		oldBuffers[i] = std::move(CommandBuffer(pool, level));
+	}
 }

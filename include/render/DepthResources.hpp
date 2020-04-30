@@ -16,8 +16,11 @@ namespace magmatic::render {
 
 		DepthResources(const LogicalDevice& l_device, vk::Extent2D extent, const CommandPool& commandPool);
 
-		DepthResources(DepthResources&) = delete;
-		DepthResources &operator=(DepthResources&) = delete;
+		DepthResources(const DepthResources&) = delete;
+		DepthResources& operator=(const DepthResources&) = delete;
+
+		DepthResources(DepthResources&& rhs) noexcept;
+		DepthResources& operator=(DepthResources&& rhs) noexcept;
 
 	private:
 		[[nodiscard]] vk::Format findDepthFormat(const LogicalDevice& l_device) const;

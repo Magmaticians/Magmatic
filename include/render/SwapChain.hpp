@@ -27,6 +27,9 @@ namespace magmatic::render
 		SwapChain(const SwapChain&) = delete;
 		SwapChain& operator=(const SwapChain&) = delete;
 
+		SwapChain(SwapChain&& rhs) noexcept;
+		SwapChain& operator=(SwapChain&&rhs) noexcept;
+
 		void presentKHR(const LogicalDevice& l_device, const Semaphores& renderFinishedSemaphores, size_t index, uint32_t currentBuffer) const;
 
 		[[nodiscard]] const std::vector<vk::UniqueImageView>& getImageViews() const {

@@ -26,6 +26,9 @@ namespace magmatic::render
         Pipeline(const Pipeline&) = delete;
         Pipeline& operator=(const Pipeline&) = delete;
 
+		Pipeline(Pipeline&& rhs) noexcept;
+		Pipeline& operator=(Pipeline&& rhs) noexcept;
+
         [[nodiscard]] const vk::UniquePipelineLayout& getPipelineLayout() const {
         	return layout;
         }

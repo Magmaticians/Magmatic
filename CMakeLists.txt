@@ -27,7 +27,6 @@ find_package(tabulate REQUIRED)
 
 include_directories("include")
 
-add_library(magmatic-render SHARED "")
 
 #Executables
 add_custom_target(examples)
@@ -36,6 +35,14 @@ add_executable(device_enumeration "")
 add_executable(sound_test "")
 add_dependencies(examples main-test device_enumeration sound_test)
 
+#magmatic-utils
+add_library(magmatic-utils SHARED "")
+target_compile_definitions(magmatic-utils PRIVATE SPDLOG_FMT_EXTERNAL=1)
+target_link_libraries(magmatic-utils PUBLIC spdlog::spdlog_header_only)
+
+
+#magmatic-render
+add_library(magmatic-render SHARED "")
 target_compile_definitions(magmatic-render PRIVATE SPDLOG_FMT_EXTERNAL=1 GLM_FORCE_DEPTH_ZERO_TO_ONE)
 target_include_directories(magmatic-render PUBLIC Vulkan::Vulkan)
 target_link_libraries(magmatic-render PUBLIC glfw Vulkan::Vulkan spdlog::spdlog_header_only glm::glm)

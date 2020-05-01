@@ -9,7 +9,7 @@ namespace {
 	constexpr int endian = 0;//little endian
 }
 
-bool magmatic::sound::SoundLoaderVorbis::registered_ = magmatic::sound::Sound::registerLoader(
+bool magmatic::sound::SoundLoaderVorbis::registered_ = magmatic::sound::SoundLoader::registerLoader(
 		magmatic::sound::SoundLoaderVorbis::factoryName(),
 		std::make_unique<SoundLoaderVorbis>()
 );
@@ -18,8 +18,8 @@ std::shared_ptr<magmatic::sound::SoundBuffer> magmatic::sound::SoundLoaderVorbis
 {
 	if(!std::filesystem::exists(path))
 	{
-		spdlog::error("Magamtic: Sound file doesn't exist: {}", path.string());
-		throw std::runtime_error("Sound file doesn't exist");
+		spdlog::error("Magamtic: SoundLoader file doesn't exist: {}", path.string());
+		throw std::runtime_error("SoundLoader file doesn't exist");
 	}
 
 	OggVorbis_File ogg_file;

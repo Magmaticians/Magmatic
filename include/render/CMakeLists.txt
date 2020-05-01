@@ -20,7 +20,7 @@ target_sources(magmatic-render
 		utils.hpp
 		UniformBufferObject.hpp
 		DescriptorSets.hpp
-		Model.hpp
+		ModelData.hpp
 		Texture.hpp
 		Bitmap.hpp
 		Sampler.hpp
@@ -31,4 +31,6 @@ target_sources(magmatic-render
 		IndexBuffer.hpp
 		UniformBuffer.hpp
 		Fences.hpp
+		model_data_loader/ModelDataLoader.hpp
+		model_data_loader/formats/ModelLoaderConcrete.hpp
 		)

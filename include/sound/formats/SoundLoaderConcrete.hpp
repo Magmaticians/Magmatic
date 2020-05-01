@@ -1,12 +1,12 @@
 #ifndef MAGMATIC_SOUNDLOADERCONCRETE_HPP
 #define MAGMATIC_SOUNDLOADERCONCRETE_HPP
 
-#include "sound/Sound.hpp"
+#include "sound/SoundLoader.hpp"
 #include "utils/factory/FileLoaderFactory.hpp"
 
 namespace magmatic::sound
 {
-	class SoundLoaderConcrete : public utils::ConcreteLoader<Sound>
+class SoundLoaderConcrete : public utils::ConcreteLoader<SoundLoader>
 	{
 	protected:
 		std::shared_ptr<SoundBuffer> fromID(ALuint buffer_ID)

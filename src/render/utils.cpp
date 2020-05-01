@@ -24,6 +24,6 @@ vk::Format magmatic::render::utils::findSupportedFormat(const std::vector<vk::Fo
 		}
 	}
 
-	spdlog::error("magmatic-render: Failed to find supported format!");
-	throw std::runtime_error("magmatic-render: Failed to find supported format!");
+	spdlog::error("magmatic-render: Failed to find supported formats!");
+	throw std::runtime_error("magmatic-render: Failed to find supported formats!");
 }

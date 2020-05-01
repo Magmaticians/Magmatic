@@ -3,7 +3,7 @@
 #include <spdlog/spdlog.h>
 
 
-bool magmatic::sound::SoundLoaderOpus::registered_ = magmatic::sound::Sound::registerLoader(
+bool magmatic::sound::SoundLoaderOpus::registered_ = magmatic::sound::SoundLoader::registerLoader(
 		SoundLoaderOpus::factoryName(),
 		std::make_unique<SoundLoaderOpus>()
 );
@@ -12,8 +12,8 @@ std::shared_ptr<magmatic::sound::SoundBuffer> magmatic::sound::SoundLoaderOpus::
 {
 	if(!std::filesystem::exists(path))
 	{
-		spdlog::error("Magamtic: Sound file doesn't exist: {}", path.string());
-		throw std::runtime_error("Sound file doesn't exist");
+		spdlog::error("Magamtic: SoundLoader file doesn't exist: {}", path.string());
+		throw std::runtime_error("SoundLoader file doesn't exist");
 	}
 
 	int error = 0;
@@ -30,8 +30,8 @@ std::shared_ptr<magmatic::sound::SoundBuffer> magmatic::sound::SoundLoaderOpus::
 
 	if(channel_count > 2)
 	{
-		spdlog::error("Magmatic: Sound files with more that 2 channels not supported");
-		throw std::runtime_error("Sound file format not supported");
+		spdlog::error("Magmatic: SoundLoader files with more that 2 channels not supported");
+		throw std::runtime_error("SoundLoader file formats not supported");
 	}
 
 	const auto format = channel_count == 1 ? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16;

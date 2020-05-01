@@ -137,7 +137,7 @@ void printSoundDevicesSummary()
 {
 	const auto enumerated_devices = magmatic::sound::SoundDevice::enumerateDevices();
 	tabulate::Table devices_summary;
-	devices_summary.add_row({"Sound devices", std::to_string(enumerated_devices.size())});
+	devices_summary.add_row({"SoundLoader devices", std::to_string(enumerated_devices.size())});
 	devices_summary[0].format().font_align(tabulate::FontAlign::center);
 	devices_summary[0].format().font_color(tabulate::Color::green);
 	devices_summary.format().border_color(tabulate::Color::cyan);

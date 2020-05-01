@@ -78,7 +78,6 @@ void magmatic::render::Buffer::copyBufferToImage(
 {
 	CommandBuffer command_buffer(pool);
 	const auto& cmd = command_buffer.beginRecording();
-
 	vk::BufferImageCopy region{
 			0,
 			0,

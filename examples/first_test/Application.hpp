@@ -112,19 +112,20 @@ class Application {
 	const magmatic::render::LogicalDevice logicalDevice;
 	magmatic::render::Shader vertShader;
 	magmatic::render::Shader fragShader;
-	magmatic::render::SwapChain swapChain;
+	std::vector<std::reference_wrapper<magmatic::render::Shader>> shaders;
+	std::unique_ptr<magmatic::render::SwapChain> swapChain;
 	const magmatic::render::CommandPool commandPool;
-	magmatic::render::DepthResources depthResources;
-	magmatic::render::RenderPass renderPass;
-	magmatic::render::DescriptorSets descriptorSets;
-	magmatic::render::Pipeline pipeline;
-	magmatic::render::Framebuffers framebuffers;
+	std::unique_ptr<magmatic::render::DepthResources> depthResources;
+	std::unique_ptr<magmatic::render::RenderPass> renderPass;
+	std::unique_ptr<magmatic::render::DescriptorSets> descriptorSets;
+	std::unique_ptr<magmatic::render::Pipeline> pipeline;
+	std::unique_ptr<magmatic::render::Framebuffers> framebuffers;
 	const magmatic::render::Texture texture;
 	const magmatic::render::Sampler sampler;
 	const magmatic::render::VertexBuffer vertexBuffer;
 	const magmatic::render::IndexBuffer indexBuffer;
-	std::vector<magmatic::render::UniformBuffer<magmatic::render::UniformBufferObject>> uniformBuffers;
-	std::vector<magmatic::render::CommandBuffer> commandBuffers;
+	std::vector<std::unique_ptr<magmatic::render::UniformBuffer<magmatic::render::UniformBufferObject>>> uniformBuffers;
+	std::vector<std::unique_ptr<magmatic::render::CommandBuffer>> commandBuffers;
 	const magmatic::render::Fences fences;
 	const magmatic::render::Semaphores imageAcquiredSemaphores;
 	const magmatic::render::Semaphores renderFinishedSemaphores;
@@ -142,7 +143,7 @@ private:
 	size_t currentFrame = 0;
 	uint32_t currentBuffer = 0;
 
-	void updateUniformBuffer(uint32_t currentBuffer);
+	void updateUniformBuffer();
 
 	[[nodiscard]] std::vector<magmatic::render::Vertex> getVertexConfig(const std::string &mode) const;
 
@@ -151,6 +152,7 @@ private:
 	void recordCommandBuffer();
 	void drawFrame();
 
+	void destroySwapChain();
 	void recreateSwapChain();
 };
 

@@ -8,8 +8,8 @@
 namespace magmatic::render {
 	class Image {
 
-		vk::UniqueImage image;
 		vk::UniqueDeviceMemory memory;
+		vk::UniqueImage image;
 		vk::Format image_format;
 	public:
 		Image(const LogicalDevice& l_device, vk::Extent2D extent, vk::Format format, vk::ImageTiling tiling, const vk::ImageUsageFlags& usage, const vk::MemoryPropertyFlags& memProps);

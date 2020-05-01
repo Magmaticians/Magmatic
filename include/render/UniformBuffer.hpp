@@ -39,6 +39,8 @@ namespace magmatic::render
 
 		[[nodiscard]] static std::vector<UniformBuffer> createUniformBuffers(size_t count, const LogicalDevice& l_device,
 		                                                       const CommandPool& pool);
+		[[nodiscard]] static std::vector<std::unique_ptr<UniformBuffer>> createUniformBuffersUnique(size_t count, const LogicalDevice& l_device,
+		                                                                     const CommandPool& pool);
 
 		static void reCreateUniformBuffers(std::vector<UniformBuffer>& oldBuffers,
 				const LogicalDevice& l_device, const CommandPool& pool);
@@ -61,6 +63,16 @@ std::vector<magmatic::render::UniformBuffer<T>> magmatic::render::UniformBuffer<
 	res.reserve(count);
 	for(size_t i = 0; i < count; ++i) {
 		res.emplace_back(UniformBuffer<T>(l_device, pool));
+	}
+	return res;
+}
+template<typename T>
+std::vector<std::unique_ptr<magmatic::render::UniformBuffer<T>>> magmatic::render::UniformBuffer<T>::createUniformBuffersUnique(size_t count, const LogicalDevice& l_device,
+                                                                                                         const CommandPool& pool) {
+	std::vector<std::unique_ptr<UniformBuffer<T>>> res;
+	res.reserve(count);
+	for(size_t i = 0; i < count; ++i) {
+		res.emplace_back(std::make_unique<UniformBuffer<T>>(l_device, pool));
 	}
 	return res;
 }

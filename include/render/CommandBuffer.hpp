@@ -30,6 +30,8 @@ namespace magmatic::render
 
 		[[nodiscard]] static std::vector<CommandBuffer> createCommandBuffers(size_t count, const CommandPool& pool,
 				vk::CommandBufferLevel level = vk::CommandBufferLevel::ePrimary);
+		[[nodiscard]] static std::vector<std::unique_ptr<CommandBuffer>> createCommandBuffersUnique(size_t count, const CommandPool& pool,
+		                                                                     vk::CommandBufferLevel level = vk::CommandBufferLevel::ePrimary);
 		static void reCreateCommandBuffers(std::vector<CommandBuffer>& oldBuffers, const CommandPool& pool,
 				vk::CommandBufferLevel level = vk::CommandBufferLevel::ePrimary);
 	private:

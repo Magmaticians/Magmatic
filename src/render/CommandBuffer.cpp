@@ -85,6 +85,14 @@ std::vector<magmatic::render::CommandBuffer> magmatic::render::CommandBuffer::cr
 	}
 	return res;
 }
+std::vector<std::unique_ptr<magmatic::render::CommandBuffer>> magmatic::render::CommandBuffer::createCommandBuffersUnique(size_t count, const CommandPool& pool, vk::CommandBufferLevel level) {
+	std::vector<std::unique_ptr<CommandBuffer>> res;
+	res.reserve(count);
+	for(size_t i = 0; i < count; i++) {
+		res.emplace_back(std::make_unique<CommandBuffer>(pool, level));
+	}
+	return res;
+}
 void magmatic::render::CommandBuffer::reCreateCommandBuffers(std::vector<CommandBuffer>& oldBuffers, const CommandPool& pool, vk::CommandBufferLevel level) {
 	for(size_t i = 0; i < oldBuffers.size(); ++i) {
 		oldBuffers[i] = std::move(CommandBuffer(pool, level));

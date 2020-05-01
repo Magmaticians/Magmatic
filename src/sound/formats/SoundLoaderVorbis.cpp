@@ -9,12 +9,12 @@ namespace {
 	constexpr int endian = 0;//little endian
 }
 
-bool magmatic::sound::SoundLoaderVorbis::registered = magmatic::sound::Sound::register_format(
+bool magmatic::sound::SoundLoaderVorbis::registered_ = magmatic::sound::Sound::registerLoader(
 		magmatic::sound::SoundLoaderVorbis::factoryName(),
-		magmatic::sound::SoundLoaderVorbis::createLoader
+		std::make_unique<SoundLoaderVorbis>()
 );
 
-std::shared_ptr<magmatic::sound::SoundBuffer> magmatic::sound::SoundLoaderVorbis::open(const std::filesystem::path& path)
+std::shared_ptr<magmatic::sound::SoundBuffer> magmatic::sound::SoundLoaderVorbis::load(const std::filesystem::path& path)
 {
 	if(!std::filesystem::exists(path))
 	{
@@ -64,10 +64,5 @@ std::shared_ptr<magmatic::sound::SoundBuffer> magmatic::sound::SoundLoaderVorbis
 		throw std::runtime_error("Failed to transfer audio to buffer");
 	}
 
-	return SoundLoader::fromID(buffer_ID);
-}
-
-std::unique_ptr<magmatic::sound::SoundLoader> magmatic::sound::SoundLoaderVorbis::createLoader()
-{
-	return std::make_unique<SoundLoaderVorbis>();
+	return SoundLoaderConcrete::fromID(buffer_ID);
 }

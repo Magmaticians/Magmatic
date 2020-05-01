@@ -2,6 +2,8 @@
 #include "sound/SoundDevice.hpp"
 #include "sound/Sound.hpp"
 #include <thread>
+#include <memory>
+#include <iostream>
 #include <chrono>
 
 using namespace std::chrono_literals;
@@ -37,8 +39,14 @@ void fadingSound(const magmatic::sound::SoundSource& source)
 
 int main(int argc, char** argv)
 {
-	magmatic::sound::SoundDevice device;
-	auto buffer = magmatic::sound::Sound::open("VORBIS", "examples/resources/bit-sound-mono.ogg");
+	magmatic::sound::SoundDevice device{};
+	std::cout << "Registered types:" << magmatic::sound::Sound::registeredCount() << "\n";
+	for(const auto& type : magmatic::sound::Sound::registeredTypes())
+	{
+		std::cout<<"\t"<<type<<"\n";
+	}
+
+	auto buffer = magmatic::sound::Sound::load("VORBIS", "examples/resources/bit-sound-mono.ogg");
 	magmatic::sound::SoundSource source({0, 0, 0});
 	//https://freesound.org/people/hmmm101/sounds/335521/
 	source.setSound(buffer);

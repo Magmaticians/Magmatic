@@ -2,21 +2,22 @@
 #define MAGMATIC_SOUNDLOADEROPUS_HPP
 
 #include "sound/SoundBuffer.hpp"
-#include "sound/formats/SoundLoader.hpp"
+#include "sound/formats/SoundLoaderConcrete.hpp"
 #include <filesystem>
 #include <memory>
 
 
 namespace magmatic::sound
 {
-	class SoundLoaderOpus: 	public SoundLoader
+	class SoundLoaderOpus: 	public SoundLoaderConcrete
 	{
 	public:
-		std::shared_ptr<SoundBuffer> open(const std::filesystem::path& path) override;
-		static bool registered;
+		std::shared_ptr<SoundBuffer> load(const std::filesystem::path& path) override;
 		static std::string factoryName() { return "OPUS"; }
 
-		static std::unique_ptr<SoundLoader> createLoader();
+	private:
+		static bool registered_;
+
 	};
 }
 

@@ -22,7 +22,7 @@ magmatic::sound::SoundSource::~SoundSource()
 	alDeleteSources(1, &source);
 }
 
-void magmatic::sound::SoundSource::setSound(const std::shared_ptr<SoundBuffer>& buffer) noexcept
+void magmatic::sound::SoundSource::setSound(std::shared_ptr<SoundBuffer> buffer) noexcept
 {
 	#if !defined(NDEBUG)
 	if(!buffer)
@@ -30,8 +30,8 @@ void magmatic::sound::SoundSource::setSound(const std::shared_ptr<SoundBuffer>& 
 		spdlog::warn("Magmatic: Set empty sound buffer");
 	}
 	#endif
-	curr_buffer = buffer;
-	alSourcei(source, AL_BUFFER, buffer->buffer_ID);
+	curr_buffer = std::move(buffer);
+	alSourcei(source, AL_BUFFER, curr_buffer->buffer_ID);
 }
 
 void magmatic::sound::SoundSource::play() const noexcept

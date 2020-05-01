@@ -3,12 +3,12 @@
 #include <spdlog/spdlog.h>
 
 
-bool magmatic::sound::SoundLoaderOpus::registered = magmatic::sound::Sound::register_format(
+bool magmatic::sound::SoundLoaderOpus::registered_ = magmatic::sound::Sound::registerLoader(
 		SoundLoaderOpus::factoryName(),
-		SoundLoaderOpus::createLoader
+		std::make_unique<SoundLoaderOpus>()
 );
 
-std::shared_ptr<magmatic::sound::SoundBuffer> magmatic::sound::SoundLoaderOpus::open(const std::filesystem::path& path)
+std::shared_ptr<magmatic::sound::SoundBuffer> magmatic::sound::SoundLoaderOpus::load(const std::filesystem::path& path)
 {
 	if(!std::filesystem::exists(path))
 	{
@@ -67,10 +67,5 @@ std::shared_ptr<magmatic::sound::SoundBuffer> magmatic::sound::SoundLoaderOpus::
 		throw std::runtime_error("Failed to transfer audio to buffer");
 	}
 
-	return SoundLoader::fromID(buffer_ID);
-}
-
-std::unique_ptr<magmatic::sound::SoundLoader> magmatic::sound::SoundLoaderOpus::createLoader()
-{
-	return std::make_unique<SoundLoaderOpus>();
+	return SoundLoaderConcrete::fromID(buffer_ID);
 }

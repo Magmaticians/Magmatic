@@ -6,6 +6,7 @@
 #include "Surface.hpp"
 #include "LogicalDevice.hpp"
 #include "Semaphores.hpp"
+#include "Window.hpp"
 
 
 namespace magmatic::render
@@ -18,11 +19,11 @@ namespace magmatic::render
 		static vk::PresentModeKHR chooseSwapPresentMode(const std::vector<vk::PresentModeKHR>& present_modes);
 		static vk::Extent2D chooseSwapExtent(
 				const vk::SurfaceCapabilitiesKHR& capabilities,
-				uint32_t window_width, uint32_t window_height
+				const Window& window
 				) noexcept;
 
 
-		explicit SwapChain(const LogicalDevice& l_device, const Surface& surface, uint32_t window_width, uint32_t window_height);
+		explicit SwapChain(const LogicalDevice& l_device, const Surface& surface, const Window& window);
 
 		SwapChain(const SwapChain&) = delete;
 		SwapChain& operator=(const SwapChain&) = delete;
@@ -30,7 +31,7 @@ namespace magmatic::render
 		SwapChain(SwapChain&& rhs) noexcept;
 		SwapChain& operator=(SwapChain&&rhs) noexcept;
 
-		void presentKHR(const LogicalDevice& l_device, const Semaphores& renderFinishedSemaphores, size_t index, uint32_t currentBuffer) const;
+		[[nodiscard]] vk::Result presentKHR(const LogicalDevice& l_device, const Semaphores& renderFinishedSemaphores, size_t index, uint32_t currentBuffer) const;
 
 		[[nodiscard]] const std::vector<vk::UniqueImageView>& getImageViews() const {
 			return image_views_;

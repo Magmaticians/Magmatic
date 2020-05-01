@@ -5,6 +5,7 @@
 #include <memory>
 #include <vector>
 #include <GLFW/glfw3.h>
+#include <vulkan/vulkan.hpp>
 
 struct GLFWwindow;
 
@@ -50,6 +51,8 @@ namespace magmatic::render
 		void restore() noexcept;
 		void focus() noexcept;
 		[[nodiscard]] bool shouldClose() const { return glfwWindowShouldClose(this->window.get()); }
+
+		[[nodiscard]] vk::Extent2D getFramebufferSize() const;
 
 		[[nodiscard]] std::vector<std::string> getRequiredExtensions() const;
 

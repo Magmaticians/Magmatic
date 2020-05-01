@@ -2,6 +2,7 @@
 #include <spdlog/spdlog.h>
 #include <GLFW/glfw3.h>
 #include <stdexcept>
+#include <vulkan/vulkan.hpp>
 
 namespace {
 	void errorCallback(int error, const char* description) {
@@ -86,6 +87,16 @@ std::pair<int, int> magmatic::render::Window::getSize() const
 std::string magmatic::render::Window::getName() const noexcept
 {
 	return window_name;
+}
+
+vk::Extent2D magmatic::render::Window::getFramebufferSize() const {
+	int width, height;
+	glfwGetFramebufferSize(window.get(), &width, &height);
+	vk::Extent2D res = {
+			static_cast<uint32_t>(width),
+			static_cast<uint32_t>(height)
+	};
+	return res;
 }
 
 magmatic::render::Window::~Window()

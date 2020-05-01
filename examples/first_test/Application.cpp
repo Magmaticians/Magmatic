@@ -18,7 +18,7 @@ physicalDevice(magmatic::render::PhysicalDevice(instance.getBestDevice())),
 logicalDevice(magmatic::render::LogicalDevice(physicalDevice, surface)),
 vertShader(logicalDevice, "./examples/first_test/vert.spv", vk::ShaderStageFlagBits::eVertex),
 fragShader(logicalDevice, "./examples/first_test/frag.spv", vk::ShaderStageFlagBits::eFragment),
-swapChain(logicalDevice, surface, window.getSize().first, window.getSize().second),
+swapChain(logicalDevice, surface, window),
 commandPool(logicalDevice, magmatic::render::QueueType::GraphicalQueue),
 depthResources(logicalDevice,swapChain.extent, commandPool),
 renderPass(logicalDevice, surface, depthResources),
@@ -38,7 +38,7 @@ renderFinishedSemaphores(logicalDevice, magmatic::render::SemaphoreType::RenderF
 	spdlog::info("Application constructor called and finished work");
 }
 
-void Application::recreateTheSwapChain() {
+void Application::recreateSwapChain() {
 	std::pair<int, int> size = window.getSize();
 	while(size.first == 0 || size.second == 0) {
 		size = window.getSize();
@@ -48,7 +48,7 @@ void Application::recreateTheSwapChain() {
 	logicalDevice.waitIdle();
 
 	// TODO: Check order
-	swapChain = std::move(magmatic::render::SwapChain(logicalDevice, surface, window.getSize().first, window.getSize().second));
+	swapChain = std::move(magmatic::render::SwapChain(logicalDevice, surface, window));
 	renderPass = std::move(magmatic::render::RenderPass(logicalDevice, surface, depthResources));
 	pipeline = std::move(magmatic::render::Pipeline(logicalDevice, swapChain.extent.width, swapChain.extent.height, {vertShader, fragShader}, renderPass, descriptorSets.getDescriptorSetLayout()));
 	depthResources = std::move(magmatic::render::DepthResources(logicalDevice,swapChain.extent, commandPool));
@@ -128,11 +128,21 @@ void Application::recordCommandBuffer() {
 }
 
 void Application::drawFrame() {
-	auto state = swapChain.acquireNextImageKHR(imageAcquiredSemaphores, currentFrame, currentBuffer, 0);
+	vk::Result state;
+	try {
+		state = swapChain.acquireNextImageKHR(imageAcquiredSemaphores, currentFrame, currentBuffer, 0);
+	} catch (vk::OutOfDateKHRError&) {
+		recreateSwapChain();
+		// TODO:: Check if reseting frames not needed;
+		return;
+	}
 	if(state == vk::Result::eNotReady)
 	{
 		std::this_thread::yield();
 		return;
+	} else if(state != vk::Result::eSuccess && state != vk::Result::eSuboptimalKHR) {
+		spdlog::error("Failed to acquire swap chain image!");
+		throw std::runtime_error("Failed to acquire swap chain image!");
 	}
 
 	if(imagesInFlight[currentBuffer] != -1) {
@@ -145,7 +155,17 @@ void Application::drawFrame() {
 
 	updateUniformBuffer(currentBuffer);
 	commandBuffers[currentBuffer].submit(imageAcquiredSemaphores, renderFinishedSemaphores, fences[currentFrame], currentFrame);
-	swapChain.presentKHR(logicalDevice, renderFinishedSemaphores, currentFrame, currentBuffer);
+	try {
+		state = swapChain.presentKHR(logicalDevice, renderFinishedSemaphores, currentFrame, currentBuffer);
+	} catch(vk::OutOfDateKHRError&) {
+		recreateSwapChain();
+	}
+	if(state == vk::Result::eSuboptimalKHR) {
+		recreateSwapChain();
+	} else if(state != vk::Result::eSuccess) {
+		spdlog::error("Failed to acquire swap chain image!");
+		throw std::runtime_error("Failed to acquire swap chain image!");
+	}
 	currentFrame = (currentFrame+1)%MAX_FRAMES_IN_FLIGHT;
 }
 

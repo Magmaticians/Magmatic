@@ -60,8 +60,6 @@ namespace magmatic::render {
 			return same_queue_family;
 		}
 
-		// TODO: Check if works without submitToGraphicsQueue
-
 		void waitIdle() const;
 
 	private:

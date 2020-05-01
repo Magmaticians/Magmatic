@@ -1,13 +1,13 @@
 #include "render/SwapChain.hpp"
 #include "render/Image.hpp"
 
-magmatic::render::SwapChain::SwapChain(const LogicalDevice& l_device, const Surface& surface, uint32_t window_width, uint32_t window_height) {
+magmatic::render::SwapChain::SwapChain(const LogicalDevice& l_device, const Surface& surface, const Window& window) {
 	const auto& handle = l_device.getHandle();
 	const auto& support_details = l_device.getPhysicalDevice().getSwapChainSupportDetails(surface);
 	const auto& capabilities = support_details.capabilities;
 
 	const auto surface_format = SwapChain::chooseSwapSurfaceFormat(support_details.formats);
-	extent = chooseSwapExtent(capabilities, window_width, window_height);
+	extent = chooseSwapExtent(capabilities, window);
 	const auto present_mode = SwapChain::chooseSwapPresentMode(support_details.present_modes);
 
 	uint32_t image_count = support_details.capabilities.minImageCount + 1;
@@ -80,7 +80,6 @@ magmatic::render::SwapChain& magmatic::render::SwapChain::operator=(SwapChain&&r
 	return *this;
 }
 
-
 vk::SurfaceFormatKHR magmatic::render::SwapChain::chooseSwapSurfaceFormat(const std::vector<vk::SurfaceFormatKHR>& formats)
 {
 	if (formats.empty())
@@ -120,7 +119,7 @@ vk::PresentModeKHR magmatic::render::SwapChain::chooseSwapPresentMode(const std:
 
 vk::Extent2D magmatic::render::SwapChain::chooseSwapExtent(
 		const vk::SurfaceCapabilitiesKHR& capabilities,
-		uint32_t window_width, uint32_t window_height
+		const Window& window
 		) noexcept
 {
 	if(capabilities.currentExtent.width != UINT32_MAX)
@@ -128,21 +127,21 @@ vk::Extent2D magmatic::render::SwapChain::chooseSwapExtent(
 		return capabilities.currentExtent;
 	}
 
-	vk::Extent2D actual_extent;
+	vk::Extent2D actual_extent = window.getFramebufferSize();
 
 	const auto& min_width = capabilities.minImageExtent.width;
 	const auto& min_height = capabilities.minImageExtent.height;
 	const auto& max_width = capabilities.maxImageExtent.width;
 	const auto& max_height = capabilities.maxImageExtent.height;
 
-	actual_extent.width = std::clamp(window_width, min_width, max_height);
-	actual_extent.height = std::clamp(window_height, min_height, max_height);
+	actual_extent.width = std::clamp(actual_extent.width, min_width, max_height);
+	actual_extent.height = std::clamp(actual_extent.height, min_height, max_height);
 
 	return actual_extent;
 }
 
-void magmatic::render::SwapChain::presentKHR(const LogicalDevice& l_device, const Semaphores& renderFinishedSemaphores, size_t index, uint32_t currentBuffer) const {
-	l_device.getPresentQueue().presentKHR(vk::PresentInfoKHR(
+vk::Result magmatic::render::SwapChain::presentKHR(const LogicalDevice& l_device, const Semaphores& renderFinishedSemaphores, size_t index, uint32_t currentBuffer) const {
+	return l_device.getPresentQueue().presentKHR(vk::PresentInfoKHR(
 			1,
 			&renderFinishedSemaphores.semaphores[index].get(),
 			1,

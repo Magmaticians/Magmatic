@@ -12,7 +12,7 @@ std::shared_ptr<magmatic::sound::SoundBuffer> magmatic::sound::SoundLoaderOpus::
 {
 	if(!std::filesystem::exists(path))
 	{
-		spdlog::error("Magamtic: SoundLoader file doesn't exist: {}", path.string());
+		spdlog::error("Magmatic: SoundLoader file doesn't exist: {}", path.string());
 		throw std::runtime_error("SoundLoader file doesn't exist");
 	}
 

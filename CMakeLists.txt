@@ -22,6 +22,7 @@ find_package(fmt REQUIRED)
 find_package(OpenAL REQUIRED)
 find_package(VorbisFile REQUIRED)
 find_package(OpusFile REQUIRED)
+find_package(TinyGLTF REQUIRED)
 #Table display
 find_package(tabulate REQUIRED)
 
@@ -33,7 +34,8 @@ add_custom_target(examples)
 add_executable(main-test "")
 add_executable(device_enumeration "")
 add_executable(sound_test "")
-add_dependencies(examples main-test device_enumeration sound_test)
+add_executable(model_info "")
+add_dependencies(examples main-test device_enumeration sound_test model_info)
 
 #magmatic-utils
 add_library(magmatic-utils SHARED "")
@@ -46,6 +48,7 @@ add_library(magmatic-render SHARED "")
 target_compile_definitions(magmatic-render PRIVATE SPDLOG_FMT_EXTERNAL=1 GLM_FORCE_DEPTH_ZERO_TO_ONE)
 target_include_directories(magmatic-render PUBLIC Vulkan::Vulkan)
 target_link_libraries(magmatic-render PUBLIC glfw Vulkan::Vulkan spdlog::spdlog_header_only glm::glm)
+target_link_libraries(magmatic-render PRIVATE TinyGLTF::TinyGLTF)
 
 #magmatic-sound
 add_library(magmatic-sound SHARED "")

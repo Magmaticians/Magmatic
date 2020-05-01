@@ -26,4 +26,5 @@ target_sources(
 		Semaphores.cpp
 		IndexBuffer.cpp
 		Fences.cpp
+		model_data_loader/formats/ModelDataLoadergltf.cpp
 )

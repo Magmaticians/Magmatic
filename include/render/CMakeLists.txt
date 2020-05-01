@@ -32,5 +32,6 @@ target_sources(magmatic-render
 		UniformBuffer.hpp
 		Fences.hpp
 		model_data_loader/ModelDataLoader.hpp
-		model_data_loader/formats/ModelLoaderConcrete.hpp
+		model_data_loader/formats/ModelDataLoaderConcrete.hpp
+		model_data_loader/formats/ModelDataLoadergltf.hpp
 		)

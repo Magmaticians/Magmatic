@@ -1,4 +1,4 @@
-#include "render/model_data_loader/ModelDataLoader.hpp"
+#include "render/model/model_data_loader/ModelDataLoader.hpp"
 #include <fmt/printf.h>
 
 int main(int argc, char** argv)

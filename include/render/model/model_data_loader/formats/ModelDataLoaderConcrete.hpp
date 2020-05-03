@@ -2,7 +2,7 @@
 #define MAGMATIC_MODELDATALOADERCONCRETE_HPP
 
 #include "utils/factory/FileLoaderFactory.hpp"
-#include "render/model_data_loader/ModelDataLoader.hpp"
+#include "render/model/model_data_loader/ModelDataLoader.hpp"
 
 
 namespace magmatic::render

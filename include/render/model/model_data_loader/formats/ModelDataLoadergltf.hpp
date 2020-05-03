@@ -1,8 +1,8 @@
 #ifndef MAGMATIC_MODELDATALOADERGLTF_HPP
 #define MAGMATIC_MODELDATALOADERGLTF_HPP
 
-#include "render/model_data_loader/formats/ModelDataLoaderConcrete.hpp"
-#include "render/ModelData.hpp"
+#include "ModelDataLoaderConcrete.hpp"
+#include "render/model/ModelData.hpp"
 #include <memory>
 #include <vector>
 

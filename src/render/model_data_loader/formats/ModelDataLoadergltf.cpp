@@ -114,6 +114,7 @@ std::shared_ptr<magmatic::render::ModelData> magmatic::render::ModelDataLoadergl
 	#endif
 	loadMaterials(model_data->material_data, model);
 	loadTextures(model_data->texture_data, model);
+	loadTextureBitmaps(model_data->texture_bitmaps, model);
 	loadSamplers(model_data->sampler_settings, model);
 
 
@@ -381,5 +382,24 @@ void magmatic::render::ModelDataLoadergltf::loadTextures(
 	}
 	#if !defined(NDEBUG)
 	spdlog::info("\tEnded loading Textures");
+	#endif
+}
+
+void magmatic::render::ModelDataLoadergltf::loadTextureBitmaps(
+		std::vector<Bitmap> &texture_bitmaps, const tinygltf::Model &model
+)
+{
+	#if !defined(NDEBUG)
+	spdlog::info("\tStarted loading Images");
+	spdlog::info("\t\tFound {} images", model.images.size());
+	#endif
+	texture_bitmaps.reserve(model.images.size());
+	for(size_t i = 0; i < model.images.size(); ++i)
+	{
+		const auto& image = model.images[i];
+		texture_bitmaps.emplace_back(std::move(Bitmap(image.image, image.width, image.height, image.component)));
+	}
+	#if !defined(NDEBUG)
+	spdlog::info("\tEnded loading Images");
 	#endif
 }

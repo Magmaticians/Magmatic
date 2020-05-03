@@ -24,7 +24,7 @@ magmatic::render::Texture::Texture(const magmatic::render::LogicalDevice& l_devi
                                    const magmatic::render::Bitmap& bitmap, const magmatic::render::CommandPool& pool)
 :image(std::move(createImage(l_device, bitmap)))
 {
-	auto buffer = Buffer::createStaging(l_device, bitmap.getPixels().get(), bitmap.getDataSize());
+	auto buffer = Buffer::createStaging(l_device, bitmap.getPixels(), bitmap.getDataSize());
 
 	const auto size = bitmap.size();
 	const auto width = static_cast<uint32_t>(size.first);

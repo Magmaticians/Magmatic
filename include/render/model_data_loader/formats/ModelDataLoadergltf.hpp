@@ -49,6 +49,8 @@ namespace magmatic::render
 		void loadMaterials(std::vector<ModelData::MaterialData> &materials, const tinygltf::Model &model);
 
 		void loadTextures(std::vector<ModelData::TextureData> &textures, const tinygltf::Model &model);
+
+		void loadTextureBitmaps(std::vector<Bitmap> &texture_bitmaps, const tinygltf::Model &model);
 	};
 }
 

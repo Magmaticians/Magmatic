@@ -30,7 +30,7 @@ std::shared_ptr<magmatic::sound::SoundBuffer> magmatic::sound::SoundLoaderOpus::
 
 	if(channel_count > 2)
 	{
-		spdlog::error("Magmatic: SoundLoader files with more that 2 channels not supported");
+		spdlog::error("Magmatic: SoundLoader files with more that 2 channels_ not supported");
 		throw std::runtime_error("SoundLoader file formats not supported");
 	}
 

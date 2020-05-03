@@ -17,8 +17,8 @@ std::shared_ptr<magmatic::render::ModelData> magmatic::render::ModelDataLoadergl
 {
 	if (!std::filesystem::exists(file_path))
 	{
-		spdlog::error("Magmatic: SoundLoader file doesn't exist: {}", file_path.string());
-		throw std::runtime_error("SoundLoader file doesn't exist");
+		spdlog::error("Magmatic: ModelDataLoader file doesn't exist: {}", file_path.string());
+		throw std::runtime_error("ModelDataLoader file doesn't exist");
 	}
 	tinygltf::Model model;
 	tinygltf::TinyGLTF context;
@@ -232,7 +232,7 @@ magmatic::render::ModelDataLoadergltf::PNodeData magmatic::render::ModelDataLoad
 			const auto& view = model.bufferViews[accessor.bufferView];
 			const auto& buffer = model.buffers[view.buffer];
 
-			uint32_t index_count = 0;
+			uint32_t index_count = accessor.count;
 			#if !defined(NDEBUG)
 			spdlog::info("\t\tFound {} indices", index_count);
 			#endif
@@ -283,6 +283,7 @@ void magmatic::render::ModelDataLoadergltf::loadSamplers(
 {
 	#if !defined(NDEBUG)
 	spdlog::info("\tStarted loading Samplers settings");
+	spdlog::info("\t\tFound {} samplers", model.samplers.size());
 	#endif
 
 	for(const auto& samp : model.samplers)

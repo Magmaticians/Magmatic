@@ -9,10 +9,9 @@ namespace magmatic::render
 {
 	class Surface
 	{
+		vk::UniqueSurfaceKHR surface;
 	public:
 		friend class Instance;
-
-		vk::UniqueSurfaceKHR surface;
 
 		[[nodiscard]] vk::SurfaceCapabilitiesKHR getCapabilities(const PhysicalDevice& physical_device) const;
 		[[nodiscard]] std::vector<vk::SurfaceFormatKHR> getFormat(const PhysicalDevice& physical_device) const;
@@ -22,6 +21,10 @@ namespace magmatic::render
 
 		Surface(Surface&& rhs) noexcept;
 		Surface& operator=(Surface&& rhs) noexcept;
+
+		[[nodiscard]] const vk::UniqueSurfaceKHR& getSurface() const {
+			return this->surface;
+		}
 
 	private:
 		explicit Surface(vk::UniqueSurfaceKHR surface);

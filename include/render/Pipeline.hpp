@@ -12,8 +12,8 @@ namespace magmatic::render
 	private:
 
 		vk::UniquePipelineLayout layout;
-	public:
 		vk::UniquePipeline pipeline;
+	public:
 
 		Pipeline(const LogicalDevice& l_device,
 				uint32_t extent_width,
@@ -32,6 +32,10 @@ namespace magmatic::render
         [[nodiscard]] const vk::UniquePipelineLayout& getPipelineLayout() const {
         	return layout;
         }
+
+		[[nodiscard]] const vk::UniquePipeline& getPipeline() const {
+			return pipeline;
+		}
 	};
 }
 

@@ -17,7 +17,7 @@ magmatic::render::Framebuffers::Framebuffers(
 		auto framebuffer = handle->createFramebufferUnique(
 				vk::FramebufferCreateInfo(
 						vk::FramebufferCreateFlags(),
-						render_pass.renderPass.get(),
+						render_pass.getRenderPass().get(),
 						static_cast<uint32_t>(attachments.size()),
 						attachments.data(),
 						swapchain.extent.width,

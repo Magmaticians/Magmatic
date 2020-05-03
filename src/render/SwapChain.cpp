@@ -19,7 +19,7 @@ magmatic::render::SwapChain::SwapChain(const LogicalDevice& l_device, const Surf
 
 	vk::SwapchainCreateInfoKHR swapchain_create_info(
 			vk::SwapchainCreateFlagsKHR(),
-			*surface.surface,
+			*surface.getSurface(),
 			image_count,
 			surface_format.format,
 			surface_format.colorSpace,
@@ -143,7 +143,7 @@ vk::Extent2D magmatic::render::SwapChain::chooseSwapExtent(
 vk::Result magmatic::render::SwapChain::presentKHR(const LogicalDevice& l_device, const Semaphores& renderFinishedSemaphores, size_t index, uint32_t currentBuffer) const {
 	return l_device.getPresentQueue().presentKHR(vk::PresentInfoKHR(
 			1,
-			&renderFinishedSemaphores.semaphores[index].get(),
+			&renderFinishedSemaphores[index].get(),
 			1,
 			&swapchain_.get(),
 			&currentBuffer
@@ -155,7 +155,7 @@ vk::Result magmatic::render::SwapChain::acquireNextImageKHR(const Semaphores& im
 	return swapchain_.getOwner().acquireNextImageKHR(
 			swapchain_.get(),
 			timeout,
-			imageAcquiredSemaphores.semaphores[index].get(),
+			imageAcquiredSemaphores[index].get(),
 			nullptr,
 			&imageIndex
 	);

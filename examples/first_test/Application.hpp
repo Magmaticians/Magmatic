@@ -138,7 +138,7 @@ public:
 
 private:
 	static constexpr uint64_t fenceTimeout = 1000000;
-	static constexpr size_t MAX_FRAMES_IN_FLIGHT = 3;
+	size_t MAX_FRAMES_IN_FLIGHT = 3;
 
 	size_t currentFrame = 0;
 	uint32_t currentBuffer = 0;

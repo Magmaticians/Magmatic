@@ -123,7 +123,7 @@ magmatic::render::Pipeline::Pipeline(const LogicalDevice& l_device,
 			&color_blending,
 			&dynamic_states,
 			layout.get(),
-			renderPass.renderPass.get()
+			renderPass.getRenderPass().get()
 	);
 
 	pipeline = handle->createGraphicsPipelineUnique(nullptr, pipeline_create_info);

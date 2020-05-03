@@ -68,12 +68,12 @@ void magmatic::render::CommandBuffer::submit(const Semaphores& imageAcquiredSema
 	vk::PipelineStageFlags flags(vk::PipelineStageFlagBits::eColorAttachmentOutput);
 	vk::SubmitInfo submitInfo(
 			1,
-			&imageAcquiredSemaphores.semaphores[index].get(),
+			&imageAcquiredSemaphores[index].get(),
 			&flags,
 			1,
 			&command_buffer.get(),
 			1,
-			&renderFinishedSemaphores.semaphores[index].get());
+			&renderFinishedSemaphores[index].get());
 	queue.submit(submitInfo, fence.get());
 }
 

@@ -70,10 +70,6 @@ void Application::recreateSwapChain() {
 
 	logicalDevice->waitIdle();
 
-	imagesInFlight.resize(MAX_FRAMES_IN_FLIGHT, -1);
-	currentBuffer = 0;
-	currentFrame = 0;
-
 	destroySwapChain();
 
 	swapChain = std::make_unique<magmatic::render::SwapChain>(magmatic::render::SwapChain(*logicalDevice, *surface, *window));
@@ -82,12 +78,18 @@ void Application::recreateSwapChain() {
 	descriptorSets = std::make_unique<magmatic::render::DescriptorSets>(*logicalDevice, bindings, MAX_FRAMES_IN_FLIGHT, descriptor_types);
 	pipeline = std::make_unique<magmatic::render::Pipeline>(*logicalDevice, swapChain->extent.width, swapChain->extent.height, shaders, *renderPass, descriptorSets->getDescriptorSetLayout());
 	framebuffers = std::make_unique<magmatic::render::Framebuffers>(*logicalDevice, *renderPass, *swapChain, depthResources->imageView);
+
+	imagesInFlight.resize(MAX_FRAMES_IN_FLIGHT, -1);
+	currentBuffer = 0;
+	currentFrame = 0;
+	MAX_FRAMES_IN_FLIGHT = std::min(static_cast<size_t>(5), swapChain->images_.size());
 }
 
 void Application::run() {
 	imagesInFlight.resize(MAX_FRAMES_IN_FLIGHT, -1);
 	currentBuffer = 0;
 	currentFrame = 0;
+	MAX_FRAMES_IN_FLIGHT = std::min(static_cast<size_t>(5), swapChain->images_.size());
 
 	while(!window->shouldClose()) {
 		glfwPollEvents();
@@ -137,13 +139,13 @@ void Application::recordCommandBuffer() {
 	std::array<vk::ClearValue, 2> clearValues;
 	clearValues[0].color =  vk::ClearColorValue(std::array<float, 4>({0.2f, 0.2f, 0.2f, 1.0f}));
 	clearValues[1].depthStencil = vk::ClearDepthStencilValue(1.0f, 0);
-	vk::RenderPassBeginInfo beginInfo(renderPass->renderPass.get(),
+	vk::RenderPassBeginInfo beginInfo(renderPass->getRenderPass().get(),
 	                                  (*framebuffers)[currentBuffer].get(),
 	                                  vk::Rect2D(vk::Offset2D(0, 0), swapChain->extent),
 	                                  static_cast<uint32_t>(clearValues.size()),
 	                                  clearValues.data());
 	commandBufferHandle->beginRenderPass(beginInfo, vk::SubpassContents::eInline);
-	commandBufferHandle->bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline->pipeline.get());
+	commandBufferHandle->bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline->getPipeline().get());
 	commandBufferHandle->bindVertexBuffers(0, 1, vertexBuffers, offsets);
 	commandBufferHandle->bindIndexBuffer(indexBuffer->getBuffer().get(), 0, vk::IndexType::eUint32);
 	commandBufferHandle->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, pipeline->getPipelineLayout().get(), 0, 1, &(*descriptorSets)[currentFrame].get(), 0, nullptr);

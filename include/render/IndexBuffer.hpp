@@ -27,7 +27,10 @@ namespace magmatic::render
 		);
 
 		IndexBuffer(const IndexBuffer&) = delete;
-		IndexBuffer& operator=(IndexBuffer&) = delete;
+		IndexBuffer& operator=(const IndexBuffer&) = delete;
+
+		IndexBuffer(IndexBuffer&& rhs) noexcept;
+		IndexBuffer& operator=(IndexBuffer&& rhs) noexcept;
 
 		[[nodiscard]] size_t indicesCount() const noexcept;
 	};

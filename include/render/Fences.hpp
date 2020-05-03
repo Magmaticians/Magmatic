@@ -14,7 +14,10 @@ namespace magmatic::render
 		Fences(const LogicalDevice& l_device, size_t count);
 
 		Fences(const Fences&) = delete;
-		Fences& operator=(Fences&) = delete;
+		Fences& operator=(const Fences&) = delete;
+
+		Fences(Fences&& rhs) noexcept;
+		Fences& operator=(Fences&& rhs) noexcept;
 
 		void waitForFence(size_t index, uint64_t timeout) const;
 		void resetFence(size_t index) const;

@@ -29,6 +29,9 @@ namespace magmatic::render
 		Instance(const Instance&) = delete;
 		Instance& operator=(const Instance&) = delete;
 
+		Instance(Instance&& rhs) noexcept;
+		Instance& operator=(Instance&& rhs) noexcept;
+
 		[[nodiscard]] std::vector<PhysicalDevice> enumeratePhysicalDevices() const;
 		[[nodiscard]] PhysicalDevice getBestDevice() const;
 		[[nodiscard]] Surface createSurface(const Window& window) const;

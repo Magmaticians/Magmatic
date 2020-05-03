@@ -8,64 +8,67 @@
 #include <render/Bitmap.hpp>
 #include "Application.hpp"
 
-Application::Application(const std::string& mode):
-vertices(std::move(getVertexConfig(mode))),
-indices(std::move(getIndexConfig(mode))),
-window(magmatic::render::Window(DEFAULT_NAME)),
-instance(magmatic::render::Instance(DEFAULT_NAME, window.getRequiredExtensions())),
-surface(instance.createSurface(window)),
-physicalDevice(magmatic::render::PhysicalDevice(instance.getBestDevice())),
-logicalDevice(magmatic::render::LogicalDevice(physicalDevice, surface)),
-vertShader(logicalDevice, "./examples/first_test/vert.spv", vk::ShaderStageFlagBits::eVertex),
-fragShader(logicalDevice, "./examples/first_test/frag.spv", vk::ShaderStageFlagBits::eFragment),
-shaders({vertShader, fragShader}),
-swapChain(std::make_unique<magmatic::render::SwapChain>(logicalDevice, surface, window)),
-commandPool(logicalDevice, magmatic::render::QueueType::GraphicalQueue),
-depthResources(std::make_unique<magmatic::render::DepthResources>(logicalDevice,swapChain->extent, commandPool)),
-renderPass(std::make_unique<magmatic::render::RenderPass>(logicalDevice, surface, *depthResources)),
-descriptorSets(std::make_unique<magmatic::render::DescriptorSets>(logicalDevice, bindings, MAX_FRAMES_IN_FLIGHT, descriptor_types)),
-pipeline(std::make_unique<magmatic::render::Pipeline>(logicalDevice, swapChain->extent.width, swapChain->extent.height, shaders, *renderPass, descriptorSets->getDescriptorSetLayout())),
-framebuffers(std::make_unique<magmatic::render::Framebuffers>(logicalDevice, *renderPass, *swapChain, depthResources->imageView)),
-texture(logicalDevice, magmatic::render::Bitmap("examples/resources/statue.jpg"), commandPool),
-sampler(logicalDevice),
-vertexBuffer(logicalDevice, vertices, commandPool),
-indexBuffer(logicalDevice, indices, commandPool),
-commandBuffers(magmatic::render::CommandBuffer::createCommandBuffersUnique(MAX_FRAMES_IN_FLIGHT, commandPool)),
-uniformBuffers(magmatic::render::UniformBuffer<magmatic::render::UniformBufferObject>::createUniformBuffersUnique(MAX_FRAMES_IN_FLIGHT, logicalDevice, commandPool)),
-fences(logicalDevice, MAX_FRAMES_IN_FLIGHT),
-imageAcquiredSemaphores(logicalDevice, magmatic::render::SemaphoreType::ImageAvailableSemaphore, MAX_FRAMES_IN_FLIGHT),
-renderFinishedSemaphores(logicalDevice, magmatic::render::SemaphoreType::RenderFinishedSemaphore, MAX_FRAMES_IN_FLIGHT)
-{
-	spdlog::info("Application constructor called and finished work");
+Application::Application(const std::string& mode) {
+	vertices = getVertexConfig(mode);
+	indices = getIndexConfig(mode);
+	spdlog::info("Chose vertices and indices");
+
+	window = std::make_unique<magmatic::render::Window>(DEFAULT_NAME);
+	instance = std::make_unique<magmatic::render::Instance>(DEFAULT_NAME, window->getRequiredExtensions());
+	surface = std::make_unique<magmatic::render::Surface>(instance->createSurface(*window));
+	spdlog::info("Created window and surface");
+
+	physicalDevice = std::make_unique<magmatic::render::PhysicalDevice>(instance->getBestDevice());
+	logicalDevice = std::make_unique<magmatic::render::LogicalDevice>(*physicalDevice, *surface);
+	spdlog::info("Created devices");
+
+	vertShader = std::make_unique<magmatic::render::Shader>(*logicalDevice, "./examples/first_test/vert.spv", vk::ShaderStageFlagBits::eVertex);
+	fragShader = std::make_unique<magmatic::render::Shader>(*logicalDevice, "./examples/first_test/frag.spv", vk::ShaderStageFlagBits::eFragment);
+	shaders = {*vertShader, *fragShader};
+	spdlog::info("Created shaders");
+
+	swapChain = std::make_unique<magmatic::render::SwapChain>(*logicalDevice, *surface, *window);
+	commandPool = std::make_unique<magmatic::render::CommandPool>(*logicalDevice, magmatic::render::QueueType::GraphicalQueue);
+	depthResources = std::make_unique<magmatic::render::DepthResources>(*logicalDevice, swapChain->extent, *commandPool);
+	renderPass = std::make_unique<magmatic::render::RenderPass>(*logicalDevice, *surface, *depthResources);
+	descriptorSets = std::make_unique<magmatic::render::DescriptorSets>(*logicalDevice, bindings, MAX_FRAMES_IN_FLIGHT, descriptor_types);
+	pipeline = std::make_unique<magmatic::render::Pipeline>(*logicalDevice, swapChain->extent.width, swapChain->extent.height, shaders, *renderPass, descriptorSets->getDescriptorSetLayout());
+	framebuffers = std::make_unique<magmatic::render::Framebuffers>(*logicalDevice, *renderPass, *swapChain, depthResources->imageView);
+	spdlog::info("Created ???");
+
+	texture = std::make_unique<magmatic::render::Texture>(*logicalDevice, magmatic::render::Bitmap("examples/resources/statue.jpg"), *commandPool);
+	sampler = std::make_unique<magmatic::render::Sampler>(*logicalDevice);
+	spdlog::info("Created textures");
+
+	vertexBuffer = std::make_unique<magmatic::render::VertexBuffer>(*logicalDevice, vertices, *commandPool);
+	indexBuffer = std::make_unique<magmatic::render::IndexBuffer>(*logicalDevice, indices, *commandPool);
+	commandBuffers = magmatic::render::CommandBuffer::createCommandBuffersUnique(MAX_FRAMES_IN_FLIGHT, *commandPool);
+	uniformBuffers = magmatic::render::UniformBuffer<magmatic::render::UniformBufferObject>::createUniformBuffersUnique(MAX_FRAMES_IN_FLIGHT, *logicalDevice, *commandPool);
+	spdlog::info("Created buffers");
+
+	fences = std::make_unique<magmatic::render::Fences>(*logicalDevice, MAX_FRAMES_IN_FLIGHT);
+	imageAcquiredSemaphores = std::make_unique<magmatic::render::Semaphores>(*logicalDevice, magmatic::render::SemaphoreType::ImageAvailableSemaphore, MAX_FRAMES_IN_FLIGHT);
+	renderFinishedSemaphores = std::make_unique<magmatic::render::Semaphores>(*logicalDevice, magmatic::render::SemaphoreType::RenderFinishedSemaphore, MAX_FRAMES_IN_FLIGHT);
+	spdlog::info("Created sync objects and thus everything");
 }
 
 void Application::destroySwapChain() {
 	depthResources.reset();
 	framebuffers.reset();
-	commandBuffers.clear();
 	pipeline.reset();
 	renderPass.reset();
 	swapChain.reset();
-	uniformBuffers.clear();
 	descriptorSets.reset();
-	/*commandBuffers.clear();
-	uniformBuffers.clear();
-	framebuffers.reset();
-	pipeline.reset();
-	descriptorSets.reset();
-	renderPass.reset();
-	depthResources.reset();
-	swapChain.reset();*/
 }
 
 void Application::recreateSwapChain() {
-	std::pair<int, int> size = window.getSize();
+	std::pair<int, int> size = window->getSize();
 	while(size.first == 0 || size.second == 0) {
-		size = window.getSize();
+		size = window->getSize();
 		glfwWaitEvents();
 	}
 
-	logicalDevice.waitIdle();
+	logicalDevice->waitIdle();
 
 	imagesInFlight.resize(MAX_FRAMES_IN_FLIGHT, -1);
 	currentBuffer = 0;
@@ -73,14 +76,12 @@ void Application::recreateSwapChain() {
 
 	destroySwapChain();
 
-	swapChain = std::make_unique<magmatic::render::SwapChain>(magmatic::render::SwapChain(logicalDevice, surface, window));
-	depthResources = std::make_unique<magmatic::render::DepthResources>(logicalDevice,swapChain->extent, commandPool);
-	renderPass = std::make_unique<magmatic::render::RenderPass>(logicalDevice, surface, *depthResources);
-	descriptorSets = std::make_unique<magmatic::render::DescriptorSets>(logicalDevice, bindings, MAX_FRAMES_IN_FLIGHT, descriptor_types);
-	pipeline = std::make_unique<magmatic::render::Pipeline>(logicalDevice, swapChain->extent.width, swapChain->extent.height, shaders, *renderPass, descriptorSets->getDescriptorSetLayout());
-	framebuffers = std::make_unique<magmatic::render::Framebuffers>(logicalDevice, *renderPass, *swapChain, depthResources->imageView);
-	commandBuffers = magmatic::render::CommandBuffer::createCommandBuffersUnique(MAX_FRAMES_IN_FLIGHT, commandPool);
-	uniformBuffers = magmatic::render::UniformBuffer<magmatic::render::UniformBufferObject>::createUniformBuffersUnique(MAX_FRAMES_IN_FLIGHT, logicalDevice, commandPool);
+	swapChain = std::make_unique<magmatic::render::SwapChain>(magmatic::render::SwapChain(*logicalDevice, *surface, *window));
+	depthResources = std::make_unique<magmatic::render::DepthResources>(*logicalDevice,swapChain->extent, *commandPool);
+	renderPass = std::make_unique<magmatic::render::RenderPass>(*logicalDevice, *surface, *depthResources);
+	descriptorSets = std::make_unique<magmatic::render::DescriptorSets>(*logicalDevice, bindings, MAX_FRAMES_IN_FLIGHT, descriptor_types);
+	pipeline = std::make_unique<magmatic::render::Pipeline>(*logicalDevice, swapChain->extent.width, swapChain->extent.height, shaders, *renderPass, descriptorSets->getDescriptorSetLayout());
+	framebuffers = std::make_unique<magmatic::render::Framebuffers>(*logicalDevice, *renderPass, *swapChain, depthResources->imageView);
 }
 
 void Application::run() {
@@ -88,12 +89,12 @@ void Application::run() {
 	currentBuffer = 0;
 	currentFrame = 0;
 
-	while(!window.shouldClose()) {
+	while(!window->shouldClose()) {
 		glfwPollEvents();
 		drawFrame();
 	}
 
-	logicalDevice.waitIdle();
+	logicalDevice->waitIdle();
 }
 
 void Application::updateUniformBuffer() {
@@ -123,13 +124,13 @@ void Application::updateDescriptorSet() {
 	write_update.data_info = info;
 	updates.emplace_back(write_update);
 
-	updates.emplace_back(texture.getWriteInfo(1, 0));
-	updates.emplace_back(sampler.getWriteInfo(2, 0));
+	updates.emplace_back(texture->getWriteInfo(1, 0));
+	updates.emplace_back(sampler->getWriteInfo(2, 0));
 	descriptorSets->updateDescriptorSet(currentFrame, updates);
 }
 
 void Application::recordCommandBuffer() {
-	vk::Buffer vertexBuffers[] = { vertexBuffer.getBuffer().get() };
+	vk::Buffer vertexBuffers[] = { vertexBuffer->getBuffer().get() };
 	vk::DeviceSize offsets[] = { 0 };
 
 	const auto& commandBufferHandle = commandBuffers[currentFrame]->beginRecording();
@@ -144,7 +145,7 @@ void Application::recordCommandBuffer() {
 	commandBufferHandle->beginRenderPass(beginInfo, vk::SubpassContents::eInline);
 	commandBufferHandle->bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline->pipeline.get());
 	commandBufferHandle->bindVertexBuffers(0, 1, vertexBuffers, offsets);
-	commandBufferHandle->bindIndexBuffer(indexBuffer.getBuffer().get(), 0, vk::IndexType::eUint32);
+	commandBufferHandle->bindIndexBuffer(indexBuffer->getBuffer().get(), 0, vk::IndexType::eUint32);
 	commandBufferHandle->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, pipeline->getPipelineLayout().get(), 0, 1, &(*descriptorSets)[currentFrame].get(), 0, nullptr);
 	commandBufferHandle->drawIndexed(static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
 	commandBufferHandle->endRenderPass();
@@ -155,10 +156,9 @@ void Application::recordCommandBuffer() {
 void Application::drawFrame() {
 	vk::Result state;
 	try {
-		state = swapChain->acquireNextImageKHR(imageAcquiredSemaphores, currentFrame, currentBuffer, 0);
+		state = swapChain->acquireNextImageKHR(*imageAcquiredSemaphores, currentFrame, currentBuffer, 0);
 	} catch (vk::OutOfDateKHRError&) {
 		recreateSwapChain();
-		// TODO:: Check if reseting frames not needed;
 		return;
 	}
 	if(state == vk::Result::eNotReady)
@@ -171,17 +171,17 @@ void Application::drawFrame() {
 	}
 
 	if(imagesInFlight[currentBuffer] != -1) {
-		fences.waitForFence(imagesInFlight[currentBuffer], fenceTimeout);
-		fences.resetFence(currentFrame);
+		fences->waitForFence(imagesInFlight[currentBuffer], fenceTimeout);
+		fences->resetFence(currentFrame);
 	}
 	imagesInFlight[currentBuffer] = currentFrame;
 	updateDescriptorSet();
 	recordCommandBuffer();
 
 	updateUniformBuffer();
-	commandBuffers[currentBuffer]->submit(imageAcquiredSemaphores, renderFinishedSemaphores, fences[currentFrame], currentFrame);
+	commandBuffers[currentBuffer]->submit(*imageAcquiredSemaphores, *renderFinishedSemaphores, (*fences)[currentFrame], currentFrame);
 	try {
-		state = swapChain->presentKHR(logicalDevice, renderFinishedSemaphores, currentFrame, currentBuffer);
+		state = swapChain->presentKHR(*logicalDevice, *renderFinishedSemaphores, currentFrame, currentBuffer);
 	} catch(vk::OutOfDateKHRError&) {
 		recreateSwapChain();
 		return;

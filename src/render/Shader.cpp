@@ -49,3 +49,11 @@ magmatic::render::Shader::Shader(
 			);
 }
 
+magmatic::render::Shader::Shader(magmatic::render::Shader &&rhs) noexcept : shader_module(std::move(rhs.shader_module)), type(rhs.type) { }
+
+magmatic::render::Shader &magmatic::render::Shader::operator=(magmatic::render::Shader &&rhs) noexcept {
+	this->shader_module = std::move(rhs.shader_module);
+	this->type = rhs.type;
+	return *this;
+}
+

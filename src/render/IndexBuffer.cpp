@@ -24,4 +24,14 @@ size_t magmatic::render::IndexBuffer::indicesCount() const noexcept
 	return indices_count;
 }
 
+magmatic::render::IndexBuffer::IndexBuffer(IndexBuffer &&rhs) noexcept :
+	indices_count(rhs.indices_count),
+	Buffer(std::move(rhs)) { }
+
+magmatic::render::IndexBuffer &magmatic::render::IndexBuffer::operator=(IndexBuffer&& rhs) noexcept {
+	this->indices_count = rhs.indices_count;
+	Buffer::operator=(std::move(rhs));
+	return *this;
+}
+
 

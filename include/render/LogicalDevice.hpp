@@ -23,7 +23,7 @@ namespace magmatic::render {
 		uint32_t present_queue_index;
 		bool same_queue_family;
 
-		const PhysicalDevice physical_dev;
+		PhysicalDevice physical_dev;
 
 	public:
 		explicit LogicalDevice(
@@ -33,8 +33,10 @@ namespace magmatic::render {
 		);
 
 		LogicalDevice(const LogicalDevice&) = delete;
-
 		LogicalDevice& operator=(LogicalDevice&) = delete;
+
+		LogicalDevice(LogicalDevice&& rhs) noexcept;
+		LogicalDevice& operator=(LogicalDevice&& rhs) noexcept;
 
 		[[nodiscard]] const vk::UniqueDevice& getHandle() const noexcept
 		{

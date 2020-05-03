@@ -22,6 +22,9 @@ namespace magmatic::render {
 		Shader(const Shader&) = delete;
 		Shader &operator=(const Shader&) = delete;
 
+		Shader(Shader&& rhs) noexcept;
+		Shader &operator=(Shader&& rhs) noexcept;
+
 		[[nodiscard]] vk::PipelineShaderStageCreateInfo getPipelineShaderStageCreateInfo() const noexcept;
 	};
 }

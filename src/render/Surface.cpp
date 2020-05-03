@@ -15,3 +15,10 @@ vk::SurfaceCapabilitiesKHR magmatic::render::Surface::getCapabilities(const Phys
 {
 	return device.device.getSurfaceCapabilitiesKHR(surface.get());
 }
+
+magmatic::render::Surface::Surface(Surface &&rhs) noexcept : surface(std::move(rhs.surface)) { }
+
+magmatic::render::Surface &magmatic::render::Surface::operator=(Surface &&rhs) noexcept {
+	this->surface = std::move(rhs.surface);
+	return *this;
+}

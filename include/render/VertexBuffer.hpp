@@ -29,7 +29,10 @@ namespace magmatic::render
 				);
 
 		VertexBuffer(const VertexBuffer&) = delete;
-		VertexBuffer& operator=(VertexBuffer&) = delete;
+		VertexBuffer& operator=(const VertexBuffer&) = delete;
+
+		VertexBuffer(VertexBuffer&& rhs) noexcept;
+		VertexBuffer& operator=(VertexBuffer&& rhs) noexcept;
 
 		[[nodiscard]] size_t verticesCount() const noexcept;
 

@@ -27,10 +27,16 @@ namespace magmatic::render
 	public:
 		[[nodiscard]] uint32_t calculateScore() const noexcept;
 
-		const vk::PhysicalDevice device;
-		const vk::PhysicalDeviceProperties device_properties;
-		const vk::PhysicalDeviceFeatures device_features;
-		const std::vector<vk::QueueFamilyProperties> queue_family_properties;
+		vk::PhysicalDevice device;
+		vk::PhysicalDeviceProperties device_properties;
+		vk::PhysicalDeviceFeatures device_features;
+		std::vector<vk::QueueFamilyProperties> queue_family_properties;
+
+		PhysicalDevice(const PhysicalDevice& rhs) noexcept;
+		PhysicalDevice& operator=(const PhysicalDevice& rhs) noexcept = default;
+
+		PhysicalDevice(PhysicalDevice&& rhs) noexcept;
+		PhysicalDevice& operator=(PhysicalDevice&& rhs) noexcept;
 
 		[[nodiscard]] std::vector<size_t> getGraphicQueue() const noexcept;
 		[[nodiscard]] std::vector<size_t> getPresentQueue(const Surface& surface) const noexcept;

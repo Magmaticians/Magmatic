@@ -23,3 +23,13 @@ size_t magmatic::render::VertexBuffer::verticesCount() const noexcept
 {
 	return vertices_count;
 }
+
+magmatic::render::VertexBuffer::VertexBuffer(VertexBuffer &&rhs) noexcept :
+		vertices_count(rhs.vertices_count),
+		Buffer(std::move(rhs)) { }
+
+magmatic::render::VertexBuffer &magmatic::render::VertexBuffer::operator=(VertexBuffer&& rhs) noexcept {
+	this->vertices_count = rhs.vertices_count;
+	Buffer::operator=(std::move(rhs));
+	return *this;
+}

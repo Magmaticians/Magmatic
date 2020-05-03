@@ -68,3 +68,26 @@ magmatic::render::PhysicalDevice::getSwapChainSupportDetails(const magmatic::ren
 
 
 }
+
+magmatic::render::PhysicalDevice::PhysicalDevice(const magmatic::render::PhysicalDevice &rhs) noexcept :
+	device(rhs.device),
+	device_properties(rhs.device_properties),
+	device_features(rhs.device_features),
+	queue_family_properties(rhs.queue_family_properties) { }
+
+magmatic::render::PhysicalDevice::PhysicalDevice(PhysicalDevice&& rhs) noexcept :
+	device(rhs.device),
+	device_properties(rhs.device_properties),
+	device_features(rhs.device_features),
+	queue_family_properties(rhs.queue_family_properties) { }
+
+magmatic::render::PhysicalDevice& magmatic::render::PhysicalDevice::operator=(PhysicalDevice&& rhs) noexcept {
+	this->device = rhs.device;
+	this->device_properties = rhs.device_properties;
+	this->device_features = rhs.device_features;
+	this->queue_family_properties = rhs.queue_family_properties;
+	return *this;
+}
+
+
+

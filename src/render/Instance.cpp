@@ -205,3 +205,9 @@ magmatic::render::Surface magmatic::render::Instance::createSurface(const magmat
 
 	return Surface(vk::UniqueSurfaceKHR(vk::SurfaceKHR(surface), deleter));
 }
+
+magmatic::render::Instance::Instance(Instance&& rhs) noexcept : instance(std::move(rhs.instance)) {}
+magmatic::render::Instance& magmatic::render::Instance::operator=(Instance&& rhs) noexcept {
+	this->instance = std::move(rhs.instance);
+	return *this;
+}

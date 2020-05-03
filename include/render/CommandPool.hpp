@@ -18,7 +18,10 @@ namespace magmatic::render
 		explicit CommandPool(const LogicalDevice& l_device, QueueType type);
 
 		CommandPool(const CommandPool&) = delete;
-		CommandPool& operator=(CommandPool&) = delete;
+		CommandPool& operator=(const CommandPool&) = delete;
+
+		CommandPool(CommandPool&& rhs) noexcept;
+		CommandPool& operator=(CommandPool&& rhs) noexcept;
 
 		[[nodiscard]] const vk::UniqueCommandPool& getHandle() const noexcept;
 		[[nodiscard]] const vk::Queue& getQueue() const noexcept;

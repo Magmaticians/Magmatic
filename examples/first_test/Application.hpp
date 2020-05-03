@@ -102,33 +102,33 @@ class Application {
 			vk::DescriptorType::eSampler
 	};
 
-	const std::vector<magmatic::render::Vertex> vertices;
-	const std::vector<uint32_t> indices;
+	std::vector<magmatic::render::Vertex> vertices;
+	std::vector<uint32_t> indices;
 
-    const magmatic::render::Window window;
-    const magmatic::render::Instance instance;
-    const magmatic::render::Surface surface;
-	const magmatic::render::PhysicalDevice physicalDevice;
-	const magmatic::render::LogicalDevice logicalDevice;
-	magmatic::render::Shader vertShader;
-	magmatic::render::Shader fragShader;
+	std::unique_ptr<magmatic::render::Window> window;
+	std::unique_ptr<magmatic::render::Instance> instance;
+	std::unique_ptr<magmatic::render::Surface> surface;
+	std::unique_ptr<magmatic::render::PhysicalDevice> physicalDevice;
+	std::unique_ptr<magmatic::render::LogicalDevice> logicalDevice;
+	std::unique_ptr<magmatic::render::Shader> vertShader;
+	std::unique_ptr<magmatic::render::Shader> fragShader;
 	std::vector<std::reference_wrapper<magmatic::render::Shader>> shaders;
 	std::unique_ptr<magmatic::render::SwapChain> swapChain;
-	const magmatic::render::CommandPool commandPool;
+	std::unique_ptr<magmatic::render::CommandPool> commandPool;
 	std::unique_ptr<magmatic::render::DepthResources> depthResources;
 	std::unique_ptr<magmatic::render::RenderPass> renderPass;
 	std::unique_ptr<magmatic::render::DescriptorSets> descriptorSets;
 	std::unique_ptr<magmatic::render::Pipeline> pipeline;
 	std::unique_ptr<magmatic::render::Framebuffers> framebuffers;
-	const magmatic::render::Texture texture;
-	const magmatic::render::Sampler sampler;
-	const magmatic::render::VertexBuffer vertexBuffer;
-	const magmatic::render::IndexBuffer indexBuffer;
+	std::unique_ptr<magmatic::render::Texture> texture;
+	std::unique_ptr<magmatic::render::Sampler> sampler;
+	std::unique_ptr<magmatic::render::VertexBuffer> vertexBuffer;
+	std::unique_ptr<magmatic::render::IndexBuffer> indexBuffer;
 	std::vector<std::unique_ptr<magmatic::render::UniformBuffer<magmatic::render::UniformBufferObject>>> uniformBuffers;
 	std::vector<std::unique_ptr<magmatic::render::CommandBuffer>> commandBuffers;
-	const magmatic::render::Fences fences;
-	const magmatic::render::Semaphores imageAcquiredSemaphores;
-	const magmatic::render::Semaphores renderFinishedSemaphores;
+	std::unique_ptr<magmatic::render::Fences> fences;
+	std::unique_ptr<magmatic::render::Semaphores> imageAcquiredSemaphores;
+	std::unique_ptr<magmatic::render::Semaphores> renderFinishedSemaphores;
 
 	std::vector<int> imagesInFlight;
 public:

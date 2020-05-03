@@ -8,3 +8,13 @@ magmatic::render::Semaphores::Semaphores(const LogicalDevice& l_device, Semaphor
 		semaphores.emplace_back(handle->createSemaphoreUnique(vk::SemaphoreCreateInfo()));
 	}
 }
+
+magmatic::render::Semaphores::Semaphores(magmatic::render::Semaphores &&rhs) noexcept :
+	semaphores(std::move(rhs.semaphores)),
+	type(rhs.type) { }
+
+magmatic::render::Semaphores &magmatic::render::Semaphores::operator=(magmatic::render::Semaphores &&rhs) noexcept {
+	this->semaphores = std::move(rhs.semaphores);
+	type = rhs.type;
+	return *this;
+}

@@ -136,3 +136,21 @@ std::optional<std::pair<size_t, size_t>> magmatic::render::LogicalDevice::choose
 void magmatic::render::LogicalDevice::waitIdle() const {
 	device->waitIdle();
 }
+
+magmatic::render::LogicalDevice::LogicalDevice(LogicalDevice &&rhs) noexcept :
+	device(std::move(rhs.device)),
+	graphics_queue(rhs.graphics_queue),
+	graphics_queue_index(rhs.graphics_queue_index),
+	present_queue(rhs.present_queue),
+	present_queue_index(rhs.present_queue_index),
+	physical_dev(std::move(rhs.physical_dev)) { }
+
+magmatic::render::LogicalDevice& magmatic::render::LogicalDevice::operator=(LogicalDevice &&rhs) noexcept {
+	this->device = std::move(rhs.device);
+	this->graphics_queue = rhs.graphics_queue;
+	this->graphics_queue_index =rhs.graphics_queue_index;
+	this->present_queue = rhs.present_queue;
+	this->present_queue_index = rhs.present_queue_index;
+	this->physical_dev = std::move(rhs.physical_dev);
+	return *this;
+}

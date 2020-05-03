@@ -32,3 +32,15 @@ const vk::Queue& magmatic::render::CommandPool::getQueue() const noexcept
 {
 	return queue;
 }
+
+magmatic::render::CommandPool::CommandPool(magmatic::render::CommandPool &&rhs) noexcept :
+	command_pool(std::move(rhs.command_pool)),
+	type(rhs.type),
+	queue(rhs.queue) { }
+
+magmatic::render::CommandPool &magmatic::render::CommandPool::operator=(magmatic::render::CommandPool &&rhs) noexcept {
+	this->command_pool = std::move(rhs.command_pool);
+	this->type = rhs.type;
+	this->queue = rhs.queue;
+	return *this;
+}

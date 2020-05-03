@@ -1,6 +1,11 @@
 #include "render/model_data_loader/formats/ModelDataLoadergltf.hpp"
 #include <tiny_gltf.h>
 #include <spdlog/spdlog.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/string_cast.hpp>
+
 
 bool magmatic::render::ModelDataLoadergltf::registered_ = magmatic::render::ModelDataLoader ::registerLoader(
 		ModelDataLoadergltf::factoryName(),
@@ -72,7 +77,72 @@ std::shared_ptr<magmatic::render::ModelData> magmatic::render::ModelDataLoadergl
 	spdlog::info("\t\tMinVersion: {}", model.asset.minVersion);
 
 	spdlog::info("\tDeafult scene index: {}", model.defaultScene);
+	spdlog::info("\tScenes({}):", model.scenes.size());
+	for(size_t i = 0; i < model.scenes.size(); ++i)
+	{
+		spdlog::info("\t\t{}.{}", i, model.scenes[i].name);
+	}
+
+
+	spdlog::info("\tNodes({})", model.nodes.size());
+	for(size_t i = 0; i < model.nodes.size(); ++i)
+	{
+		spdlog::info("\t\t{}.{}", i, model.nodes[i].name);
+	}
+
+	auto model_data = std::make_shared<ModelData>();
+
+	for(int index : model.scenes[model.defaultScene].nodes)
+	{
+		model_data->nodes.emplace_back(loadNode(nullptr, model.nodes[index], model, model_data->vertices, model_data->indices));
+	}
 	#endif
 
+	//todo: loadSamplers
+
+
 	return nullptr;
+}
+magmatic::render::ModelDataLoadergltf::PNodeData magmatic::render::ModelDataLoadergltf::loadNode(
+	const magmatic::render::ModelDataLoadergltf::PNodeData &parent,
+	const tinygltf::Node &node, const tinygltf::Model &model,
+	std::vector<Vertex> &vertices, std::vector<uint32_t> &indices
+)
+{
+	auto new_node = std::make_shared<NodeData>();
+	new_node->parent = parent;
+
+	if(node.matrix.size() == 16)
+	{
+		new_node->matrix = glm::make_mat4x4(node.matrix.data());
+	}
+	else
+	{
+		new_node->matrix = glm::mat4(1.0f);
+
+		if(node.translation.size() == 3)
+		{
+			new_node->matrix = glm::translate(new_node->matrix, glm::vec3(glm::make_vec3(node.translation.data())));
+		}
+		if(node.rotation.size() == 4)
+		{
+			glm::quat temp_quat = glm::make_quat(node.rotation.data());
+			new_node->matrix *= glm::mat4(temp_quat);
+		}
+		if(node.scale.size() == 3)
+		{
+			new_node->matrix = glm::scale(new_node->matrix, glm::vec3(glm::make_vec3(node.scale.data())));
+		}
+	}
+
+
+	if(!node.children.empty())
+	{
+		for(int index : node.children)
+		{
+			new_node->children.emplace_back(loadNode(new_node, model.nodes[index], model, vertices, indices));
+		}
+	}
+	//todo: loading meshes
+	return new_node;
 }

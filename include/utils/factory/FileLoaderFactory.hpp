@@ -14,38 +14,38 @@ namespace magmatic::utils
 	class ConcreteLoader
 	{
 	public:
-		using TProduct = typename Factory::TProduct;
+		using Product = typename Factory::Product;
 
 		ConcreteLoader() = default;
 
 		virtual ~ConcreteLoader() = default;
 
-		virtual TProduct load(const std::filesystem::path& file_path) {
+		virtual Product load(const std::filesystem::path& file_path) {
 			throw std::runtime_error("Not implemented");
 		};
 
 	};
 
-	template<typename Product>
+	template<typename Prod>
 	class FileLoaderFactory
 	{
 	public:
-		using TAFactory = FileLoaderFactory<Product>;
-		using TCreator = std::unique_ptr<ConcreteLoader<TAFactory>>;
-		using TProduct = std::shared_ptr<Product>;
-		using TKey = std::string;
+		using AFactory = FileLoaderFactory<Prod>;
+		using Creator = std::unique_ptr<ConcreteLoader<AFactory>>;
+		using Product = std::shared_ptr<Prod>;
+		using Key = std::string;
 
 	private:
-		static std::unordered_map<TKey, TCreator>& getInternalMap() noexcept
+		static std::unordered_map<Key, Creator>& getInternalMap() noexcept
 		{
-			static std::unordered_map<TKey, TCreator> map_;
+			static std::unordered_map<Key, Creator> map_;
 			return map_;
 		}
 
 	public:
 		FileLoaderFactory() = delete;
 
-		static bool registerLoader(const std::string type, TCreator creator)
+		static bool registerLoader(const std::string type, Creator creator)
 		{
 			auto& map = getInternalMap();
 			assert((map.find(type) == std::end(map)));
@@ -53,7 +53,7 @@ namespace magmatic::utils
 			return true;
 		}
 
-		static TProduct load(const std::string& type, const std::filesystem::path& file_path)
+		static Product load(const std::string& type, const std::filesystem::path& file_path)
 		{
 			const auto& map = getInternalMap();
 			const auto loader = map.find(type);
@@ -67,9 +67,9 @@ namespace magmatic::utils
 			return map.contains(type);
 		}
 
-		static std::set<TKey> registeredTypes() noexcept
+		static std::set<Key> registeredTypes() noexcept
 		{
-			std::set<TKey> types;
+			std::set<Key> types;
 			const auto& map = getInternalMap();
 			for (const auto&[key, val] : map)
 			{

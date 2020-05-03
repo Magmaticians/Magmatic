@@ -45,6 +45,10 @@ namespace magmatic::render
 		vk::Filter decodeFilterMode(int filter);
 
 		vk::SamplerAddressMode decodeAddressMode(int wrap_mode);
+
+		void loadMaterials(std::vector<ModelData::MaterialData> &materials, const tinygltf::Model &model);
+
+		void loadTextures(std::vector<ModelData::TextureData> &textures, const tinygltf::Model &model);
 	};
 }
 

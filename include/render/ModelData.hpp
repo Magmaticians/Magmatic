@@ -30,11 +30,23 @@ namespace magmatic::render
 			uint32_t first_index;
 			uint32_t index_count;
 			uint32_t vertex_count;
+
+			uint32_t material_index;
 		};
 
 		using MeshData = std::vector<PrimitiveData>;
 
+		struct MaterialData
+		{
+			glm::vec4 color_factor = glm::vec4(1.0f);
+			uint32_t texture_index;
+		};
 
+		struct TextureData
+		{
+			uint16_t bitmap_index;
+			std::optional<int16_t> sampler_index;
+		};
 
 		struct NodeData
 		{
@@ -51,6 +63,9 @@ namespace magmatic::render
 		std::vector<uint32_t> indices;
 
 		std::vector<SamplerSettings> sampler_settings;
+
+		std::vector<MaterialData> material_data;
+		std::vector<TextureData> texture_data;
 		std::vector<Bitmap> texture_bitmaps;
 
 		std::vector<NodeData::self_pointer> nodes;

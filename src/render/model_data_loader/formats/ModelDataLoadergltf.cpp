@@ -112,6 +112,8 @@ std::shared_ptr<magmatic::render::ModelData> magmatic::render::ModelDataLoadergl
 	#if !defined(NDEBUG)
 	spdlog::info("\tEnded loading nodes");
 	#endif
+	loadMaterials(model_data->material_data, model);
+	loadTextures(model_data->texture_data, model);
 	loadSamplers(model_data->sampler_settings, model);
 
 
@@ -265,7 +267,8 @@ magmatic::render::ModelDataLoadergltf::PNodeData magmatic::render::ModelDataLoad
 			primitive_data.first_index = first_index;
 			primitive_data.index_count = index_count;
 			primitive_data.vertex_count = vertex_count;
-			//todo: materials
+			primitive_data.material_index = primitive.material;
+
 			new_node->mesh_data.emplace_back(primitive_data);
 		}
 	}
@@ -331,4 +334,52 @@ vk::SamplerAddressMode magmatic::render::ModelDataLoadergltf::decodeAddressMode(
 		default:
 			return vk::SamplerAddressMode::eClampToEdge;
 	}
+}
+
+void magmatic::render::ModelDataLoadergltf::loadMaterials(
+		std::vector<ModelData::MaterialData> &materials,
+		const tinygltf::Model &model
+)
+{
+	#if !defined(NDEBUG)
+	spdlog::info("\tStarted loading Materials");
+	spdlog::info("\t\tFound {} materials", model.materials.size());
+
+#endif
+	materials.resize(model.materials.size());
+	for(size_t i = 0; i < model.materials.size(); ++i)
+	{
+		auto material = model.materials[i];
+		if(material.values.contains("baseColorFactor"))
+		{
+			materials[i].color_factor = glm::make_vec4(material.values["baseColorFactor"].ColorFactor().data());
+		}
+		if(material.values.contains("baseColorTexture"))
+		{
+			materials[i].texture_index = material.values["baseColorTexture"].TextureIndex();
+		}
+	}
+	#if !defined(NDEBUG)
+	spdlog::info("\tEnded loading Materials");
+	#endif
+}
+
+void magmatic::render::ModelDataLoadergltf::loadTextures(
+		std::vector<ModelData::TextureData> &textures,
+		const tinygltf::Model &model
+)
+{
+	#if !defined(NDEBUG)
+	spdlog::info("\tStarted loading Textures");
+	spdlog::info("\t\tFound {} textures", model.textures.size());
+	#endif
+	textures.resize(model.textures.size());
+	for(size_t i = 0; i < model.textures.size(); ++i)
+	{
+		textures[i].bitmap_index = model.textures[i].source;
+		textures[i].sampler_index = model.textures[i].sampler;
+	}
+	#if !defined(NDEBUG)
+	spdlog::info("\tEnded loading Textures");
+	#endif
 }

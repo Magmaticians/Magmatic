@@ -40,6 +40,11 @@ namespace magmatic::render
 	private:
 		static bool registered_;
 
+		void loadSamplers(std::vector<ModelData::SamplerSettings> &samplers, const tinygltf::Model &model);
+
+		vk::Filter decodeFilterMode(int filter);
+
+		vk::SamplerAddressMode decodeAddressMode(int wrap_mode);
 	};
 }
 

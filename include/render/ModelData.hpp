@@ -28,7 +28,8 @@ namespace magmatic::render
 
 		struct PrimitiveData {
 			uint32_t first_index;
-			uint32_t count;
+			uint32_t index_count;
+			uint32_t vertex_count;
 		};
 
 		using MeshData = std::vector<PrimitiveData>;
@@ -45,7 +46,6 @@ namespace magmatic::render
 
 			MeshData mesh_data;
 		};
-		//todo: move vertex here
 	public:
 		std::vector<Vertex> vertices;
 		std::vector<uint32_t> indices;

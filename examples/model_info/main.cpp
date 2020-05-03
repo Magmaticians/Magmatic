@@ -13,4 +13,5 @@ int main(int argc, char** argv)
 	}
 
 	auto model = magmatic::render::ModelDataLoader::load("GLTF", "examples/resources/basic_tank.gltf");
+	return 0;
 }

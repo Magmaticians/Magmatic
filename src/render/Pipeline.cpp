@@ -1,5 +1,7 @@
-#include <render/Vertex.hpp>
+#include "render/Vertex.hpp"
+#include "render/PushConstantObject.h"
 #include "render/Pipeline.hpp"
+
 magmatic::render::Pipeline::Pipeline(const LogicalDevice& l_device,
                                      uint32_t extent_width, uint32_t extent_height,
                                      std::vector<std::reference_wrapper<Shader>> shaderStages,
@@ -8,10 +10,15 @@ magmatic::render::Pipeline::Pipeline(const LogicalDevice& l_device,
 ) {
 	const auto& handle = l_device.getHandle();
 
+	assert((sizeof(PushConstantObject) <= l_device.getPhysicalDevice().device_properties.limits.maxPushConstantsSize));
+	vk::PushConstantRange push_constant_range(vk::ShaderStageFlagBits::eVertex, 0, sizeof(PushConstantObject));
+
 	vk::PipelineLayoutCreateInfo pipeline_layout_info(
 			vk::PipelineLayoutCreateFlags(),
 			1,
-			&descriptorSetLayout.get()
+			&descriptorSetLayout.get(),
+			1,
+			&push_constant_range
 	);
 	layout = handle->createPipelineLayoutUnique(pipeline_layout_info);
 

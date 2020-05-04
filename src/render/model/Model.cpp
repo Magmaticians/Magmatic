@@ -1,4 +1,4 @@
-#include "render/model/Model.h"
+#include "render/model/Model.hpp"
 #include "render/model/ModelData.hpp"
 #include "render/VertexBuffer.hpp"
 #include "render/IndexBuffer.hpp"
@@ -17,7 +17,7 @@ magmatic::render::Model::Model(
 	textures.reserve(data->texture_bitmaps.size());
 	std::transform(data->texture_bitmaps.begin(), data->texture_bitmaps.end(), std::back_inserter(textures),
 	               [&l_device, &pool](const Bitmap &bitmap) {
-		               return Texture(l_device, bitmap, pool);
+		               return std::make_shared<Texture>(l_device, bitmap, pool);
 	               });
 
 }

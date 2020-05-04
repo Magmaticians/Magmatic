@@ -34,6 +34,6 @@ target_sources(magmatic-render
 		model/model_data_loader/ModelDataLoader.hpp
         model/model_data_loader/formats/ModelDataLoaderConcrete.hpp
         model/model_data_loader/formats/ModelDataLoadergltf.hpp
-		model/Model.h
+        model/Model.hpp
 		PushConstantObject.h
 		)

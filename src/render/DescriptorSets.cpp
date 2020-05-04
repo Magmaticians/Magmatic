@@ -1,11 +1,11 @@
 #include "render/DescriptorSets.hpp"
 
-magmatic::render::DescriptorSets::DescriptorSets(const LogicalDevice& l_device, const std::vector<vk::DescriptorSetLayoutBinding>& bindings, size_t count, std::vector<vk::DescriptorType> types) {
+magmatic::render::DescriptorSets::DescriptorSets(const LogicalDevice& l_device, const std::vector<vk::DescriptorSetLayoutBinding>& bindings, size_t count) {
 	const auto& handle = l_device.getHandle();
 
 	auto size = static_cast<uint32_t>(count);
 	std::vector<vk::DescriptorPoolSize> sizes;
-	sizes.reserve(types.size());
+	sizes.reserve(bindings.size());
 
 
 	vk::DescriptorSetLayoutCreateInfo descriptor_set_layout_create_info(
@@ -16,15 +16,15 @@ magmatic::render::DescriptorSets::DescriptorSets(const LogicalDevice& l_device, 
 	descriptor_set_layout = handle->createDescriptorSetLayoutUnique(descriptor_set_layout_create_info);
 
 	std::transform(
-			types.begin(),
-			types.end(),
+			bindings.begin(),
+			bindings.end(),
 			std::back_inserter(sizes),
-			[size](vk::DescriptorType type)
+			[size](const vk::DescriptorSetLayoutBinding& binding)
 			{
 				return vk::DescriptorPoolSize
 						{
-								type,
-								size
+								binding.descriptorType,
+								size * binding.descriptorCount
 						};
 			}
 	);

@@ -14,7 +14,6 @@
 #include <render/Framebuffers.hpp>
 #include <render/CommandBuffer.hpp>
 #include <render/UniformBuffer.hpp>
-#include <iostream>
 #include "render/Vertex.hpp"
 #include "render/Window.hpp"
 #include "render/Instance.hpp"
@@ -24,67 +23,25 @@
 #include "render/SwapChain.hpp"
 #include "render/Buffer.hpp"
 #include "render/UniformBufferObject.hpp"
+#include "render/model/Model.hpp"
+#include <chrono>
+
 
 class Application {
     static constexpr const char* DEFAULT_NAME{"Test application"};
-    /** Triangle */
-	const std::vector<magmatic::render::Vertex> triangleVertices = {
-			{{0.0f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}},
-			{{0.5f, 0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}},
-			{{-0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}},
-	};
-	const std::vector<uint32_t> triangleIndices = {
-			0, 1, 2
-	};
-	/** Square */
-	const std::vector<magmatic::render::Vertex> squareVertices = {
-			{{-0.8f, -0.8f, 0.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
-			{{0.8f, -0.8f, 0.0f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
-			{{-0.8f, 0.8f, 0.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
-			{{0.8f, 0.8f, 0.0f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}},
 
-			{{-0.8f, -0.8f, -0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
-			{{0.8f, -0.8f, -0.5f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
-			{{-0.8f, 0.8f, -0.5f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
-			{{0.8f, 0.8f, -0.5f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}}
-	};
-	const std::vector<uint32_t> squareIndices = {
-			0, 1, 2, 1, 3, 2,
-			4, 5, 6, 5, 7, 6,
-	};
-	/** Hourglass */
-	const std::vector<magmatic::render::Vertex> hourglassVertices = {
-			{{-0.5f, -0.5f, -0.8f}, {0.8f, 0.8f, 1.0f}, {0.0f, 0.0f}},
-			{{-0.5f, 0.5f, -0.8f}, {0.8f, 0.8f, 1.0f}, {1.0f, 0.0f}},
-			{{0.5f, 0.5f, -0.8f}, {0.8f, 0.8f, 1.0f}, {0.0f, 1.0f}},
-			{{0.5f, -0.5f, -0.8f}, {0.8f, 0.8f, 1.0f}, {1.0f, 1.0f}},
-
-			{{0.0f, 0.0f, 0.0f}, {0.8f, 0.8f, 1.0f}, {0.0f, 0.0f}},
-
-			{{-0.5f, -0.5f, 0.8f}, {0.8f, 0.8f, 1.0f}, {1.0f, 1.0f}},
-			{{-0.5f, 0.5f, 0.8f}, {0.8f, 0.8f, 1.0f}, {0.0f, 1.0f}},
-			{{0.5f, 0.5f, 0.8f}, {0.8f, 0.8f, 1.0f}, {0.0f, 0.0f}},
-			{{0.5f, -0.5f, 0.8f}, {0.8f, 0.8f, 1.0f}, {1.0f, 0.0f}},
-	};
-	const std::vector<uint32_t> hourglassIndices = {
-			0, 1, 2, 2, 3, 0,// lower base
-			1, 0, 4, 2, 1, 4, 3, 2, 4, 0, 3, 4,// Lower faces
-			5, 6, 4, 6, 7, 4, 7, 8, 4, 8, 5, 4,// Upper faces
-			7, 6, 5, 5, 8, 7// Upper base
-	};
-
-	const std::vector<vk::DescriptorSetLayoutBinding> bindings = {
+	std::vector<vk::DescriptorSetLayoutBinding> bindings = {
 			{
-				0,
-				vk::DescriptorType::eUniformBuffer,
-				1,
-				vk::ShaderStageFlagBits::eVertex,
-				nullptr
+			0,
+			vk::DescriptorType::eUniformBuffer,
+			1,
+			vk::ShaderStageFlagBits::eVertex,
+			nullptr
 			},
 			{
 				1,
 				vk::DescriptorType::eSampledImage,
-				1,
+				32,
 				vk::ShaderStageFlagBits::eFragment,
 				nullptr
 			},
@@ -103,9 +60,6 @@ class Application {
 			vk::DescriptorType::eSampler
 	};
 
-	std::vector<magmatic::render::Vertex> vertices;
-	std::vector<uint32_t> indices;
-
 	std::unique_ptr<magmatic::render::Window> window;
 	std::unique_ptr<magmatic::render::Instance> instance;
 	std::unique_ptr<magmatic::render::Surface> surface;
@@ -121,15 +75,14 @@ class Application {
 	std::unique_ptr<magmatic::render::DescriptorSets> descriptorSets;
 	std::unique_ptr<magmatic::render::Pipeline> pipeline;
 	std::unique_ptr<magmatic::render::Framebuffers> framebuffers;
-	std::unique_ptr<magmatic::render::Texture> texture;
 	std::unique_ptr<magmatic::render::Sampler> sampler;
-	std::unique_ptr<magmatic::render::VertexBuffer> vertexBuffer;
-	std::unique_ptr<magmatic::render::IndexBuffer> indexBuffer;
 	std::vector<std::unique_ptr<magmatic::render::UniformBuffer<magmatic::render::UniformBufferObject>>> uniformBuffers;
 	std::vector<std::unique_ptr<magmatic::render::CommandBuffer>> commandBuffers;
 	std::unique_ptr<magmatic::render::Fences> fences;
 	std::unique_ptr<magmatic::render::Semaphores> imageAcquiredSemaphores;
 	std::unique_ptr<magmatic::render::Semaphores> renderFinishedSemaphores;
+	std::unique_ptr<magmatic::render::Model> model;
+	std::vector<std::shared_ptr<magmatic::render::Texture>> textures;
 
 	std::vector<int> imagesInFlight;
 public:
@@ -146,12 +99,15 @@ private:
 
 	void updateUniformBuffer();
 
-	[[nodiscard]] std::vector<magmatic::render::Vertex> getVertexConfig(const std::string &mode) const;
-
-	[[nodiscard]] std::vector<uint32_t> getIndexConfig(const std::string& mode) const;
 	void updateDescriptorSets();
 	void recordCommandBuffer();
 	void drawFrame();
+
+	void renderNode(
+			const vk::UniqueCommandBuffer& buff,
+			const std::shared_ptr<magmatic::render::ModelData::NodeData>& node,
+			glm::mat4 parent_matrix
+			);
 
 	void destroySwapChain();
 	void recreateSwapChain();
@@ -161,7 +117,7 @@ private:
 
 	static constexpr float speed = 1.5f;
 
-	std::chrono::time_point<std::chrono::steady_clock> lastFrame;
+	std::chrono::time_point<std::chrono::high_resolution_clock> lastFrame;
 	float deltaTime = 0.0f;
 	// TODO: Extract to external class
 	bool right = false;

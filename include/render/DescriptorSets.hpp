@@ -15,7 +15,7 @@ namespace magmatic::render
 		std::vector<vk::UniqueDescriptorSet> sets;
 	public:
 
-		DescriptorSets(const LogicalDevice& l_device, const std::vector<vk::DescriptorSetLayoutBinding>& bindings, size_t count, std::vector<vk::DescriptorType> types);
+		DescriptorSets(const LogicalDevice& l_device, const std::vector<vk::DescriptorSetLayoutBinding>& bindings, size_t count);
 
 		DescriptorSets(DescriptorSets&) = delete;
 		DescriptorSets& operator=(DescriptorSets&) = delete;

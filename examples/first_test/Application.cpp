@@ -1,19 +1,19 @@
 #define GLM_FORCE_RADIANS
+#include "Application.hpp"
+#include "render/Bitmap.hpp"
+#include "render/UniformBufferObject.hpp"
+#include "render/model/ModelData.hpp"
+#include "render/model/model_data_loader/ModelDataLoader.hpp"
+#include "ActionHandlers.hpp"
 #include <algorithm>
 #include <spdlog/spdlog.h>
 #include <vulkan/vulkan.hpp>
-#include "render/UniformBufferObject.hpp"
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include <render/Bitmap.hpp>
-#include "Application.hpp"
-#include "ActionHandlers.hpp"
+#include <render/PushConstantObject.h>
+
 
 Application::Application(const std::string& mode) {
-	vertices = getVertexConfig(mode);
-	indices = getIndexConfig(mode);
-	spdlog::info("Chose vertices and indices");
-
 	window = std::make_unique<magmatic::render::Window>(DEFAULT_NAME);
 	instance = std::make_unique<magmatic::render::Instance>(DEFAULT_NAME, window->getRequiredExtensions());
 	surface = std::make_unique<magmatic::render::Surface>(instance->createSurface(*window));
@@ -30,22 +30,30 @@ Application::Application(const std::string& mode) {
 
 	swapChain = std::make_unique<magmatic::render::SwapChain>(*logicalDevice, *surface, *window);
 	commandPool = std::make_unique<magmatic::render::CommandPool>(*logicalDevice, magmatic::render::QueueType::GraphicalQueue);
+
+	{
+		auto model_data = magmatic::render::ModelDataLoader::load("GLTF", "examples/resources/basic_tank.gltf");
+		model = std::make_unique<magmatic::render::Model>(*logicalDevice, *commandPool, model_data);
+	}
+
+	textures.reserve(model->textures.size());
+	std::copy(model->textures.begin(), model->textures.end(), std::back_inserter(textures));
+	spdlog::info("Created textures");
+
 	depthResources = std::make_unique<magmatic::render::DepthResources>(*logicalDevice, swapChain->extent, *commandPool);
 	renderPass = std::make_unique<magmatic::render::RenderPass>(*logicalDevice, *surface, *depthResources);
-	descriptorSets = std::make_unique<magmatic::render::DescriptorSets>(*logicalDevice, bindings, MAX_FRAMES_IN_FLIGHT, descriptor_types);
+	descriptorSets = std::make_unique<magmatic::render::DescriptorSets>(*logicalDevice, bindings, MAX_FRAMES_IN_FLIGHT);
 	pipeline = std::make_unique<magmatic::render::Pipeline>(*logicalDevice, swapChain->extent.width, swapChain->extent.height, shaders, *renderPass, descriptorSets->getDescriptorSetLayout());
 	framebuffers = std::make_unique<magmatic::render::Framebuffers>(*logicalDevice, *renderPass, *swapChain, depthResources->imageView);
 	spdlog::info("Created ???");
 
-	texture = std::make_unique<magmatic::render::Texture>(*logicalDevice, magmatic::render::Bitmap("examples/resources/statue.jpg"), *commandPool);
 	sampler = std::make_unique<magmatic::render::Sampler>(*logicalDevice);
-	spdlog::info("Created textures");
 
-	vertexBuffer = std::make_unique<magmatic::render::VertexBuffer>(*logicalDevice, vertices, *commandPool);
-	indexBuffer = std::make_unique<magmatic::render::IndexBuffer>(*logicalDevice, indices, *commandPool);
 	commandBuffers = magmatic::render::CommandBuffer::createCommandBuffersUnique(MAX_FRAMES_IN_FLIGHT, *commandPool);
 	uniformBuffers = magmatic::render::UniformBuffer<magmatic::render::UniformBufferObject>::createUniformBuffersUnique(MAX_FRAMES_IN_FLIGHT, *logicalDevice, *commandPool);
 	spdlog::info("Created buffers");
+
+
 
 	fences = std::make_unique<magmatic::render::Fences>(*logicalDevice, MAX_FRAMES_IN_FLIGHT);
 	imageAcquiredSemaphores = std::make_unique<magmatic::render::Semaphores>(*logicalDevice, magmatic::render::SemaphoreType::ImageAvailableSemaphore, MAX_FRAMES_IN_FLIGHT);
@@ -78,7 +86,7 @@ void Application::recreateSwapChain() {
 	swapChain = std::make_unique<magmatic::render::SwapChain>(magmatic::render::SwapChain(*logicalDevice, *surface, *window));
 	depthResources = std::make_unique<magmatic::render::DepthResources>(*logicalDevice,swapChain->extent, *commandPool);
 	renderPass = std::make_unique<magmatic::render::RenderPass>(*logicalDevice, *surface, *depthResources);
-	descriptorSets = std::make_unique<magmatic::render::DescriptorSets>(*logicalDevice, bindings, MAX_FRAMES_IN_FLIGHT, descriptor_types);
+	descriptorSets = std::make_unique<magmatic::render::DescriptorSets>(*logicalDevice, bindings, MAX_FRAMES_IN_FLIGHT);
 	pipeline = std::make_unique<magmatic::render::Pipeline>(*logicalDevice, swapChain->extent.width, swapChain->extent.height, shaders, *renderPass, descriptorSets->getDescriptorSetLayout());
 	framebuffers = std::make_unique<magmatic::render::Framebuffers>(*logicalDevice, *renderPass, *swapChain, depthResources->imageView);
 
@@ -139,15 +147,19 @@ void Application::updateDescriptorSets() {
 		);
 		write_update.data_info = info;
 		updates.emplace_back(write_update);
-
-		updates.emplace_back(texture->getWriteInfo(1, 0));
+		assert((textures.size() < 32));
+		for(size_t j = 0; j < textures.size(); ++j)
+		{
+			updates.emplace_back(textures[j]->getWriteInfo(1, j));
+		}
 		updates.emplace_back(sampler->getWriteInfo(2, 0));
 		descriptorSets->updateDescriptorSet(i, updates);
 	}
 }
 
 void Application::recordCommandBuffer() {
-	vk::Buffer vertexBuffers[] = { vertexBuffer->getBuffer().get() };
+	vk::Buffer vertexBuffers[] = { model->vertex_buffer->getBuffer().get() };
+	vk::Buffer indexBuffers{ model->index_buffer->getBuffer().get() };
 	vk::DeviceSize offsets[] = { 0 };
 
 	const auto& commandBufferHandle = commandBuffers[currentFrame]->beginRecording();
@@ -162,9 +174,13 @@ void Application::recordCommandBuffer() {
 	commandBufferHandle->beginRenderPass(beginInfo, vk::SubpassContents::eInline);
 	commandBufferHandle->bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline->getPipeline().get());
 	commandBufferHandle->bindVertexBuffers(0, 1, vertexBuffers, offsets);
-	commandBufferHandle->bindIndexBuffer(indexBuffer->getBuffer().get(), 0, vk::IndexType::eUint32);
+	commandBufferHandle->bindIndexBuffer(indexBuffers, 0, vk::IndexType::eUint32);
 	commandBufferHandle->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, pipeline->getPipelineLayout().get(), 0, 1, &(*descriptorSets)[currentFrame].get(), 0, nullptr);
-	commandBufferHandle->drawIndexed(static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
+
+	for(const auto& node : model->nodes)
+	{
+		renderNode(commandBufferHandle, node, glm::mat4(1.0f));
+	}
 	commandBufferHandle->endRenderPass();
 	commandBuffers[currentFrame]->endRecording();
 
@@ -212,45 +228,33 @@ void Application::drawFrame() {
 	currentFrame = (currentFrame+1)%MAX_FRAMES_IN_FLIGHT;
 }
 
-std::vector<magmatic::render::Vertex> Application::getVertexConfig(const std::string& mode) const {
-	if(mode == "square") {
-		return squareVertices;
-	} else if(mode == "triangle") {
-		return triangleVertices;
-	} else if(mode == "hourglass") {
-		return hourglassVertices;
-	} else if(mode == "hourglass on square") {
-		std::vector<magmatic::render::Vertex> res;
-		res.reserve(hourglassVertices.size() + squareVertices.size());
-		res.insert(res.end(), squareVertices.begin(), squareVertices.end());
-		res.insert(res.end(), hourglassVertices.begin(), hourglassVertices.end());
-		return res;
-	} else {
-		spdlog::error("Mode {} not implemented", mode);
-		throw std::runtime_error("Mode '" + mode + "' is not yet implemented");
+void Application::renderNode(
+		const vk::UniqueCommandBuffer &buff,
+		const std::shared_ptr<magmatic::render::ModelData::NodeData> &node,
+		glm::mat4 parent_matrix
+)
+{
+	glm::mat4 current_matrix = parent_matrix * node->matrix;
+	magmatic::render::PushConstantObject obj{};
+	obj.matrix = current_matrix;
+	for(const auto& primitive : node->mesh_data)
+	{
+		obj.sampler_index = 0;
+		obj.texture_index = model->texture_data[model->material_data[primitive.material_index].texture_index].bitmap_index;
+		buff->pushConstants(
+				pipeline->getPipelineLayout().get(),
+				vk::ShaderStageFlagBits::eVertex,
+				0, sizeof(magmatic::render::PushConstantObject),
+				&obj
+				);
+		buff->drawIndexed(primitive.index_count, 1u, primitive.first_index, 0, 0);
+	}
+	for(const auto& child : node->children)
+	{
+		renderNode(buff, child, current_matrix);
 	}
 }
 
-std::vector<uint32_t> Application::getIndexConfig(const std::string& mode) const {
-	if(mode == "square") {
-		return squareIndices;
-	} else if(mode == "triangle") {
-		return triangleIndices;
-	} else if(mode == "hourglass") {
-		return hourglassIndices;
-	} else if(mode == "hourglass on square") {
-		std::vector<uint32_t> res;
-		res.reserve(hourglassIndices.size() + squareIndices.size());
-		res.insert(res.end(), squareIndices.begin(),squareIndices.end());
-		for(uint32_t index : hourglassIndices) {
-			res.emplace_back(index + static_cast<uint32_t>(squareVertices.size()));
-		}
-		return res;
-	} else {
-		spdlog::error("Mode {} not implemented", mode);
-		throw std::runtime_error("Mode '" + mode + "' is not yet implemented");
-	}
-}
 
 void Application::moveLeft() {
 	position += deltaTime*glm::vec3(0.0f, -speed, 0.0f);

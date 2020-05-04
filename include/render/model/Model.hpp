@@ -1,5 +1,5 @@
-#ifndef MAGMATIC_MODEL_H
-#define MAGMATIC_MODEL_H
+#ifndef MAGMATIC_MODEL_HPP
+#define MAGMATIC_MODEL_HPP
 
 #include "ModelData.hpp"
 #include <memory>
@@ -19,7 +19,7 @@ namespace magmatic::render
 	public:
 		std::unique_ptr<VertexBuffer> vertex_buffer;
 		std::unique_ptr<IndexBuffer> index_buffer;
-		std::vector<Texture> textures;
+		std::vector<std::shared_ptr<Texture>> textures;
 		std::vector<ModelData::NodeData::self_pointer> nodes;
 
 		std::vector<ModelData::SamplerSettings> sampler_settings;
@@ -33,4 +33,4 @@ namespace magmatic::render
 	};
 }
 
-#endif //MAGMATIC_MODEL_H
+#endif //MAGMATIC_MODEL_HPP

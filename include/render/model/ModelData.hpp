@@ -10,6 +10,7 @@
 //todo: optimize import
 #include <glm/glm.hpp>
 #include <glm/detail/type_quat.hpp>
+#include <functional>
 
 
 namespace magmatic::render
@@ -21,9 +22,9 @@ namespace magmatic::render
 		{
 			vk::Filter min_filter;
 			vk::Filter mag_filter;
-			vk::SamplerAddressMode modeU;
-			vk::SamplerAddressMode modeV;
-			vk::SamplerAddressMode modeW;
+			vk::SamplerAddressMode mode_U;
+			vk::SamplerAddressMode mode_V;
+			vk::SamplerAddressMode mode_W;
 		};
 
 		struct PrimitiveData {
@@ -74,6 +75,24 @@ namespace magmatic::render
 
 		ModelData(std::vector<Vertex>&& vertices, std::vector<uint32_t>&& indices)
 		: vertices(std::move(vertices)), indices(std::move(indices)) {};
+	};
+}
+
+namespace std {
+	template<> struct hash<magmatic::render::ModelData::SamplerSettings> {
+		size_t operator()(magmatic::render::ModelData::SamplerSettings const& sampler_settings) const {
+			const auto mag_filter = std::hash<int>()(static_cast<int>(sampler_settings.mag_filter));
+			const auto min_filter = std::hash<int>()(static_cast<int>(sampler_settings.min_filter));
+			const auto mode_u = std::hash<int>()(static_cast<int>(sampler_settings.mode_U));
+			const auto mode_w = std::hash<int>()(static_cast<int>(sampler_settings.mode_W));
+			const auto mode_v = std::hash<int>()(static_cast<int>(sampler_settings.mode_V));
+
+			return (((((mag_filter
+			^ (min_filter << 1u) >> 1u)
+			^ (mode_u << 1u)) >> 1u)
+			^ (mode_w << 1u)) >> 1u)
+			^ (mode_v << 1u);
+		}
 	};
 }
 

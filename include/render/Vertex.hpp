@@ -2,6 +2,8 @@
 #define MAGMATIC_VERTEX_HPP
 
 #include <glm/glm.hpp>
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/hash.hpp>
 #include <vulkan/vulkan.hpp>
 
 namespace magmatic::render {
@@ -29,6 +31,17 @@ namespace magmatic::render {
 					vk::VertexInputAttributeDescription(2, binding, vk::Format::eR32G32B32Sfloat, offsetof(Vertex, color)),
 					vk::VertexInputAttributeDescription(3, binding, vk::Format::eR32G32Sfloat, offsetof(Vertex, uv))
 			};
+		}
+	};
+}
+
+namespace std {
+	template<> struct hash<magmatic::render::Vertex> {
+		size_t operator()(magmatic::render::Vertex const& vertex) const {
+			return (((hash<glm::vec3>()(vertex.position) ^
+			         (hash<glm::vec3>()(vertex.normal) << 1)) >> 1) ^
+			       (hash<glm::vec3>()(vertex.color) << 1) >> 1) ^
+					(hash<glm::vec2>()(vertex.uv) << 1);
 		}
 	};
 }

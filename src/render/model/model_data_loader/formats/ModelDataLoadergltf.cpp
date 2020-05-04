@@ -290,9 +290,9 @@ void magmatic::render::ModelDataLoadergltf::loadSamplers(
 		ModelData::SamplerSettings sampler{};
 		sampler.min_filter = decodeFilterMode(samp.minFilter);
 		sampler.mag_filter = decodeFilterMode(samp.magFilter);
-		sampler.modeU = decodeAddressMode(samp.wrapS);
-		sampler.modeV = decodeAddressMode(samp.wrapT);
-		sampler.modeW = sampler.modeU;
+		sampler.mode_U = decodeAddressMode(samp.wrapS);
+		sampler.mode_V = decodeAddressMode(samp.wrapT);
+		sampler.mode_W = sampler.mode_U;
 		samplers.emplace_back(sampler);
 	}
 	#if !defined(NDEBUG)

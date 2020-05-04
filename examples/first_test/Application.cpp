@@ -7,6 +7,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <render/Bitmap.hpp>
 #include "Application.hpp"
+#include "ActionHandlers.hpp"
 
 Application::Application(const std::string& mode) {
 	vertices = getVertexConfig(mode);
@@ -50,6 +51,8 @@ Application::Application(const std::string& mode) {
 	imageAcquiredSemaphores = std::make_unique<magmatic::render::Semaphores>(*logicalDevice, magmatic::render::SemaphoreType::ImageAvailableSemaphore, MAX_FRAMES_IN_FLIGHT);
 	renderFinishedSemaphores = std::make_unique<magmatic::render::Semaphores>(*logicalDevice, magmatic::render::SemaphoreType::RenderFinishedSemaphore, MAX_FRAMES_IN_FLIGHT);
 	spdlog::info("Created sync objects and thus everything");
+
+	setMoveBindings();
 }
 
 void Application::destroySwapChain() {
@@ -83,6 +86,8 @@ void Application::recreateSwapChain() {
 	currentBuffer = 0;
 	currentFrame = 0;
 	MAX_FRAMES_IN_FLIGHT = std::min(static_cast<size_t>(5), swapChain->images_.size());
+
+	updateDescriptorSets();
 }
 
 void Application::run() {
@@ -90,10 +95,18 @@ void Application::run() {
 	currentBuffer = 0;
 	currentFrame = 0;
 	MAX_FRAMES_IN_FLIGHT = std::min(static_cast<size_t>(5), swapChain->images_.size());
+	lastFrame = std::chrono::high_resolution_clock::now();
+
+
+	updateDescriptorSets();
 
 	while(!window->shouldClose()) {
 		glfwPollEvents();
 		drawFrame();
+		move();
+		auto time = std::chrono::high_resolution_clock::now();
+		deltaTime = std::chrono::duration<float, std::chrono::seconds::period>(time - lastFrame).count();
+		lastFrame = time;
 	}
 
 	logicalDevice->waitIdle();
@@ -105,30 +118,32 @@ void Application::updateUniformBuffer() {
 	auto currentTime = std::chrono::high_resolution_clock::now();
 	float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
 	ubo.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-	ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+	ubo.view = glm::lookAt(position, position - offset, glm::vec3(0.0f, 0.0f, 1.0f));
 	ubo.proj = glm::perspective(glm::radians(45.0f), swapChain->extent.width/(float) swapChain->extent.height, 0.1f, 10.0f);
 	ubo.proj[1][1] *= -1;
 
 	uniformBuffers[currentBuffer]->copyMemory(sizeof(ubo), ubo);
 }
 
-void Application::updateDescriptorSet() {
-	std::vector<magmatic::render::DescriptorWriteUpdate> updates;
-	magmatic::render::DescriptorWriteUpdate write_update;
-	write_update.type = magmatic::render::DescriptorWriteUpdate::eUniform;
-	write_update.dst_binding = 0;
-	write_update.dst_array_elem = 0;
-	vk::DescriptorBufferInfo info(
-			uniformBuffers[currentFrame]->getBuffer().get(),
-			0,
-			sizeof(magmatic::render::UniformBufferObject)
-	);
-	write_update.data_info = info;
-	updates.emplace_back(write_update);
+void Application::updateDescriptorSets() {
+	for(size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+		std::vector<magmatic::render::DescriptorWriteUpdate> updates;
+		magmatic::render::DescriptorWriteUpdate write_update;
+		write_update.type = magmatic::render::DescriptorWriteUpdate::eUniform;
+		write_update.dst_binding = 0;
+		write_update.dst_array_elem = 0;
+		vk::DescriptorBufferInfo info(
+				uniformBuffers[currentFrame]->getBuffer().get(),
+				0,
+				sizeof(magmatic::render::UniformBufferObject)
+		);
+		write_update.data_info = info;
+		updates.emplace_back(write_update);
 
-	updates.emplace_back(texture->getWriteInfo(1, 0));
-	updates.emplace_back(sampler->getWriteInfo(2, 0));
-	descriptorSets->updateDescriptorSet(currentFrame, updates);
+		updates.emplace_back(texture->getWriteInfo(1, 0));
+		updates.emplace_back(sampler->getWriteInfo(2, 0));
+		descriptorSets->updateDescriptorSet(i, updates);
+	}
 }
 
 void Application::recordCommandBuffer() {
@@ -177,7 +192,6 @@ void Application::drawFrame() {
 		fences->resetFence(currentFrame);
 	}
 	imagesInFlight[currentBuffer] = currentFrame;
-	updateDescriptorSet();
 	recordCommandBuffer();
 
 	updateUniformBuffer();
@@ -236,4 +250,94 @@ std::vector<uint32_t> Application::getIndexConfig(const std::string& mode) const
 		spdlog::error("Mode {} not implemented", mode);
 		throw std::runtime_error("Mode '" + mode + "' is not yet implemented");
 	}
+}
+
+void Application::moveLeft() {
+	position += deltaTime*glm::vec3(0.0f, -speed, 0.0f);
+}
+void Application::moveRight() {
+	position += deltaTime*glm::vec3(0.0f, speed, 0.0f);
+}
+void Application::moveForward() {
+	position += deltaTime*glm::vec3(-speed, 0.0f, 0.0f);
+}
+void Application::moveBackward() {
+	position += deltaTime*glm::vec3(speed, 0.0f, 0.0f);
+}
+void Application::moveUp() {
+	position += deltaTime*glm::vec3(0.0f, 0.0f, speed);
+}
+void Application::moveDown() {
+	position += deltaTime*glm::vec3(0.0f, 0.0f, -speed);
+}
+
+void Application::move() {
+	if(right)
+		moveRight();
+	if(left)
+		moveLeft();
+	if(forward)
+		moveForward();
+	if(backward)
+		moveBackward();
+	if(up)
+		moveUp();
+	if(down)
+		moveDown();
+}
+
+void Application::moveBindings(int key, int action) {
+	if(action == GLFW_PRESS || action == GLFW_REPEAT) {
+		switch (key) {
+			case GLFW_KEY_A:
+				left = true;
+				break;
+			case GLFW_KEY_D:
+				right = true;
+				break;
+			case GLFW_KEY_W:
+				forward = true;
+				break;
+			case GLFW_KEY_S:
+				backward = true;
+				break;
+			case GLFW_KEY_SPACE:
+				up = true;
+				break;
+			case GLFW_KEY_LEFT_SHIFT:
+				down = true;
+				break;
+		}
+	}
+	if(action == GLFW_RELEASE) {
+		switch (key) {
+			case GLFW_KEY_A:
+				left = false;
+				break;
+			case GLFW_KEY_D:
+				right = false;
+				break;
+			case GLFW_KEY_W:
+				forward = false;
+				break;
+			case GLFW_KEY_S:
+				backward = false;
+				break;
+			case GLFW_KEY_SPACE:
+				up = false;
+				break;
+			case GLFW_KEY_LEFT_SHIFT:
+				down = false;
+				break;
+		}
+	}
+}
+
+void Application::setMoveBindings() {
+	ActionHandlers::registerKeyboardObserver([&](int key, int action) {
+		moveBindings(key, action);
+	});
+
+	glfwSetKeyCallback(window->getWindow().get(), ActionHandlers::keyHandler);
+	//gflwSetScrollCallback(window->getWindow().get(), )
 }

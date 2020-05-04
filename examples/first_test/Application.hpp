@@ -14,6 +14,7 @@
 #include <render/Framebuffers.hpp>
 #include <render/CommandBuffer.hpp>
 #include <render/UniformBuffer.hpp>
+#include <iostream>
 #include "render/Vertex.hpp"
 #include "render/Window.hpp"
 #include "render/Instance.hpp"
@@ -74,11 +75,11 @@ class Application {
 
 	const std::vector<vk::DescriptorSetLayoutBinding> bindings = {
 			{
-			0,
-			vk::DescriptorType::eUniformBuffer,
-			1,
-			vk::ShaderStageFlagBits::eVertex,
-			nullptr
+				0,
+				vk::DescriptorType::eUniformBuffer,
+				1,
+				vk::ShaderStageFlagBits::eVertex,
+				nullptr
 			},
 			{
 				1,
@@ -148,12 +149,39 @@ private:
 	[[nodiscard]] std::vector<magmatic::render::Vertex> getVertexConfig(const std::string &mode) const;
 
 	[[nodiscard]] std::vector<uint32_t> getIndexConfig(const std::string& mode) const;
-	void updateDescriptorSet();
+	void updateDescriptorSets();
 	void recordCommandBuffer();
 	void drawFrame();
 
 	void destroySwapChain();
 	void recreateSwapChain();
+
+	glm::vec3 position = glm::vec3(4.0f, 0.0f, 0.0f);
+	glm::vec3 offset = glm::vec3(4.0f, 0.0f, 0.0f);
+
+	static constexpr float speed = 1.5f;
+
+	std::chrono::time_point<std::chrono::steady_clock> lastFrame;
+	float deltaTime = 0.0f;
+	// TODO: Extract to external class
+	bool right = false;
+	bool left = false;
+	bool forward = false;
+	bool backward = false;
+	bool up = false;
+	bool down = false;
+	void moveLeft();
+	void moveRight();
+	void moveForward();
+	void moveBackward();
+	void moveUp();
+	void moveDown();
+
+	void move();
+
+	void moveBindings(int key, int action);
+
+	void setMoveBindings();
 };
 
 

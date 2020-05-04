@@ -61,6 +61,9 @@ namespace magmatic::render
 			void operator()(GLFWwindow* pointer) noexcept;
 		};
 
+		[[nodiscard]] const std::unique_ptr<GLFWwindow, GLFWWindowDeleter>& getWindow() const {
+			return this->window;
+		}
 	private:
 
 		std::unique_ptr<GLFWwindow, GLFWWindowDeleter> window;

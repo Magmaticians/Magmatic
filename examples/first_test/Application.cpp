@@ -3,7 +3,7 @@
 #include "render/Bitmap.hpp"
 #include "render/UniformBufferObject.hpp"
 #include "render/model/ModelData.hpp"
-#include "render/model/model_data_loader/ModelDataLoader.hpp"
+#include "render/model/model_data_loader/formats/ModelDataLoadergltf.hpp"
 #include "ActionHandlers.hpp"
 #include <algorithm>
 #include <spdlog/spdlog.h>
@@ -14,6 +14,11 @@
 
 
 Application::Application(const std::string& mode) {
+	magmatic::render::ModelDataLoader::registerLoader(
+			magmatic::render::ModelDataLoadergltf::factoryName(),
+			std::make_unique<magmatic::render::ModelDataLoadergltf>()
+	);
+
 	window = std::make_unique<magmatic::render::Window>(DEFAULT_NAME);
 	instance = std::make_unique<magmatic::render::Instance>(DEFAULT_NAME, window->getRequiredExtensions());
 	surface = std::make_unique<magmatic::render::Surface>(instance->createSurface(*window));

@@ -5,7 +5,6 @@
 #include "render/LogicalDevice.hpp"
 #include "render/Texture.hpp"
 
-
 magmatic::render::Model::Model(
 		const LogicalDevice& l_device, const CommandPool& pool,
 		const std::shared_ptr<ModelData>& data
@@ -19,5 +18,6 @@ magmatic::render::Model::Model(
 	               [&l_device, &pool](const Bitmap &bitmap) {
 		               return std::make_shared<Texture>(l_device, bitmap, pool);
 	               });
-
+	material_data = data->material_data;
+	texture_data = data->texture_data;
 }

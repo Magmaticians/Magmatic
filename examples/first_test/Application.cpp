@@ -34,10 +34,11 @@ Application::Application(const std::string& mode) {
 	spdlog::info("Created shaders");
 
 	swapChain = std::make_unique<magmatic::render::SwapChain>(*logicalDevice, *surface, *window);
+	MAX_FRAMES_IN_FLIGHT = (swapChain->images_.size());
 	commandPool = std::make_unique<magmatic::render::CommandPool>(*logicalDevice, magmatic::render::QueueType::GraphicalQueue);
 
 	{
-		auto model_data = magmatic::render::ModelDataLoader::load("GLTF", "examples/resources/basic_tank.gltf");
+		auto model_data = magmatic::render::ModelDataLoader::load("GLTF", "examples/resources/Duck.gltf");
 		model = std::make_unique<magmatic::render::Model>(*logicalDevice, *commandPool, model_data);
 	}
 
@@ -89,6 +90,7 @@ void Application::recreateSwapChain() {
 	destroySwapChain();
 
 	swapChain = std::make_unique<magmatic::render::SwapChain>(magmatic::render::SwapChain(*logicalDevice, *surface, *window));
+	MAX_FRAMES_IN_FLIGHT = (swapChain->images_.size());
 	depthResources = std::make_unique<magmatic::render::DepthResources>(*logicalDevice,swapChain->extent, *commandPool);
 	renderPass = std::make_unique<magmatic::render::RenderPass>(*logicalDevice, *surface, *depthResources);
 	descriptorSets = std::make_unique<magmatic::render::DescriptorSets>(*logicalDevice, bindings, MAX_FRAMES_IN_FLIGHT);
@@ -98,7 +100,6 @@ void Application::recreateSwapChain() {
 	imagesInFlight.resize(MAX_FRAMES_IN_FLIGHT, -1);
 	currentBuffer = 0;
 	currentFrame = 0;
-	MAX_FRAMES_IN_FLIGHT = std::min(static_cast<size_t>(4), swapChain->images_.size());
 
 	updateDescriptorSets();
 }
@@ -107,7 +108,6 @@ void Application::run() {
 	imagesInFlight.resize(MAX_FRAMES_IN_FLIGHT, -1);
 	currentBuffer = 0;
 	currentFrame = 0;
-	MAX_FRAMES_IN_FLIGHT = std::min(static_cast<size_t>(3), swapChain->images_.size());
 	lastFrame = std::chrono::high_resolution_clock::now();
 
 
@@ -130,7 +130,7 @@ void Application::updateUniformBuffer() {
 	magmatic::render::UniformBufferObject ubo = {};
 	auto currentTime = std::chrono::high_resolution_clock::now();
 	float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
-	ubo.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+	ubo.model = glm::scale(glm::rotate(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 2.0f)), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f)), glm::vec3(0.03f, 0.03f, 0.03f));
 	ubo.view = glm::lookAt(position, position - offset, glm::vec3(0.0f, 0.0f, 1.0f));
 	ubo.proj = glm::perspective(glm::radians(45.0f), swapChain->extent.width/(float) swapChain->extent.height, 0.1f, 10.0f);
 	ubo.proj[1][1] *= -1;

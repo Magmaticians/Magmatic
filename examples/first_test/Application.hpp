@@ -41,7 +41,7 @@ class Application {
 			{
 				1,
 				vk::DescriptorType::eSampledImage,
-				32,
+				1,
 				vk::ShaderStageFlagBits::eFragment,
 				nullptr
 			},
@@ -92,7 +92,7 @@ public:
 
 private:
 	static constexpr uint64_t fenceTimeout = 1000000;
-	size_t MAX_FRAMES_IN_FLIGHT = 3;
+	size_t MAX_FRAMES_IN_FLIGHT = 4;
 
 	size_t currentFrame = 0;
 	uint32_t currentBuffer = 0;

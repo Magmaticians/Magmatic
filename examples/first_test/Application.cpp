@@ -98,7 +98,7 @@ void Application::recreateSwapChain() {
 	imagesInFlight.resize(MAX_FRAMES_IN_FLIGHT, -1);
 	currentBuffer = 0;
 	currentFrame = 0;
-	MAX_FRAMES_IN_FLIGHT = std::min(static_cast<size_t>(5), swapChain->images_.size());
+	MAX_FRAMES_IN_FLIGHT = std::min(static_cast<size_t>(4), swapChain->images_.size());
 
 	updateDescriptorSets();
 }
@@ -107,7 +107,7 @@ void Application::run() {
 	imagesInFlight.resize(MAX_FRAMES_IN_FLIGHT, -1);
 	currentBuffer = 0;
 	currentFrame = 0;
-	MAX_FRAMES_IN_FLIGHT = std::min(static_cast<size_t>(5), swapChain->images_.size());
+	MAX_FRAMES_IN_FLIGHT = std::min(static_cast<size_t>(3), swapChain->images_.size());
 	lastFrame = std::chrono::high_resolution_clock::now();
 
 
@@ -150,13 +150,19 @@ void Application::updateDescriptorSets() {
 				0,
 				sizeof(magmatic::render::UniformBufferObject)
 		);
-		write_update.data_info = info;
+		write_update.data_info = std::vector<vk::DescriptorBufferInfo>{info};
 		updates.emplace_back(write_update);
 		assert((textures.size() < 32));
-		for(size_t j = 0; j < textures.size(); ++j)
-		{
-			updates.emplace_back(textures[j]->getWriteInfo(1, j));
-		}
+		vk::DescriptorImageInfo descriptorImageInfos;
+			descriptorImageInfos.sampler = nullptr;
+			descriptorImageInfos.imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
+			descriptorImageInfos.imageView = textures[0]->image_view.get();
+		write_update = {};
+		write_update.dst_binding = 1;
+		write_update.dst_array_elem = 0;
+		write_update.type = magmatic::render::DescriptorWriteUpdate::eImage;
+		write_update.data_info = std::vector{descriptorImageInfos};
+		updates.emplace_back(write_update);
 		updates.emplace_back(sampler->getWriteInfo(2, 0));
 		descriptorSets->updateDescriptorSet(i, updates);
 	}

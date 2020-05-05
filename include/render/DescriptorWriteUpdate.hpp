@@ -21,7 +21,7 @@ namespace magmatic::render
 		uint32_t dst_binding;
 		uint32_t dst_array_elem;
 
-		std::variant<vk::DescriptorBufferInfo, vk::DescriptorImageInfo> data_info;
+		std::variant<std::vector<vk::DescriptorBufferInfo>, std::vector<vk::DescriptorImageInfo>> data_info;
 
 		vk::WriteDescriptorSet toWriteInfo(const vk::DescriptorSet& descriptor) const;
 	};

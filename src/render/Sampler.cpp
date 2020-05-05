@@ -30,8 +30,8 @@ magmatic::render::Sampler::getWriteInfo(size_t dst_binding, size_t dst_array_ele
 	update.type = DescriptorWriteUpdate::eSampler;
 	update.dst_binding = dst_binding;
 	update.dst_array_elem = dst_array_elem;
-	update.data_info = vk::DescriptorImageInfo {
+	update.data_info = std::vector<vk::DescriptorImageInfo>{ {
 			sampler.get()
-	};
+	}};
 	return update;
 }

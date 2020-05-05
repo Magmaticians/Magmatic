@@ -2,9 +2,15 @@
 #  TinyGLTF_INCLUDE_DIRS - The TinyGLTF include directories
 #  TinyGLTF_LIBRARIES - The libraries needed to use TinyGLTF
 
+
+find_package(PkgConfig)
+pkg_check_modules(PC_TinyGLTF QUIET TinyGLTF)
+
 find_path(
 		TinyGLTF_INCLUDE_DIR
 		tiny_gltf.h
+		HINTS ${PC_TinyGLTF_INCLUDEDIR} ${PC_TinyGLTF_INCLUDE_DIRS}
+
 )
 
 include(FindPackageHandleStandardArgs)

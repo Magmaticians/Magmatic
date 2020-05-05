@@ -12,6 +12,3 @@ int main() {
     application.run();
     return 0;
 }
-// TODO: Create custom cursor (glfw)
-// TODO: Scroll = change distance
-

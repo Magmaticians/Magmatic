@@ -9,7 +9,7 @@ Magmatic is multiplatform graphics and audio engine made by [Magmaticians](https
 
 ### Possibilities presentation
 
-Coming soon...
+![Duck](docs/Duck2.png)
 
 ## Requirements
 
@@ -35,3 +35,4 @@ Coming soon...
 - opusfile - Decoding .opus streams
 - spdlog - Logging library - 1.4.2-1
 - tabulate - Creating tables in console - 2019-01-06
+- tinygltf - Library for model loading (requires stb and nlohmann-json) - 2.2.0

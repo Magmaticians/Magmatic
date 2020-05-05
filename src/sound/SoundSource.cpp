@@ -130,3 +130,11 @@ void magmatic::sound::SoundSource::setGain(float gain) const noexcept
 {
 	alSourcef(source, AL_GAIN, gain);
 }
+
+void magmatic::sound::SoundSource::setRepeats(bool enable) const noexcept {
+	if(enable) {
+		alSourcei(source, AL_LOOPING, AL_TRUE);
+	} else {
+		alSourcei(source, AL_LOOPING, AL_FALSE);
+	}
+}

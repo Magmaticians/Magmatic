@@ -1,5 +1,5 @@
-//#define TINYGLTF_IMPLEMENTATION
-//#define TINYGLTF_NO_STB_IMAGE_WRITE
+#define TINYGLTF_IMPLEMENTATION
+#define TINYGLTF_NO_STB_IMAGE_WRITE
 #include "render/model/model_data_loader/formats/ModelDataLoadergltf.hpp"
 #include <tiny_gltf.h>
 #include <spdlog/spdlog.h>

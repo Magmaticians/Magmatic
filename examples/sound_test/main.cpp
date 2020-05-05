@@ -5,6 +5,7 @@
 #include <memory>
 #include <iostream>
 #include <chrono>
+#include <sound/formats/SoundLoaderVorbis.hpp>
 
 using namespace std::chrono_literals;
 
@@ -39,6 +40,10 @@ void fadingSound(const magmatic::sound::SoundSource& source)
 
 int main(int argc, char** argv)
 {
+	 magmatic::sound::SoundLoader::registerLoader(
+			magmatic::sound::SoundLoaderVorbis::factoryName(),
+			std::make_unique<magmatic::sound::SoundLoaderVorbis>()
+	);
 	magmatic::sound::SoundDevice device{};
 	std::cout << "Registered types:" << magmatic::sound::SoundLoader::registeredCount() << "\n";
 	for(const auto& type : magmatic::sound::SoundLoader::registeredTypes())

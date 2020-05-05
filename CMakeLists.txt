@@ -58,7 +58,7 @@ target_include_directories(magmatic-sound PUBLIC ${OPENAL_INCLUDE_DIRS})
 target_compile_definitions(magmatic-sound PRIVATE SPDLOG_FMT_EXTERNAL=1)
 
 
-target_link_libraries(main-test PRIVATE magmatic-render)
+target_link_libraries(main-test PRIVATE magmatic-render magmatic-sound)
 
 add_subdirectory("src")
 add_subdirectory("include")

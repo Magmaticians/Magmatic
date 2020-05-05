@@ -25,6 +25,8 @@
 #include "render/UniformBufferObject.hpp"
 #include "render/model/Model.hpp"
 #include <chrono>
+#include <sound/SoundDevice.hpp>
+#include <sound/SoundSource.hpp>
 
 
 class Application {
@@ -60,6 +62,9 @@ class Application {
 			vk::DescriptorType::eSampler
 	};
 
+	magmatic::sound::SoundDevice soundDevice{};
+	magmatic::sound::SoundSource quackSource;
+	magmatic::sound::SoundSource musicSource;
 	std::unique_ptr<magmatic::render::Window> window;
 	std::unique_ptr<magmatic::render::Instance> instance;
 	std::unique_ptr<magmatic::render::Surface> surface;
@@ -115,7 +120,9 @@ private:
 	glm::vec3 position = glm::vec3(4.0f, 0.0f, 0.0f);
 	glm::vec3 offset = glm::vec3(4.0f, 0.0f, 0.0f);
 
-	static constexpr float speed = 1.5f;
+	float speed = 1.5f;
+	float normalSpeed = 1.5f;
+	float sprintSpeed = 3.0f;
 
 	std::chrono::time_point<std::chrono::high_resolution_clock> lastFrame;
 	float deltaTime = 0.0f;

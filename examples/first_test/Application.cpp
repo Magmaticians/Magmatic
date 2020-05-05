@@ -11,13 +11,30 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <render/PushConstantObject.h>
+#include <utils/factory/FileLoaderFactory.hpp>
+#include <sound/formats/SoundLoaderVorbis.hpp>
 
 
-Application::Application(const std::string& mode) {
+Application::Application(const std::string& mode):
+	quackSource({0, 0, 0}),
+	musicSource({0, 0, 0}) {
 	magmatic::render::ModelDataLoader::registerLoader(
 			magmatic::render::ModelDataLoadergltf::factoryName(),
 			std::make_unique<magmatic::render::ModelDataLoadergltf>()
 	);
+	magmatic::sound::SoundLoader::registerLoader(
+			magmatic::sound::SoundLoaderVorbis::factoryName(),
+			std::make_unique<magmatic::sound::SoundLoaderVorbis>()
+	);
+	spdlog::info("Loaders registered");
+
+	auto quackBuffer = magmatic::sound::SoundLoader::load("VORBIS", "examples/resources/Duck-quack.ogg");
+	quackSource.setSound(quackBuffer);
+	auto musicBuffer = magmatic::sound::SoundLoader::load("VORBIS", "examples/resources/bit-sound-mono.ogg");
+	musicSource.setSound(musicBuffer);
+	musicSource.setGain(0.2f);
+	musicSource.setRepeats(true);
+	spdlog::info("Initialized sound");
 
 	window = std::make_unique<magmatic::render::Window>(DEFAULT_NAME);
 	instance = std::make_unique<magmatic::render::Instance>(DEFAULT_NAME, window->getRequiredExtensions());
@@ -110,9 +127,9 @@ void Application::run() {
 	currentFrame = 0;
 	lastFrame = std::chrono::high_resolution_clock::now();
 
-
 	updateDescriptorSets();
 
+	musicSource.play();
 	while(!window->shouldClose()) {
 		glfwPollEvents();
 		drawFrame();
@@ -130,7 +147,7 @@ void Application::updateUniformBuffer() {
 	magmatic::render::UniformBufferObject ubo = {};
 	auto currentTime = std::chrono::high_resolution_clock::now();
 	float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
-	ubo.model = glm::scale(glm::rotate(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 2.0f)), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f)), glm::vec3(0.03f, 0.03f, 0.03f));
+	ubo.model = glm::scale(glm::rotate(glm::rotate(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -0.75f)), glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f)), time*glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f)), glm::vec3(0.01f, 0.01f, 0.01f));
 	ubo.view = glm::lookAt(position, position - offset, glm::vec3(0.0f, 0.0f, 1.0f));
 	ubo.proj = glm::perspective(glm::radians(45.0f), swapChain->extent.width/(float) swapChain->extent.height, 0.1f, 10.0f);
 	ubo.proj[1][1] *= -1;
@@ -300,7 +317,8 @@ void Application::move() {
 	if(down)
 		moveDown();
 }
-
+// TODO: Create custom cursor (glfw)
+// TODO: Scroll = change distance
 void Application::moveBindings(int key, int action) {
 	if(action == GLFW_PRESS || action == GLFW_REPEAT) {
 		switch (key) {
@@ -319,8 +337,14 @@ void Application::moveBindings(int key, int action) {
 			case GLFW_KEY_SPACE:
 				up = true;
 				break;
-			case GLFW_KEY_LEFT_SHIFT:
+			case GLFW_KEY_LEFT_CONTROL:
 				down = true;
+				break;
+			case GLFW_KEY_LEFT_SHIFT:
+				speed = sprintSpeed;
+				break;
+			case GLFW_KEY_P:
+				quackSource.play();
 				break;
 		}
 	}
@@ -341,8 +365,11 @@ void Application::moveBindings(int key, int action) {
 			case GLFW_KEY_SPACE:
 				up = false;
 				break;
-			case GLFW_KEY_LEFT_SHIFT:
+			case GLFW_KEY_LEFT_CONTROL:
 				down = false;
+				break;
+			case GLFW_KEY_LEFT_SHIFT:
+				speed = normalSpeed;
 				break;
 		}
 	}

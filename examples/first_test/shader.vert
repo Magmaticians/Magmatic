@@ -27,8 +27,8 @@ layout(location = 2) out vec3 LightingColor;
 
 void main() {
     vec3 lightColor = vec3(1, 1, 1);
-    vec3 viewPos = vec3(0, 0, -1.0);
-    vec3 lightPos = vec3(-1.0, 1.0, 1.0);
+    vec3 viewPos = vec3(0, 0, 0);
+    vec3 lightPos = vec3(1.0, 1.0, 1.0);
 
 
     gl_Position = ubo.proj * ubo.view * ubo.model * vec4(inPosition, 1.0);

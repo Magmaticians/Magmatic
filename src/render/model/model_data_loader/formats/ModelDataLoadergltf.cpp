@@ -1,18 +1,15 @@
-#define TINYGLTF_IMPLEMENTATION
-#define TINYGLTF_NO_STB_IMAGE_WRITE
 #include "render/model/model_data_loader/formats/ModelDataLoadergltf.hpp"
 #include <tiny_gltf.h>
 #include <spdlog/spdlog.h>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
+
 #include <glm/gtc/type_ptr.hpp>
 #include <vulkan/vulkan.hpp>
 
 
-/*bool magmatic::render::ModelDataLoadergltf::registered_ = magmatic::render::ModelDataLoader::registerLoader(
+bool magmatic::render::ModelDataLoadergltf::registered_ = magmatic::render::ModelDataLoader::registerLoader(
 		ModelDataLoadergltf::factoryName(),
 		std::make_unique<ModelDataLoadergltf>()
-);*/
+);
 
 std::shared_ptr<magmatic::render::ModelData> magmatic::render::ModelDataLoadergltf::load(const std::filesystem::path& file_path)
 {

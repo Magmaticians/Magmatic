@@ -44,13 +44,6 @@ magmatic::render::Image::Image(
 	handle->bindImageMemory(image.get(), memory.get(), 0);
 }
 
-magmatic::render::Image& magmatic::render::Image::operator=(Image && rhs) noexcept {
-	this->image = std::move(rhs.image);
-	this->memory = std::move(rhs.memory);
-	this->image_format = rhs.image_format;
-	return *this;
-}
-
 void magmatic::render::Image::transitionImageLayout(
 		vk::ImageLayout old_layout,
 		vk::ImageLayout new_layout,
@@ -121,8 +114,8 @@ void magmatic::render::Image::transitionImageLayout(
 	command_buffer.submitWait();
 }
 
-vk::UniqueImageView magmatic::render::Image::createImageView(const vk::ImageAspectFlags& aspectFlags,
-                                                             const vk::ComponentMapping& compMapping)
+vk::UniqueImageView magmatic::render::Image::createImageView(const vk::ImageAspectFlags& aspect_flags,
+                                                             const vk::ComponentMapping& component_mapping)
 {
 	const auto& l_device = image.getOwner();
 
@@ -131,9 +124,9 @@ vk::UniqueImageView magmatic::render::Image::createImageView(const vk::ImageAspe
 			image.get(),
 			vk::ImageViewType::e2D,
 			image_format,
-			compMapping,
+			component_mapping,
 			vk::ImageSubresourceRange {
-					aspectFlags,
+					aspect_flags,
 					0,
 					1,
 					0,
@@ -145,15 +138,15 @@ vk::UniqueImageView magmatic::render::Image::createImageView(const vk::ImageAspe
 }
 
 
-vk::UniqueImageView magmatic::render::Image::createImageView(const LogicalDevice& l_device, const vk::Image& image, const vk::Format& format, const vk::ImageAspectFlags& aspectFlags, const vk::ComponentMapping& compMapping) {
+vk::UniqueImageView magmatic::render::Image::createImageView(const LogicalDevice& l_device, const vk::Image& image, const vk::Format& format, const vk::ImageAspectFlags& aspect_flags, const vk::ComponentMapping& component_mapping) {
 	vk::ImageViewCreateInfo image_view_info = {
 			vk::ImageViewCreateFlags(),
 			image,
 			vk::ImageViewType::e2D,
 			format,
-			compMapping,
+			component_mapping,
 			vk::ImageSubresourceRange {
-					aspectFlags,
+					aspect_flags,
 					0,
 					1,
 					0,
@@ -162,4 +155,14 @@ vk::UniqueImageView magmatic::render::Image::createImageView(const LogicalDevice
 	};
 
 	return l_device.getHandle()->createImageViewUnique(image_view_info);
+}
+
+const vk::UniqueImage &magmatic::render::Image::getImage()
+{
+	return image;
+}
+
+const vk::UniqueDeviceMemory &magmatic::render::Image::getMemory()
+{
+	return memory;
 }

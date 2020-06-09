@@ -11,6 +11,8 @@ magmatic::render::Framebuffers::Framebuffers(
 
 	framebuffers.reserve(swapchain.getImageViews().size());
 
+	const auto extent = swapchain.getExtent();
+
 	for(const auto& view: swapchain.getImageViews())
 	{
 		std::array<vk::ImageView, 2> attachments = {view.get(), depthImageView.get()};
@@ -20,17 +22,11 @@ magmatic::render::Framebuffers::Framebuffers(
 						render_pass.getRenderPass().get(),
 						static_cast<uint32_t>(attachments.size()),
 						attachments.data(),
-						swapchain.extent.width,
-						swapchain.extent.height,
+						extent.width,
+						extent.height,
 						1
 				)
 		);
 		framebuffers.emplace_back(std::move(framebuffer));
 	}
-}
-
-magmatic::render::Framebuffers::Framebuffers(Framebuffers&& rhs) noexcept : framebuffers(std::move(rhs.framebuffers)) { }
-magmatic::render::Framebuffers& magmatic::render::Framebuffers::operator=(Framebuffers&& rhs) noexcept {
-	this->framebuffers = std::move(rhs.framebuffers);
-	return *this;
 }

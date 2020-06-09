@@ -3,10 +3,10 @@
 #include <spdlog/spdlog.h>
 
 
-/*bool magmatic::sound::SoundLoaderOpus::registered_ = magmatic::sound::SoundLoader::registerLoader(
+bool magmatic::sound::SoundLoaderOpus::registered_ = magmatic::sound::SoundLoader::registerLoader(
 		SoundLoaderOpus::factoryName(),
 		std::make_unique<SoundLoaderOpus>()
-);*/
+);
 
 std::shared_ptr<magmatic::sound::SoundBuffer> magmatic::sound::SoundLoaderOpus::load(const std::filesystem::path& path)
 {

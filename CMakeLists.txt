@@ -38,9 +38,9 @@ add_executable(model_info "")
 add_dependencies(examples main-test device_enumeration sound_test model_info)
 
 #magmatic-utils
-#[[add_library(magmatic-utils SHARED "")
+add_library(magmatic-utils SHARED "")
 target_compile_definitions(magmatic-utils PRIVATE SPDLOG_FMT_EXTERNAL=1)
-target_link_libraries(magmatic-utils PUBLIC spdlog::spdlog_header_only)]]
+target_link_libraries(magmatic-utils PUBLIC spdlog::spdlog_header_only)
 
 
 #magmatic-render

@@ -20,32 +20,24 @@ namespace magmatic::render
 
 	class PhysicalDevice
 	{
-		friend class Instance;
-	private:
-		explicit PhysicalDevice(vk::PhysicalDevice physical_device);
-
 	public:
-		[[nodiscard]] uint32_t calculateScore() const noexcept;
-
 		vk::PhysicalDevice device;
 		vk::PhysicalDeviceProperties device_properties;
 		vk::PhysicalDeviceFeatures device_features;
 		std::vector<vk::QueueFamilyProperties> queue_family_properties;
 
-		PhysicalDevice(const PhysicalDevice& rhs) noexcept;
-		PhysicalDevice& operator=(const PhysicalDevice& rhs) noexcept = default;
-
-		PhysicalDevice(PhysicalDevice&& rhs) noexcept;
-		PhysicalDevice& operator=(PhysicalDevice&& rhs) noexcept;
+		[[nodiscard]] uint32_t calculateScore() const noexcept;
 
 		[[nodiscard]] std::vector<size_t> getGraphicQueue() const noexcept;
 		[[nodiscard]] std::vector<size_t> getPresentQueue(const Surface& surface) const noexcept;
 
 		[[nodiscard]] SwapChainSupportDetails getSwapChainSupportDetails(const Surface& surface) const;
 
-		[[nodiscard]] vk::FormatProperties getFormatProperties(const vk::Format& format) const {
-			return device.getFormatProperties(format);
-		}
+		[[nodiscard]] vk::FormatProperties getFormatProperties(const vk::Format& format) const;
+
+	private:
+		friend class Instance;
+		explicit PhysicalDevice(vk::PhysicalDevice physical_device);
 	};
 }
 

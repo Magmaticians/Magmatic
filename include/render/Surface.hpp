@@ -9,24 +9,23 @@ namespace magmatic::render
 {
 	class Surface
 	{
-		vk::UniqueSurfaceKHR surface;
 	public:
-		friend class Instance;
+		Surface(const Surface&) = delete;
+		Surface& operator=(const Surface&) = delete;
+
+		Surface(Surface&& rhs) noexcept = default;
+		Surface& operator=(Surface&& rhs) noexcept = default;
+
+		~Surface() = default;
 
 		[[nodiscard]] vk::SurfaceCapabilitiesKHR getCapabilities(const PhysicalDevice& physical_device) const;
 		[[nodiscard]] std::vector<vk::SurfaceFormatKHR> getFormat(const PhysicalDevice& physical_device) const;
 
-		Surface(const Surface&) = delete;
-		Surface& operator=(const Surface&) = delete;
-
-		Surface(Surface&& rhs) noexcept;
-		Surface& operator=(Surface&& rhs) noexcept;
-
-		[[nodiscard]] const vk::UniqueSurfaceKHR& getSurface() const {
-			return this->surface;
-		}
+		[[nodiscard]] const vk::UniqueSurfaceKHR& getSurface() const;
 
 	private:
+		vk::UniqueSurfaceKHR surface;
+		friend class Instance;
 		explicit Surface(vk::UniqueSurfaceKHR surface);
 	};
 }

@@ -11,16 +11,6 @@ namespace magmatic::render
 {
 	class VertexBuffer : public Buffer
 	{
-	private:
-		size_t vertices_count;
-		constexpr static vk::BufferUsageFlags buffer_usage_flags =
-				vk::BufferUsageFlagBits::eTransferDst
-				| vk::BufferUsageFlagBits::eVertexBuffer;
-
-		constexpr static vk::MemoryPropertyFlags memory_property = vk::MemoryPropertyFlagBits::eDeviceLocal;
-
-		constexpr static size_t vert_size = sizeof(Vertex);
-
 	public:
 		VertexBuffer(
 				const LogicalDevice& l_device,
@@ -31,10 +21,23 @@ namespace magmatic::render
 		VertexBuffer(const VertexBuffer&) = delete;
 		VertexBuffer& operator=(const VertexBuffer&) = delete;
 
-		VertexBuffer(VertexBuffer&& rhs) noexcept;
-		VertexBuffer& operator=(VertexBuffer&& rhs) noexcept;
+		VertexBuffer(VertexBuffer&& rhs) noexcept = default;
+		VertexBuffer& operator=(VertexBuffer&& rhs) noexcept = default;
+
+		~VertexBuffer() = default;
 
 		[[nodiscard]] size_t verticesCount() const noexcept;
+
+	private:
+		size_t vertices_count;
+
+		constexpr static vk::BufferUsageFlags buffer_usage_flags =
+				vk::BufferUsageFlagBits::eTransferDst
+				| vk::BufferUsageFlagBits::eVertexBuffer;
+
+		constexpr static vk::MemoryPropertyFlags memory_property = vk::MemoryPropertyFlagBits::eDeviceLocal;
+
+		constexpr static size_t vert_size = sizeof(Vertex);
 
 	};
 }

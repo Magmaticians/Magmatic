@@ -59,35 +59,13 @@ magmatic::render::SwapChainSupportDetails
 magmatic::render::PhysicalDevice::getSwapChainSupportDetails(const magmatic::render::Surface& surface) const
 {
 	const auto surface_capabilities = device.getSurfaceCapabilitiesKHR(surface.getSurface().get());
-
 	const auto surface_format = device.getSurfaceFormatsKHR(surface.getSurface().get());
-
 	const auto surface_present_modes = device.getSurfacePresentModesKHR(surface.getSurface().get());
 
 	return SwapChainSupportDetails{surface_capabilities, surface_format, surface_present_modes};
-
-
 }
 
-magmatic::render::PhysicalDevice::PhysicalDevice(const magmatic::render::PhysicalDevice &rhs) noexcept :
-	device(rhs.device),
-	device_properties(rhs.device_properties),
-	device_features(rhs.device_features),
-	queue_family_properties(rhs.queue_family_properties) { }
-
-magmatic::render::PhysicalDevice::PhysicalDevice(PhysicalDevice&& rhs) noexcept :
-	device(rhs.device),
-	device_properties(rhs.device_properties),
-	device_features(rhs.device_features),
-	queue_family_properties(rhs.queue_family_properties) { }
-
-magmatic::render::PhysicalDevice& magmatic::render::PhysicalDevice::operator=(PhysicalDevice&& rhs) noexcept {
-	this->device = rhs.device;
-	this->device_properties = rhs.device_properties;
-	this->device_features = rhs.device_features;
-	this->queue_family_properties = rhs.queue_family_properties;
-	return *this;
+vk::FormatProperties magmatic::render::PhysicalDevice::getFormatProperties(const vk::Format &format) const
+{
+	return device.getFormatProperties(format);
 }
-
-
-

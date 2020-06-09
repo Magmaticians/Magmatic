@@ -20,8 +20,10 @@ namespace magmatic::render
 		CommandPool(const CommandPool&) = delete;
 		CommandPool& operator=(const CommandPool&) = delete;
 
-		CommandPool(CommandPool&& rhs) noexcept;
-		CommandPool& operator=(CommandPool&& rhs) noexcept;
+		CommandPool(CommandPool&& rhs) noexcept = default;
+		CommandPool& operator=(CommandPool&& rhs) noexcept = default;
+
+		~CommandPool() = default;
 
 		[[nodiscard]] const vk::UniqueCommandPool& getHandle() const noexcept;
 		[[nodiscard]] const vk::Queue& getQueue() const noexcept;

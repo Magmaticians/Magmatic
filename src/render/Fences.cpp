@@ -17,10 +17,3 @@ void magmatic::render::Fences::resetFence(size_t index) const {
 	const auto& handle = fences[index].getOwner();
 	handle.resetFences(1, &fences[index].get());
 }
-
-magmatic::render::Fences::Fences(magmatic::render::Fences &&rhs) noexcept : fences(std::move(rhs.fences)) { }
-
-magmatic::render::Fences &magmatic::render::Fences::operator=(magmatic::render::Fences &&rhs) noexcept {
-	this->fences = std::move(rhs.fences);
-	return *this;
-}

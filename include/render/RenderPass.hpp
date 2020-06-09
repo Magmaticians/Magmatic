@@ -7,20 +7,21 @@
 
 namespace magmatic::render {
     class RenderPass {
-	    vk::UniqueRenderPass renderPass;
-
     public:
 	    RenderPass(const LogicalDevice& l_device, const Surface& surface, const DepthResources& depthResources);
 
         RenderPass(const RenderPass&) = delete;
         RenderPass& operator=(const RenderPass&) = delete;
 
-	    RenderPass(RenderPass&& rhs) noexcept;
-	    RenderPass& operator=(RenderPass&& rhs) noexcept;
+	    RenderPass(RenderPass&& rhs) noexcept = default;
+	    RenderPass& operator=(RenderPass&& rhs) noexcept = default;
 
-	    [[nodiscard]] const vk::UniqueRenderPass& getRenderPass() const {
-	    	return this->renderPass;
-	    }
+	    ~RenderPass() = default;
+
+	    [[nodiscard]] const vk::UniqueRenderPass& getRenderPass() const;
+
+    private:
+	    vk::UniqueRenderPass renderPass;
     };
 }
 

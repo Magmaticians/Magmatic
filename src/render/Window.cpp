@@ -78,7 +78,8 @@ void magmatic::render::Window::focus() noexcept
 
 std::pair<int, int> magmatic::render::Window::getSize() const
 {
-	int width, height;
+	int width;
+	int height;
 	glfwGetWindowSize(window.get(), &width, &height);
 
 	return std::make_pair(width, height);
@@ -90,7 +91,8 @@ std::string magmatic::render::Window::getName() const noexcept
 }
 
 vk::Extent2D magmatic::render::Window::getFramebufferSize() const {
-	int width, height;
+	int width;
+	int height;
 	glfwGetFramebufferSize(window.get(), &width, &height);
 	vk::Extent2D res = {
 			static_cast<uint32_t>(width),
@@ -101,7 +103,6 @@ vk::Extent2D magmatic::render::Window::getFramebufferSize() const {
 
 magmatic::render::Window::~Window()
 {
-	window.reset();
 	glfwTerminate();
 }
 
@@ -117,6 +118,11 @@ std::vector<std::string> magmatic::render::Window::getRequiredExtensions() const
 	std::copy_n(glfw_extensions, glfw_extension_count, std::back_inserter(extensions));
 
 	return extensions;
+}
+
+const std::unique_ptr<GLFWwindow, magmatic::render::Window::GLFWWindowDeleter> &magmatic::render::Window::getWindow() const
+{
+	return this->window;
 }
 
 void magmatic::render::Window::GLFWWindowDeleter::operator()(GLFWwindow* pointer) noexcept

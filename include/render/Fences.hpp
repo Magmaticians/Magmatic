@@ -8,23 +8,25 @@ namespace magmatic::render
 {
 	class Fences
 	{
-		std::vector<vk::UniqueFence> fences;
-
 	public:
+
 		Fences(const LogicalDevice& l_device, size_t count);
 
 		Fences(const Fences&) = delete;
 		Fences& operator=(const Fences&) = delete;
 
-		Fences(Fences&& rhs) noexcept;
-		Fences& operator=(Fences&& rhs) noexcept;
+		Fences(Fences&& rhs) noexcept = default;
+		Fences& operator=(Fences&& rhs) noexcept = default;
 
-		void waitForFence(size_t index, uint64_t timeout) const;
+		void waitForFence(size_t index, uint64_t timeout) const ;
+
 		void resetFence(size_t index) const;
-
 		const vk::UniqueFence& operator[](size_t index) const {
 			return fences.at(index);
 		}
+
+	private:
+		std::vector<vk::UniqueFence> fences;
 	};
 }
 

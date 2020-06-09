@@ -63,18 +63,3 @@ magmatic::render::Bitmap::Bitmap(
 		}
 	}
 }
-
-magmatic::render::Bitmap::Bitmap(const magmatic::render::Bitmap &&rhs) noexcept
-:pixels_(std::move(rhs.pixels_)), width_(rhs.width_), height_(rhs.height_), channels_(rhs.channels_)
-{
-
-}
-
-magmatic::render::Bitmap &magmatic::render::Bitmap::operator=(magmatic::render::Bitmap &&rhs) noexcept
-{
-	pixels_ = std::move(rhs.pixels_);
-	width_ = rhs.width_;
-	height_ = rhs.height_;
-	channels_ = rhs.channels_;
-	return *this;
-}

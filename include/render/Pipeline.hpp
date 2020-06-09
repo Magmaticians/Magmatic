@@ -9,10 +9,6 @@ namespace magmatic::render
 {
 	class Pipeline
 	{
-	private:
-
-		vk::UniquePipelineLayout layout;
-		vk::UniquePipeline pipeline;
 	public:
 
 		Pipeline(const LogicalDevice& l_device,
@@ -26,16 +22,18 @@ namespace magmatic::render
         Pipeline(const Pipeline&) = delete;
         Pipeline& operator=(const Pipeline&) = delete;
 
-		Pipeline(Pipeline&& rhs) noexcept;
-		Pipeline& operator=(Pipeline&& rhs) noexcept;
+		Pipeline(Pipeline&& rhs) noexcept = default;
+		Pipeline& operator=(Pipeline&& rhs) noexcept = default;
 
-        [[nodiscard]] const vk::UniquePipelineLayout& getPipelineLayout() const {
-        	return layout;
-        }
+		~Pipeline() = default;
 
-		[[nodiscard]] const vk::UniquePipeline& getPipeline() const {
-			return pipeline;
-		}
+        [[nodiscard]] const vk::UniquePipelineLayout& getPipelineLayout() const;
+
+		[[nodiscard]] const vk::UniquePipeline& getPipeline() const;
+
+	private:
+		vk::UniquePipelineLayout layout;
+		vk::UniquePipeline pipeline;
 	};
 }
 

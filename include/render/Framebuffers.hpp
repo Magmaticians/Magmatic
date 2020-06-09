@@ -11,8 +11,6 @@ namespace magmatic::render
 
 	class Framebuffers
 	{
-		std::vector<vk::UniqueFramebuffer> framebuffers;
-
 	public:
 		Framebuffers(
 				const LogicalDevice& l_device,
@@ -24,13 +22,18 @@ namespace magmatic::render
 		Framebuffers(const Framebuffers&) = delete;
 		Framebuffers& operator=(const Framebuffers&) = delete;
 
-		Framebuffers(Framebuffers&& rhs) noexcept;
-		Framebuffers& operator=(Framebuffers&& rhs) noexcept;
+		Framebuffers(Framebuffers&& rhs) noexcept = default;
+		Framebuffers& operator=(Framebuffers&& rhs) noexcept = default;
+
+		~Framebuffers() = default;
 
 		[[nodiscard]] size_t size() const { return framebuffers.size(); }
 		[[nodiscard]] const vk::UniqueFramebuffer& operator[](size_t index) const {
 			return framebuffers.at(index);
 		}
+
+	private:
+		std::vector<vk::UniqueFramebuffer> framebuffers;
 	};
 }
 

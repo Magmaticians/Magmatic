@@ -8,10 +8,6 @@
 namespace magmatic::render {
 
 	class Shader {
-	private:
-		vk::UniqueShaderModule shader_module;
-		vk::ShaderStageFlagBits type;
-
 	public:
 		Shader(
 				const LogicalDevice& l_device,
@@ -22,10 +18,17 @@ namespace magmatic::render {
 		Shader(const Shader&) = delete;
 		Shader &operator=(const Shader&) = delete;
 
-		Shader(Shader&& rhs) noexcept;
-		Shader &operator=(Shader&& rhs) noexcept;
+		Shader(Shader&& rhs) noexcept = default;
+		Shader &operator=(Shader&& rhs) noexcept = default;
+
+		~Shader() = default;
 
 		[[nodiscard]] vk::PipelineShaderStageCreateInfo getPipelineShaderStageCreateInfo() const noexcept;
+
+	private:
+		vk::UniqueShaderModule shader_module;
+		vk::ShaderStageFlagBits type;
+
 	};
 }
 

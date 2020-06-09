@@ -11,14 +11,6 @@ namespace magmatic::render
 {
 	class IndexBuffer : public Buffer
 	{
-	private:
-		size_t indices_count;
-		constexpr static vk::BufferUsageFlags buffer_usage_flags =
-				vk::BufferUsageFlagBits::eTransferDst
-				| vk::BufferUsageFlagBits::eIndexBuffer;
-
-		constexpr static vk::MemoryPropertyFlags memory_property = vk::MemoryPropertyFlagBits::eDeviceLocal;
-
 	public:
 		IndexBuffer(
 				const LogicalDevice& l_device,
@@ -29,10 +21,21 @@ namespace magmatic::render
 		IndexBuffer(const IndexBuffer&) = delete;
 		IndexBuffer& operator=(const IndexBuffer&) = delete;
 
-		IndexBuffer(IndexBuffer&& rhs) noexcept;
-		IndexBuffer& operator=(IndexBuffer&& rhs) noexcept;
+		IndexBuffer(IndexBuffer&& rhs) noexcept = default;
+		IndexBuffer& operator=(IndexBuffer&& rhs) noexcept = default;
+
+		~IndexBuffer() = default;
 
 		[[nodiscard]] size_t indicesCount() const noexcept;
+
+	private:
+		size_t indices_count;
+		constexpr static vk::BufferUsageFlags buffer_usage_flags =
+				vk::BufferUsageFlagBits::eTransferDst
+				| vk::BufferUsageFlagBits::eIndexBuffer;
+
+		constexpr static vk::MemoryPropertyFlags memory_property = vk::MemoryPropertyFlagBits::eDeviceLocal;
+
 	};
 }
 

@@ -22,12 +22,6 @@ namespace magmatic::render
 		explicit Bitmap(const std::filesystem::path& file_path);
 		explicit Bitmap(const std::vector<uint8_t>& pixels, int width, int height, int channels) noexcept;
 
-		Bitmap(const Bitmap&) = delete;
-		Bitmap& operator=(const Bitmap&) = delete;
-
-		Bitmap(const Bitmap&& rhs) noexcept;
-		Bitmap&operator=(Bitmap&& rhs) noexcept;
-
 		[[nodiscard]] std::pair<int, int> size() const noexcept;
 		[[nodiscard]] int getChannel() const noexcept;
 		[[nodiscard]] const uint8_t* getPixels() const noexcept;

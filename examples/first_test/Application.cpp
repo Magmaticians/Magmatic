@@ -1,6 +1,5 @@
 #define GLM_FORCE_RADIANS
 #include "Application.hpp"
-#include "render/Bitmap.hpp"
 #include "render/UniformBufferObject.hpp"
 #include "render/model/ModelData.hpp"
 #include "render/model/model_data_loader/formats/ModelDataLoadergltf.hpp"
@@ -8,8 +7,7 @@
 #include <algorithm>
 #include <spdlog/spdlog.h>
 #include <vulkan/vulkan.hpp>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
+#include <render/CommandBuffer.hpp>
 #include <render/PushConstantObject.h>
 #include <utils/factory/FileLoaderFactory.hpp>
 #include <sound/formats/SoundLoaderVorbis.hpp>
@@ -18,14 +16,6 @@
 Application::Application(const std::string& mode):
 	quackSource({0, 0, 0}),
 	musicSource({0, 0, 0}) {
-	magmatic::render::ModelDataLoader::registerLoader(
-			magmatic::render::ModelDataLoadergltf::factoryName(),
-			std::make_unique<magmatic::render::ModelDataLoadergltf>()
-	);
-	magmatic::sound::SoundLoader::registerLoader(
-			magmatic::sound::SoundLoaderVorbis::factoryName(),
-			std::make_unique<magmatic::sound::SoundLoaderVorbis>()
-	);
 	spdlog::info("Loaders registered");
 
 	auto quackBuffer = magmatic::sound::SoundLoader::load("VORBIS", "examples/resources/Duck-quack.ogg");
@@ -51,7 +41,7 @@ Application::Application(const std::string& mode):
 	spdlog::info("Created shaders");
 
 	swapChain = std::make_unique<magmatic::render::SwapChain>(*logicalDevice, *surface, *window);
-	MAX_FRAMES_IN_FLIGHT = (swapChain->images_.size());
+	MAX_FRAMES_IN_FLIGHT = (swapChain->images.size());
 	commandPool = std::make_unique<magmatic::render::CommandPool>(*logicalDevice, magmatic::render::QueueType::GraphicalQueue);
 
 	{
@@ -107,7 +97,7 @@ void Application::recreateSwapChain() {
 	destroySwapChain();
 
 	swapChain = std::make_unique<magmatic::render::SwapChain>(magmatic::render::SwapChain(*logicalDevice, *surface, *window));
-	MAX_FRAMES_IN_FLIGHT = (swapChain->images_.size());
+	MAX_FRAMES_IN_FLIGHT = (swapChain->images.size());
 	depthResources = std::make_unique<magmatic::render::DepthResources>(*logicalDevice,swapChain->extent, *commandPool);
 	renderPass = std::make_unique<magmatic::render::RenderPass>(*logicalDevice, *surface, *depthResources);
 	descriptorSets = std::make_unique<magmatic::render::DescriptorSets>(*logicalDevice, bindings, MAX_FRAMES_IN_FLIGHT);

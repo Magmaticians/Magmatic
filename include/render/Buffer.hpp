@@ -9,10 +9,6 @@
 namespace magmatic::render
 {
 	class Buffer {
-	protected:
-		vk::UniqueBuffer buffer;
-		vk::UniqueDeviceMemory memory;
-
 	public:
 		Buffer(
 				const LogicalDevice& l_device,
@@ -24,15 +20,17 @@ namespace magmatic::render
 		Buffer(const Buffer&) = delete;
 		Buffer& operator=(Buffer&) = delete;
 
-		Buffer(Buffer&& rhs) noexcept;
-		Buffer& operator=(Buffer&& rhs) noexcept;
+		Buffer(Buffer&& rhs) noexcept = default;
+		Buffer& operator=(Buffer&& rhs) noexcept = default;
+
+		~Buffer() = default;
 
 		template <typename T>
 		static Buffer createStaging(const LogicalDevice& l_device,const T* data_to_copy, size_t data_size);
 
 		[[nodiscard]] const vk::UniqueBuffer& getBuffer() const noexcept;
-		[[nodiscard]] const vk::UniqueDeviceMemory& getMemory() const noexcept;
 
+		[[nodiscard]] const vk::UniqueDeviceMemory& getMemory() const noexcept;
 		static void copyBuffer(
 				const vk::UniqueBuffer& src,
 				const vk::UniqueBuffer& dst,
@@ -46,6 +44,10 @@ namespace magmatic::render
 				uint32_t width, uint32_t height,
 				const CommandPool& pool
 		);
+
+	protected:
+		vk::UniqueBuffer buffer;
+		vk::UniqueDeviceMemory memory;
 
 	};
 }

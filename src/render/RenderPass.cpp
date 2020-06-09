@@ -26,7 +26,7 @@ magmatic::render::RenderPass::RenderPass(const LogicalDevice& l_device, const Su
 
 	vk::AttachmentDescription depthAttachment(
 			vk::AttachmentDescriptionFlags(),
-			depthResources.format,
+			depthResources.getFormat(),
 			vk::SampleCountFlagBits::e1,
 			vk::AttachmentLoadOp::eClear,
 			vk::AttachmentStoreOp::eDontCare,
@@ -75,8 +75,7 @@ magmatic::render::RenderPass::RenderPass(const LogicalDevice& l_device, const Su
 	renderPass = handle->createRenderPassUnique(render_pass_info);
 }
 
-magmatic::render::RenderPass::RenderPass(RenderPass&& rhs) noexcept : renderPass(std::move(rhs.renderPass)) { }
-magmatic::render::RenderPass& magmatic::render::RenderPass::operator=(RenderPass&& rhs) noexcept {
-	this->renderPass = std::move(rhs.renderPass);
-	return *this;
+const vk::UniqueRenderPass &magmatic::render::RenderPass::getRenderPass() const
+{
+	return this->renderPass;
 }

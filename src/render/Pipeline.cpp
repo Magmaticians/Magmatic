@@ -2,11 +2,13 @@
 #include "render/PushConstantObject.h"
 #include "render/Pipeline.hpp"
 
-magmatic::render::Pipeline::Pipeline(const LogicalDevice& l_device,
-                                     uint32_t extent_width, uint32_t extent_height,
-                                     std::vector<std::reference_wrapper<Shader>> shaderStages,
-                                     const RenderPass& renderPass,
-                                     const vk::UniqueDescriptorSetLayout& descriptorSetLayout
+
+magmatic::render::Pipeline::Pipeline(
+		const LogicalDevice& l_device,
+		uint32_t extent_width, uint32_t extent_height,
+		std::vector<std::reference_wrapper<Shader>> shaderStages,
+		const RenderPass& renderPass,
+		const vk::UniqueDescriptorSetLayout& descriptorSetLayout
 ) {
 	const auto& handle = l_device.getHandle();
 
@@ -136,9 +138,12 @@ magmatic::render::Pipeline::Pipeline(const LogicalDevice& l_device,
 	pipeline = handle->createGraphicsPipelineUnique(nullptr, pipeline_create_info);
 }
 
-magmatic::render::Pipeline::Pipeline(Pipeline&& rhs) noexcept : layout(std::move(rhs.layout)), pipeline(std::move(rhs.pipeline)) { }
-magmatic::render::Pipeline& magmatic::render::Pipeline::operator=(Pipeline&& rhs) noexcept {
-	this->layout = std::move(rhs.layout);
-	this->pipeline = std::move(rhs.pipeline);
-	return *this;
+const vk::UniquePipeline &magmatic::render::Pipeline::getPipeline() const
+{
+	return pipeline;
+}
+
+const vk::UniquePipelineLayout &magmatic::render::Pipeline::getPipelineLayout() const
+{
+	return layout;
 }

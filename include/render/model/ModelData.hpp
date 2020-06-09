@@ -59,7 +59,7 @@ namespace magmatic::render
 
 			MeshData mesh_data;
 		};
-	public:
+
 		std::vector<Vertex> vertices;
 		std::vector<uint32_t> indices;
 
@@ -70,7 +70,7 @@ namespace magmatic::render
 		std::vector<Bitmap> texture_bitmaps;
 
 		std::vector<NodeData::self_pointer> nodes;
-	public:
+
 		ModelData() = default;
 
 		ModelData(std::vector<Vertex>&& vertices, std::vector<uint32_t>&& indices)

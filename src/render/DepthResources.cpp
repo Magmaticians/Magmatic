@@ -19,9 +19,13 @@ magmatic::render::Image magmatic::render::DepthResources::createDepthImage(const
 	             vk::MemoryPropertyFlagBits::eDeviceLocal);
 }
 
-magmatic::render::DepthResources::DepthResources(const LogicalDevice& l_device, vk::Extent2D extent, const CommandPool& commandPool): format(findDepthFormat(l_device)), image(createDepthImage(l_device, extent)){
-	const auto& handle = l_device.getHandle();
-
+magmatic::render::DepthResources::DepthResources(
+		const LogicalDevice& l_device,
+		vk::Extent2D extent,
+		const CommandPool& commandPool
+		)
+: format(findDepthFormat(l_device)), image(createDepthImage(l_device, extent))
+{
 	imageView = image.createImageView(vk::ImageAspectFlagBits::eDepth, {});
 
 	image.transitionImageLayout(vk::ImageLayout::eUndefined,
@@ -29,10 +33,17 @@ magmatic::render::DepthResources::DepthResources(const LogicalDevice& l_device, 
 	                      commandPool);
 }
 
-magmatic::render::DepthResources::DepthResources(DepthResources&& rhs) noexcept : format(rhs.format), image(std::move(rhs.image)), imageView(std::move(rhs.imageView)) {}
-magmatic::render::DepthResources& magmatic::render::DepthResources::operator=(DepthResources&& rhs) noexcept {
-	this->format = rhs.format;
-	this->image = std::move(rhs.image);
-	this->imageView = std::move(rhs.imageView);
-	return *this;
+const vk::Format & magmatic::render::DepthResources::getFormat() const
+{
+	return format;
+}
+
+const magmatic::render::Image& magmatic::render::DepthResources::getImage() const
+{
+	return image;
+}
+
+const vk::UniqueImageView& magmatic::render::DepthResources::getImageView() const
+{
+	return imageView;
 }

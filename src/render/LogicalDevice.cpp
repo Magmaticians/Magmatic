@@ -137,20 +137,37 @@ void magmatic::render::LogicalDevice::waitIdle() const {
 	device->waitIdle();
 }
 
-magmatic::render::LogicalDevice::LogicalDevice(LogicalDevice &&rhs) noexcept :
-	device(std::move(rhs.device)),
-	graphics_queue(rhs.graphics_queue),
-	graphics_queue_index(rhs.graphics_queue_index),
-	present_queue(rhs.present_queue),
-	present_queue_index(rhs.present_queue_index),
-	physical_dev(std::move(rhs.physical_dev)) { }
+bool magmatic::render::LogicalDevice::sameQueueFamily() const
+{
+	return same_queue_family;
+}
 
-magmatic::render::LogicalDevice& magmatic::render::LogicalDevice::operator=(LogicalDevice &&rhs) noexcept {
-	this->device = std::move(rhs.device);
-	this->graphics_queue = rhs.graphics_queue;
-	this->graphics_queue_index =rhs.graphics_queue_index;
-	this->present_queue = rhs.present_queue;
-	this->present_queue_index = rhs.present_queue_index;
-	this->physical_dev = std::move(rhs.physical_dev);
-	return *this;
+uint32_t magmatic::render::LogicalDevice::getPresentQueueIndex() const
+{
+	return present_queue_index;
+}
+
+uint32_t magmatic::render::LogicalDevice::getGraphicsQueueIndex() const
+{
+	return graphics_queue_index;
+}
+
+vk::Queue magmatic::render::LogicalDevice::getPresentQueue() const
+{
+	return present_queue;
+}
+
+vk::Queue magmatic::render::LogicalDevice::getGraphicsQueue() const
+{
+	return graphics_queue;
+}
+
+magmatic::render::PhysicalDevice magmatic::render::LogicalDevice::getPhysicalDevice() const
+{
+	return physical_dev;
+}
+
+const vk::UniqueDevice &magmatic::render::LogicalDevice::getHandle() const noexcept
+{
+	return device;
 }

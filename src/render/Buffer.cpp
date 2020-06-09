@@ -31,14 +31,6 @@ magmatic::render::Buffer::Buffer(const LogicalDevice& l_device, vk::DeviceSize s
 }
 
 
-magmatic::render::Buffer::Buffer(magmatic::render::Buffer&& rhs) noexcept : buffer(std::move(rhs.buffer)), memory(std::move(rhs.memory)) {}
-
-magmatic::render::Buffer& magmatic::render::Buffer::operator=(magmatic::render::Buffer&& rhs) noexcept {
-	buffer = std::move(rhs.buffer);
-	memory = std::move(rhs.memory);
-	return *this;
-}
-
 const vk::UniqueBuffer& magmatic::render::Buffer::getBuffer() const noexcept
 {
 	return buffer;
@@ -107,6 +99,3 @@ void magmatic::render::Buffer::copyBufferToImage(
 	command_buffer.endRecording();
 	command_buffer.submitWait();
 }
-
-
-

@@ -9,7 +9,41 @@
 
 namespace magmatic::render {
 	class LogicalDevice {
+	public:
+		explicit LogicalDevice(
+				const PhysicalDevice& physical_device,
+				const Surface& surface,
+				const std::vector<std::string>& extensions = {}
+		);
+
+		LogicalDevice(const LogicalDevice&) = delete;
+		LogicalDevice& operator=(LogicalDevice&) = delete;
+
+		LogicalDevice(LogicalDevice&& rhs) noexcept = default;
+		LogicalDevice& operator=(LogicalDevice&& rhs) noexcept = default;
+
+		~LogicalDevice() = default;
+
+		[[nodiscard]] const vk::UniqueDevice& getHandle() const noexcept;
+
+		[[nodiscard]] PhysicalDevice getPhysicalDevice() const;
+
+		[[nodiscard]] vk::Queue getGraphicsQueue() const;
+		[[nodiscard]] vk::Queue getPresentQueue() const;
+
+		[[nodiscard]] uint32_t getGraphicsQueueIndex() const;;
+		[[nodiscard]] uint32_t getPresentQueueIndex() const;;
+
+		[[nodiscard]] bool sameQueueFamily() const;
+
+		void waitIdle() const;
+
 	private:
+		static std::optional<std::pair<size_t, size_t>> chooseGraphicPresentQueue(
+				const std::vector<size_t>& graphics,
+				const std::vector<size_t>& presents
+		);
+
 		static constexpr const char* DEFAULT_EXTENSIONS[] =
 				{
 						VK_KHR_SWAPCHAIN_EXTENSION_NAME
@@ -25,50 +59,6 @@ namespace magmatic::render {
 
 		PhysicalDevice physical_dev;
 
-	public:
-		explicit LogicalDevice(
-				const PhysicalDevice& physical_device,
-				const Surface& surface,
-				const std::vector<std::string>& extensions = {}
-		);
-
-		LogicalDevice(const LogicalDevice&) = delete;
-		LogicalDevice& operator=(LogicalDevice&) = delete;
-
-		LogicalDevice(LogicalDevice&& rhs) noexcept;
-		LogicalDevice& operator=(LogicalDevice&& rhs) noexcept;
-
-		[[nodiscard]] const vk::UniqueDevice& getHandle() const noexcept
-		{
-			return device;
-		}
-
-		[[nodiscard]] PhysicalDevice getPhysicalDevice() const {
-			return physical_dev;
-		}
-		[[nodiscard]] vk::Queue getGraphicsQueue() const {
-			return graphics_queue;
-		}
-		[[nodiscard]] vk::Queue getPresentQueue() const {
-			return present_queue;
-		}
-		[[nodiscard]] uint32_t getGraphicsQueueIndex() const {
-			return graphics_queue_index;
-		};
-		[[nodiscard]] uint32_t getPresentQueueIndex() const {
-			return present_queue_index;
-		};
-		[[nodiscard]] bool sameQueueFamily() const {
-			return same_queue_family;
-		}
-
-		void waitIdle() const;
-
-	private:
-		static std::optional<std::pair<size_t, size_t>> chooseGraphicPresentQueue(
-				const std::vector<size_t>& graphics,
-				const std::vector<size_t>& presents
-		);
 	};
 }
 

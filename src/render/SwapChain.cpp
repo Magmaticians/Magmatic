@@ -47,9 +47,9 @@ magmatic::render::SwapChain::SwapChain(const LogicalDevice& l_device, const Surf
 
 	swapchain_ = handle->createSwapchainKHRUnique(swapchain_create_info);
 
-	images_ = handle->getSwapchainImagesKHR(swapchain_.get());
+	images = handle->getSwapchainImagesKHR(swapchain_.get());
 
-	image_views_.reserve(images_.size());
+	image_views_.reserve(images.size());
 
 	vk::ComponentMapping component_mapping(
 			vk::ComponentSwizzle::eR,
@@ -57,7 +57,7 @@ magmatic::render::SwapChain::SwapChain(const LogicalDevice& l_device, const Surf
 			vk::ComponentSwizzle::eB,
 			vk::ComponentSwizzle::eA);
 
-	for(const auto& image: images_) {
+	for(const auto& image: images) {
 		image_views_.emplace_back(Image::createImageView(l_device,
 		                                                image,
 		                                                surface_format.format,
@@ -67,17 +67,6 @@ magmatic::render::SwapChain::SwapChain(const LogicalDevice& l_device, const Surf
 
 	vk::FenceCreateInfo fence_create_info{vk::FenceCreateFlags()};
 	fence_ = handle->createFenceUnique(fence_create_info);
-}
-
-magmatic::render::SwapChain::SwapChain(SwapChain&& rhs) noexcept : extent(rhs.extent), images_(std::move(rhs.images_)),
-	swapchain_(std::move(rhs.swapchain_)), image_views_(std::move(rhs.image_views_)), fence_(std::move(rhs.fence_)) {}
-magmatic::render::SwapChain& magmatic::render::SwapChain::operator=(SwapChain&&rhs) noexcept {
-	this->extent = rhs.extent;
-	this->images_ = std::move(rhs.images_);
-	this->swapchain_ = std::move(rhs.swapchain_);
-	this->image_views_ = std::move(rhs.image_views_);
-	this->fence_ = std::move(rhs.fence_);
-	return *this;
 }
 
 vk::SurfaceFormatKHR magmatic::render::SwapChain::chooseSwapSurfaceFormat(const std::vector<vk::SurfaceFormatKHR>& formats)
@@ -134,7 +123,7 @@ vk::Extent2D magmatic::render::SwapChain::chooseSwapExtent(
 	const auto& max_width = capabilities.maxImageExtent.width;
 	const auto& max_height = capabilities.maxImageExtent.height;
 
-	actual_extent.width = std::clamp(actual_extent.width, min_width, max_height);
+	actual_extent.width = std::clamp(actual_extent.width, min_width, max_width);
 	actual_extent.height = std::clamp(actual_extent.height, min_height, max_height);
 
 	return actual_extent;
@@ -150,13 +139,28 @@ vk::Result magmatic::render::SwapChain::presentKHR(const LogicalDevice& l_device
 	));
 }
 
-vk::Result magmatic::render::SwapChain::acquireNextImageKHR(const Semaphores& imageAcquiredSemaphores,
-		size_t index, uint32_t& imageIndex, uint64_t timeout) const {
+vk::Result magmatic::render::SwapChain::acquireNextImageKHR(const Semaphores& image_acquired_semaphores,
+		size_t index, uint32_t& image_index, uint64_t timeout) const {
 	return swapchain_.getOwner().acquireNextImageKHR(
 			swapchain_.get(),
 			timeout,
-			imageAcquiredSemaphores[index].get(),
+			image_acquired_semaphores[index].get(),
 			nullptr,
-			&imageIndex
+			&image_index
 	);
+}
+
+const std::vector<vk::UniqueImageView> &magmatic::render::SwapChain::getImageViews() const
+{
+	return image_views_;
+}
+
+const vk::Extent2D& magmatic::render::SwapChain::getExtent() const
+{
+	return extent;
+}
+
+const std::vector<vk::Image>& magmatic::render::SwapChain::getImages() const
+{
+	return images;
 }

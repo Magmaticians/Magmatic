@@ -45,7 +45,7 @@ namespace magmatic::utils
 	public:
 		FileLoaderFactory() = delete;
 
-		static bool registerLoader(const std::string type, Creator creator)
+		static bool registerLoader(const std::string& type, Creator creator)
 		{
 			auto& map = getInternalMap();
 			assert((map.find(type) == std::end(map)));

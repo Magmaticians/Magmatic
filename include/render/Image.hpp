@@ -7,32 +7,44 @@
 
 namespace magmatic::render {
 	class Image {
-
-		vk::UniqueDeviceMemory memory;
-		vk::UniqueImage image;
-		vk::Format image_format;
 	public:
 		Image(const LogicalDevice& l_device, vk::Extent2D extent, vk::Format format, vk::ImageTiling tiling, const vk::ImageUsageFlags& usage, const vk::MemoryPropertyFlags& memProps);
 
 		Image(Image&) = delete;
 		Image &operator=(Image &) = delete;
 
-		Image(Image&& rhs) noexcept: image(std::move(rhs.image)), memory(std::move(rhs.memory)), image_format(rhs.image_format) {}
-		Image &operator=(Image && rhs) noexcept;
+		Image(Image&& rhs) noexcept = default;
+		Image &operator=(Image && rhs) noexcept = default;
 
-		[[nodiscard]] const vk::UniqueImage& getImage() {
-			return image;
-		}
-		[[nodiscard]] const vk::UniqueDeviceMemory& getMemory() {
-			return memory;
-		}
+		~Image() = default;
 
-		void transitionImageLayout(vk::ImageLayout old_layout,
-				vk::ImageLayout new_layout, const CommandPool& command_pool);
+		[[nodiscard]] const vk::UniqueImage& getImage();
 
-		[[nodiscard]] vk::UniqueImageView createImageView(const vk::ImageAspectFlags& aspectFlags, const vk::ComponentMapping& compMapping);
+		[[nodiscard]] const vk::UniqueDeviceMemory& getMemory();
 
-		[[nodiscard]] static vk::UniqueImageView createImageView(const LogicalDevice& l_device, const vk::Image& image, const vk::Format& format, const vk::ImageAspectFlags& aspectFlags, const vk::ComponentMapping& compMapping);
+		void transitionImageLayout(
+				vk::ImageLayout old_layout,
+				vk::ImageLayout new_layout,
+				const CommandPool& command_pool
+				);
+
+		[[nodiscard]] vk::UniqueImageView createImageView(
+				const vk::ImageAspectFlags& aspect_flags,
+				const vk::ComponentMapping& component_mapping
+				);
+
+		[[nodiscard]] static vk::UniqueImageView createImageView(
+				const LogicalDevice& l_device,
+				const vk::Image& image,
+				const vk::Format& format,
+				const vk::ImageAspectFlags& aspect_flags,
+				const vk::ComponentMapping& component_mapping
+				);
+
+	private:
+		vk::UniqueDeviceMemory memory;
+		vk::UniqueImage image;
+		vk::Format image_format;
 	};
 }
 

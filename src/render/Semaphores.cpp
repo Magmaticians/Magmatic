@@ -9,12 +9,12 @@ magmatic::render::Semaphores::Semaphores(const LogicalDevice& l_device, Semaphor
 	}
 }
 
-magmatic::render::Semaphores::Semaphores(magmatic::render::Semaphores &&rhs) noexcept :
-	semaphores(std::move(rhs.semaphores)),
-	type(rhs.type) { }
+const vk::UniqueSemaphore &magmatic::render::Semaphores::operator[](size_t index) const
+{
+	return this->semaphores[index];
+}
 
-magmatic::render::Semaphores &magmatic::render::Semaphores::operator=(magmatic::render::Semaphores &&rhs) noexcept {
-	this->semaphores = std::move(rhs.semaphores);
-	type = rhs.type;
-	return *this;
+const std::vector<vk::UniqueSemaphore> &magmatic::render::Semaphores::getSemaphores() const
+{
+	return this->semaphores;
 }

@@ -3,15 +3,6 @@
 #include <spdlog/spdlog.h>
 #include <limits>
 
-magmatic::render::CommandBuffer::CommandBuffer(CommandBuffer&& rhs) noexcept
-		: queue(rhs.queue), command_buffer(std::move(rhs.command_buffer)) {}
-magmatic::render::CommandBuffer& magmatic::render::CommandBuffer::operator=(magmatic::render::CommandBuffer&& rhs) noexcept
-{
-	command_buffer = std::move(rhs.command_buffer);
-	queue = rhs.queue;
-	return *this;
-}
-
 const vk::UniqueCommandBuffer& magmatic::render::CommandBuffer::beginRecording(const vk::CommandBufferUsageFlags& usage)
 {
 	if(recording)
@@ -85,6 +76,7 @@ std::vector<magmatic::render::CommandBuffer> magmatic::render::CommandBuffer::cr
 	}
 	return res;
 }
+
 std::vector<std::unique_ptr<magmatic::render::CommandBuffer>> magmatic::render::CommandBuffer::createCommandBuffersUnique(size_t count, const CommandPool& pool, vk::CommandBufferLevel level) {
 	std::vector<std::unique_ptr<CommandBuffer>> res;
 	res.reserve(count);

@@ -20,8 +20,10 @@ namespace magmatic::render
 		DescriptorSets(DescriptorSets&) = delete;
 		DescriptorSets& operator=(DescriptorSets&) = delete;
 
-		DescriptorSets(DescriptorSets&& rhs) noexcept : sets(std::move(rhs.sets)), descriptorPool(std::move(rhs.descriptorPool)) {};
-		DescriptorSets& operator=(DescriptorSets&& rhs) noexcept;
+		DescriptorSets(DescriptorSets&& rhs) noexcept = default;
+		DescriptorSets& operator=(DescriptorSets&& rhs) noexcept = default;
+
+		~DescriptorSets() = default;
 
 		void updateDescriptorSet(size_t index,const std::vector<DescriptorWriteUpdate>& write_info) const;
 

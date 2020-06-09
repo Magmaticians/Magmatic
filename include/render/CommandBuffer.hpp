@@ -18,8 +18,10 @@ namespace magmatic::render
 		CommandBuffer(const CommandBuffer&) = delete;
 		CommandBuffer& operator=(CommandBuffer&) = delete;
 
-		CommandBuffer(CommandBuffer&& rhs) noexcept;
-		CommandBuffer& operator=(CommandBuffer&& rhs) noexcept;
+		CommandBuffer(CommandBuffer&& rhs) noexcept = default;
+		CommandBuffer& operator=(CommandBuffer&& rhs) noexcept = default;
+
+		~CommandBuffer() = default;
 
 		const vk::UniqueCommandBuffer& beginRecording(const vk::CommandBufferUsageFlags& usage = vk::CommandBufferUsageFlagBits::eOneTimeSubmit);
 		void endRecording();

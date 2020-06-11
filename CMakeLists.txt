@@ -3,6 +3,7 @@ project(magmatic)
 
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS 1)
 set(CMAKE_CXX_STANDARD 20)
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 #GLSL compiler support
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/CMakeModules")
@@ -49,6 +50,7 @@ target_compile_definitions(magmatic-render PRIVATE SPDLOG_FMT_EXTERNAL=1 GLM_FOR
 target_include_directories(magmatic-render PUBLIC Vulkan::Vulkan)
 target_link_libraries(magmatic-render PUBLIC glfw Vulkan::Vulkan spdlog::spdlog_header_only glm::glm)
 target_link_libraries(magmatic-render PRIVATE TinyGLTF::TinyGLTF)
+set_target_properties(magmatic-render PROPERTIES FOLDER modules)
 
 #magmatic-sound
 add_library(magmatic-sound SHARED "")
@@ -56,6 +58,8 @@ target_link_libraries(magmatic-sound PRIVATE ${OPENAL_LIBRARY} spdlog::spdlog_he
 target_link_libraries(magmatic-sound PUBLIC VorbisFile::VorbisFile OpusFile::OpusFile)
 target_include_directories(magmatic-sound PUBLIC ${OPENAL_INCLUDE_DIRS})
 target_compile_definitions(magmatic-sound PRIVATE SPDLOG_FMT_EXTERNAL=1)
+set_target_properties(magmatic-sound PROPERTIES FOLDER modules)
+
 
 
 target_link_libraries(main-test PRIVATE magmatic-render magmatic-sound)

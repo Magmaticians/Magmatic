@@ -41,7 +41,7 @@ Application::Application(const std::string& mode):
 	spdlog::info("Created shaders");
 
 	swapChain = std::make_unique<magmatic::render::SwapChain>(*logicalDevice, *surface, *window);
-	MAX_FRAMES_IN_FLIGHT = (swapChain->images.size());
+	MAX_FRAMES_IN_FLIGHT = (swapChain->getImages().size());
 	commandPool = std::make_unique<magmatic::render::CommandPool>(*logicalDevice, magmatic::render::QueueType::GraphicalQueue);
 
 	{
@@ -53,11 +53,11 @@ Application::Application(const std::string& mode):
 	std::copy(model->textures.begin(), model->textures.end(), std::back_inserter(textures));
 	spdlog::info("Created textures");
 
-	depthResources = std::make_unique<magmatic::render::DepthResources>(*logicalDevice, swapChain->extent, *commandPool);
+	depthResources = std::make_unique<magmatic::render::DepthResources>(*logicalDevice, swapChain->getExtent(), *commandPool);
 	renderPass = std::make_unique<magmatic::render::RenderPass>(*logicalDevice, *surface, *depthResources);
 	descriptorSets = std::make_unique<magmatic::render::DescriptorSets>(*logicalDevice, bindings, MAX_FRAMES_IN_FLIGHT);
-	pipeline = std::make_unique<magmatic::render::Pipeline>(*logicalDevice, swapChain->extent.width, swapChain->extent.height, shaders, *renderPass, descriptorSets->getDescriptorSetLayout());
-	framebuffers = std::make_unique<magmatic::render::Framebuffers>(*logicalDevice, *renderPass, *swapChain, depthResources->imageView);
+	pipeline = std::make_unique<magmatic::render::Pipeline>(*logicalDevice, swapChain->getExtent().width, swapChain->getExtent().height, shaders, *renderPass, descriptorSets->getDescriptorSetLayout());
+	framebuffers = std::make_unique<magmatic::render::Framebuffers>(*logicalDevice, *renderPass, *swapChain, depthResources->getImageView());
 	spdlog::info("Created ???");
 
 	sampler = std::make_unique<magmatic::render::Sampler>(*logicalDevice);
@@ -97,12 +97,12 @@ void Application::recreateSwapChain() {
 	destroySwapChain();
 
 	swapChain = std::make_unique<magmatic::render::SwapChain>(magmatic::render::SwapChain(*logicalDevice, *surface, *window));
-	MAX_FRAMES_IN_FLIGHT = (swapChain->images.size());
-	depthResources = std::make_unique<magmatic::render::DepthResources>(*logicalDevice,swapChain->extent, *commandPool);
+	MAX_FRAMES_IN_FLIGHT = (swapChain->getImages().size());
+	depthResources = std::make_unique<magmatic::render::DepthResources>(*logicalDevice,swapChain->getExtent(), *commandPool);
 	renderPass = std::make_unique<magmatic::render::RenderPass>(*logicalDevice, *surface, *depthResources);
 	descriptorSets = std::make_unique<magmatic::render::DescriptorSets>(*logicalDevice, bindings, MAX_FRAMES_IN_FLIGHT);
-	pipeline = std::make_unique<magmatic::render::Pipeline>(*logicalDevice, swapChain->extent.width, swapChain->extent.height, shaders, *renderPass, descriptorSets->getDescriptorSetLayout());
-	framebuffers = std::make_unique<magmatic::render::Framebuffers>(*logicalDevice, *renderPass, *swapChain, depthResources->imageView);
+	pipeline = std::make_unique<magmatic::render::Pipeline>(*logicalDevice, swapChain->getExtent().width, swapChain->getExtent().height, shaders, *renderPass, descriptorSets->getDescriptorSetLayout());
+	framebuffers = std::make_unique<magmatic::render::Framebuffers>(*logicalDevice, *renderPass, *swapChain, depthResources->getImageView());
 
 	imagesInFlight.resize(MAX_FRAMES_IN_FLIGHT, -1);
 	currentBuffer = 0;
@@ -139,7 +139,7 @@ void Application::updateUniformBuffer() {
 	float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
 	ubo.model = glm::scale(glm::rotate(glm::rotate(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -0.75f)), glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f)), time*glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f)), glm::vec3(0.01f, 0.01f, 0.01f));
 	ubo.view = glm::lookAt(position, position - offset, glm::vec3(0.0f, 0.0f, 1.0f));
-	ubo.proj = glm::perspective(glm::radians(45.0f), swapChain->extent.width/(float) swapChain->extent.height, 0.1f, 10.0f);
+	ubo.proj = glm::perspective(glm::radians(45.0f), swapChain->getExtent().width/(float) swapChain->getExtent().height, 0.1f, 10.0f);
 	ubo.proj[1][1] *= -1;
 
 	uniformBuffers[currentBuffer]->copyMemory(sizeof(ubo), ubo);
@@ -186,7 +186,7 @@ void Application::recordCommandBuffer() {
 	clearValues[1].depthStencil = vk::ClearDepthStencilValue(1.0f, 0);
 	vk::RenderPassBeginInfo beginInfo(renderPass->getRenderPass().get(),
 	                                  (*framebuffers)[currentBuffer].get(),
-	                                  vk::Rect2D(vk::Offset2D(0, 0), swapChain->extent),
+	                                  vk::Rect2D(vk::Offset2D(0, 0), swapChain->getExtent()),
 	                                  static_cast<uint32_t>(clearValues.size()),
 	                                  clearValues.data());
 	commandBufferHandle->beginRenderPass(beginInfo, vk::SubpassContents::eInline);

@@ -15,14 +15,26 @@ namespace magmatic::render
 	class Texture
 	{
 	public:
-		Image image;
-		vk::UniqueImageView image_view;
-
 		Texture(const LogicalDevice& l_device, const Bitmap& bitmap, const CommandPool& pool);
 
 		[[nodiscard]] DescriptorWriteUpdate getWriteInfo(size_t dst_binding, size_t dst_array_elem) const;
+
+		const Image &getImage() const;
+
+		const vk::UniqueImageView &getImageView() const;
+
 	private:
-		[[nodiscard]] Image createImage(const LogicalDevice& l_device, const Bitmap& bitmap);
+		Image image;
+		vk::UniqueImageView image_view;
+
+		[[nodiscard]] static Image createImage(const LogicalDevice& l_device, const Bitmap& bitmap);
+		[[nodiscard]] static vk::UniqueImageView createImageView(
+				const LogicalDevice& l_device,
+				Image& new_image,
+				const Bitmap& bitmap,
+				const CommandPool& pool
+				);
+
 	};
 }
 

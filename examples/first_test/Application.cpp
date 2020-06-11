@@ -163,7 +163,7 @@ void Application::updateDescriptorSets() {
 		vk::DescriptorImageInfo descriptorImageInfos;
 			descriptorImageInfos.sampler = nullptr;
 			descriptorImageInfos.imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
-			descriptorImageInfos.imageView = textures[0]->image_view.get();
+			descriptorImageInfos.imageView = *(textures[0]->getImageView());
 		write_update = {};
 		write_update.dst_binding = 1;
 		write_update.dst_array_elem = 0;

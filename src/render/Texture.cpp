@@ -20,9 +20,12 @@ magmatic::render::Image magmatic::render::Texture::createImage(
 	);
 }
 
-magmatic::render::Texture::Texture(const magmatic::render::LogicalDevice& l_device,
-                                   const magmatic::render::Bitmap& bitmap, const magmatic::render::CommandPool& pool)
-:image(std::move(createImage(l_device, bitmap)))
+vk::UniqueImageView magmatic::render::Texture::createImageView(
+		const LogicalDevice& l_device,
+		Image& new_image,
+		const Bitmap& bitmap,
+		const CommandPool& pool
+)
 {
 	auto buffer = Buffer::createStaging(l_device, bitmap.getPixels(), bitmap.getDataSize());
 
@@ -30,21 +33,30 @@ magmatic::render::Texture::Texture(const magmatic::render::LogicalDevice& l_devi
 	const auto width = static_cast<uint32_t>(size.first);
 	const auto height = static_cast<uint32_t>(size.second);
 
-	image.transitionImageLayout(
+	new_image.transitionImageLayout(
 			vk::ImageLayout::eUndefined,
 			vk::ImageLayout::eTransferDstOptimal,
 			pool
 	);
 
-	Buffer::copyBufferToImage(buffer.getBuffer(), image.getImage(), width, height, pool);
+	Buffer::copyBufferToImage(buffer.getBuffer(), new_image.getImage(), width, height, pool);
 
-	image.transitionImageLayout(
+	new_image.transitionImageLayout(
 			vk::ImageLayout::eTransferDstOptimal,
 			vk::ImageLayout::eShaderReadOnlyOptimal,
 			pool
 	);
 
-	image_view = image.createImageView(vk::ImageAspectFlagBits::eColor, {});
+	return new_image.createImageView(vk::ImageAspectFlagBits::eColor, {});
+}
+
+magmatic::render::Texture::Texture(const magmatic::render::LogicalDevice& l_device,
+                                   const magmatic::render::Bitmap& bitmap,
+                                   const magmatic::render::CommandPool& pool
+                                   )
+:image(createImage(l_device, bitmap)),
+image_view(createImageView(l_device, image, bitmap, pool))
+{
 }
 
 magmatic::render::DescriptorWriteUpdate
@@ -61,6 +73,13 @@ magmatic::render::Texture::getWriteInfo(size_t dst_binding, size_t dst_array_ele
 	return update;
 }
 
+const magmatic::render::Image& magmatic::render::Texture::getImage() const
+{
+	return image;
+}
 
-
+const vk::UniqueImageView& magmatic::render::Texture::getImageView() const
+{
+	return image_view;
+}
 

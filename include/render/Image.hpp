@@ -10,8 +10,8 @@ namespace magmatic::render {
 	public:
 		Image(const LogicalDevice& l_device, vk::Extent2D extent, vk::Format format, vk::ImageTiling tiling, const vk::ImageUsageFlags& usage, const vk::MemoryPropertyFlags& memProps);
 
-		Image(Image&) = delete;
-		Image &operator=(Image &) = delete;
+		Image(const Image&) = delete;
+		Image &operator=(const Image &) = delete;
 
 		Image(Image&& rhs) noexcept = default;
 		Image &operator=(Image && rhs) noexcept = default;

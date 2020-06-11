@@ -17,8 +17,8 @@ namespace magmatic::render
 
 		DescriptorSets(const LogicalDevice& l_device, const std::vector<vk::DescriptorSetLayoutBinding>& bindings, size_t count);
 
-		DescriptorSets(DescriptorSets&) = delete;
-		DescriptorSets& operator=(DescriptorSets&) = delete;
+		DescriptorSets(const DescriptorSets&) = delete;
+		DescriptorSets& operator=(const DescriptorSets&) = delete;
 
 		DescriptorSets(DescriptorSets&& rhs) noexcept = default;
 		DescriptorSets& operator=(DescriptorSets&& rhs) noexcept = default;

@@ -18,7 +18,7 @@ namespace magmatic::render
 				);
 
 		Buffer(const Buffer&) = delete;
-		Buffer& operator=(Buffer&) = delete;
+		Buffer& operator=(const Buffer&) = delete;
 
 		Buffer(Buffer&& rhs) noexcept = default;
 		Buffer& operator=(Buffer&& rhs) noexcept = default;

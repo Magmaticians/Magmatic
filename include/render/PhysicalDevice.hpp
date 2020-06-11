@@ -21,10 +21,10 @@ namespace magmatic::render
 	class PhysicalDevice
 	{
 	public:
-		vk::PhysicalDevice device;
-		vk::PhysicalDeviceProperties device_properties;
-		vk::PhysicalDeviceFeatures device_features;
-		std::vector<vk::QueueFamilyProperties> queue_family_properties;
+		const vk::PhysicalDevice device;
+		const vk::PhysicalDeviceProperties device_properties;
+		const vk::PhysicalDeviceFeatures device_features;
+		const std::vector<vk::QueueFamilyProperties> queue_family_properties;
 
 		[[nodiscard]] uint32_t calculateScore() const noexcept;
 

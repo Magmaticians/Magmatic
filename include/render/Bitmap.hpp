@@ -11,12 +11,6 @@ namespace magmatic::render
 {
 	class Bitmap
 	{
-	private:
-		int width_{0};
-		int height_{0};
-		int channels_ {0};
-		std::vector<uint8_t> pixels_;
-
 	public:
 		Bitmap() = default;
 		explicit Bitmap(const std::filesystem::path& file_path);
@@ -26,6 +20,13 @@ namespace magmatic::render
 		[[nodiscard]] int getChannel() const noexcept;
 		[[nodiscard]] const uint8_t* getPixels() const noexcept;
 		[[nodiscard]] size_t getDataSize() const noexcept;
+
+	private:
+		int width_{0};
+		int height_{0};
+		int channels_ {0};
+
+		std::vector<uint8_t> pixels_;
 	};
 }
 

@@ -17,7 +17,7 @@ namespace magmatic::render {
 		);
 
 		LogicalDevice(const LogicalDevice&) = delete;
-		LogicalDevice& operator=(LogicalDevice&) = delete;
+		LogicalDevice& operator=(const LogicalDevice&) = delete;
 
 		LogicalDevice(LogicalDevice&& rhs) noexcept = default;
 		LogicalDevice& operator=(LogicalDevice&& rhs) noexcept = default;

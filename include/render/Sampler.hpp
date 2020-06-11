@@ -10,16 +10,17 @@ namespace magmatic::render
 {
 	class Sampler
 	{
-	private:
-		vk::UniqueSampler sampler;
 	public:
 		[[nodiscard]] DescriptorWriteUpdate getWriteInfo(size_t dst_binding, size_t dst_array_elem) const;
 
 		explicit Sampler(const LogicalDevice& l_device,
-		                 vk::Filter filter = vk::Filter::eNearest,
-		                 float anisotropy_samples = 1.0f,
-		                 bool normalized_coordinates = true
+				vk::Filter filter = vk::Filter::eNearest,
+				float anisotropy_samples = 1.0f,
+				bool normalized_coordinates = true
 		);
+		
+	private:
+		vk::UniqueSampler sampler;
 	};
 }
 

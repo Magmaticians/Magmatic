@@ -1,0 +1,11 @@
+#ifndef MAGMATIC_ADDRESSIPV4_H
+#define MAGMATIC_ADDRESSIPV4_H
+
+
+class AddressIPv4
+{
+
+};
+
+
+#endif //MAGMATIC_ADDRESSIPV4_H

@@ -16,7 +16,7 @@ namespace magmatic::render
 		explicit CommandBuffer(const CommandPool& pool, vk::CommandBufferLevel level = vk::CommandBufferLevel::ePrimary);
 
 		CommandBuffer(const CommandBuffer&) = delete;
-		CommandBuffer& operator=(CommandBuffer&) = delete;
+		CommandBuffer& operator=(const CommandBuffer&) = delete;
 
 		CommandBuffer(CommandBuffer&& rhs) noexcept = default;
 		CommandBuffer& operator=(CommandBuffer&& rhs) noexcept = default;

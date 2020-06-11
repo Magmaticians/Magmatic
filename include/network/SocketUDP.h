@@ -4,6 +4,15 @@
 
 class SocketUDP
 {
+public:
+	SocketUDP();
+
+	SocketUDP(const SocketUDP&) = delete;
+	SocketUDP& operator=(const SocketUDP&) = delete;
+
+	SocketUDP(SocketUDP&&) = default;
+	SocketUDP& operator=(SocketUDP&&) = default;
+
 
 };
 

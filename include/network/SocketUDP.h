@@ -1,0 +1,11 @@
+#ifndef MAGMATIC_SOCKETUDP_H
+#define MAGMATIC_SOCKETUDP_H
+
+
+class SocketUDP
+{
+
+};
+
+
+#endif //MAGMATIC_SOCKETUDP_H

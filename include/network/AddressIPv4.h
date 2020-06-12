@@ -12,10 +12,10 @@ namespace magmatic::network
 	public:
 		AddressIPv4(const std::string& address_str, unsigned short port);
 
-		const sockaddr_in address;
+		const sockaddr_in raw_address;
 
 	private:
-		sockaddr_in parseAddress(const std::string& address_str, unsigned short port);
+		static sockaddr_in parseAddress(const std::string& address_str, unsigned short port);
 	};
 }
 

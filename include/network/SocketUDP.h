@@ -18,8 +18,12 @@ namespace magmatic::network
 
 		~SocketUDP();
 
+		void setBlockMode(bool mode);
+		[[nodiscard]] bool getBlockMode() noexcept;
+
 	private:
 		int socket_fd;
+		bool block_mode = true;
 	};
 }
 

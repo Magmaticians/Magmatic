@@ -1,5 +1,6 @@
 #include "network/SocketUDP.h"
 #include <sys/socket.h>
+#include <sys/fcntl.h>
 #include <stdexcept>
 #include <cstring>
 #include <unistd.h>
@@ -24,4 +25,33 @@ magmatic::network::SocketUDP::~SocketUDP()
 {
 	shutdown(socket_fd, SHUT_RDWR);
 	close(socket_fd);
+}
+
+void magmatic::network::SocketUDP::setBlockMode(bool mode)
+{
+	int flags = fcntl(socket_fd, F_GETFL, 0);
+	if(flags == -1)
+	{
+		throw std::runtime_error(strerror(errno));
+	}
+	if(mode)
+	{
+		flags |= O_NONBLOCK;
+	}
+	else
+	{
+		flags &= ~O_NONBLOCK;
+	}
+	const int err = fcntl(socket_fd, F_SETFL, flags);
+	if(err == -1)
+	{
+		throw std::runtime_error(strerror(errno));
+	}
+
+	block_mode = mode;
+}
+
+bool magmatic::network::SocketUDP::getBlockMode() noexcept
+{
+	return block_mode;
 }

@@ -19,9 +19,9 @@ namespace magmatic::render
 
 		[[nodiscard]] DescriptorWriteUpdate getWriteInfo(size_t dst_binding, size_t dst_array_elem) const;
 
-		const Image &getImage() const;
+		[[nodiscard]] const Image &getImage() const;
 
-		const vk::UniqueImageView &getImageView() const;
+		[[nodiscard]] const vk::UniqueImageView &getImageView() const;
 
 	private:
 		Image image;

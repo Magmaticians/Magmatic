@@ -1,0 +1,11 @@
+#ifndef MAGMATIC_ENTITYMANAGER_H
+#define MAGMATIC_ENTITYMANAGER_H
+
+
+class EntityManager
+{
+
+};
+
+
+#endif //MAGMATIC_ENTITYMANAGER_H

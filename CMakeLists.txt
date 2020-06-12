@@ -64,6 +64,10 @@ set_target_properties(magmatic-sound PROPERTIES FOLDER modules)
 add_library(magmatic-network SHARED "")
 set_target_properties(magmatic-network PROPERTIES FOLDER modules)
 
+#magmatic-ecs
+add_library(magmatic-ecs SHARED "")
+set_target_properties(magmatic-ecs PROPERTIES FOLDER modules)
+
 target_link_libraries(main-test PRIVATE magmatic-render magmatic-sound)
 
 add_subdirectory("src")

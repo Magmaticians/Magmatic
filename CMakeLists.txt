@@ -9,6 +9,9 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/CMakeModules")
 Enable_language(GLSL)
 
+enable_testing()
+find_package(GTest)
+
 #Required libraries
 find_package(glfw3 REQUIRED)
 find_package(Vulkan REQUIRED)
@@ -62,14 +65,27 @@ set_target_properties(magmatic-sound PROPERTIES FOLDER modules)
 
 #magmatic-network
 add_library(magmatic-network SHARED "")
+target_link_libraries(magmatic-network PRIVATE spdlog::spdlog_header_only)
+target_compile_definitions(magmatic-network PRIVATE SPDLOG_FMT_EXTERNAL=1)
 set_target_properties(magmatic-network PROPERTIES FOLDER modules)
 
 #magmatic-ecs
 add_library(magmatic-ecs SHARED "")
+target_link_libraries(magmatic-ecs PRIVATE spdlog::spdlog_header_only)
+target_compile_definitions(magmatic-ecs PRIVATE SPDLOG_FMT_EXTERNAL=1)
 set_target_properties(magmatic-ecs PROPERTIES FOLDER modules)
+
+#tests
+add_executable(magmatic-tests "")
+target_link_libraries(magmatic-tests magmatic-ecs)
+target_link_libraries(magmatic-tests GTest::GTest gmock gtest_main)
+
+add_test( test magmatic-tests )
+
 
 target_link_libraries(main-test PRIVATE magmatic-render magmatic-sound)
 
-add_subdirectory("src")
-add_subdirectory("include")
-add_subdirectory("examples")
+add_subdirectory(src)
+add_subdirectory(include)
+add_subdirectory(examples)
+add_subdirectory(test)

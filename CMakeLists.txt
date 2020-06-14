@@ -71,8 +71,8 @@ set_target_properties(magmatic-network PROPERTIES FOLDER modules)
 
 #magmatic-ecs
 add_library(magmatic-ecs SHARED "")
-target_link_libraries(magmatic-ecs PRIVATE spdlog::spdlog_header_only)
-target_compile_definitions(magmatic-ecs PRIVATE SPDLOG_FMT_EXTERNAL=1)
+target_link_libraries(magmatic-ecs PUBLIC spdlog::spdlog_header_only)
+target_compile_definitions(magmatic-ecs PUBLIC SPDLOG_FMT_EXTERNAL=1)
 set_target_properties(magmatic-ecs PROPERTIES FOLDER modules)
 
 #tests

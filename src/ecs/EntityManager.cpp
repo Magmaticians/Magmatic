@@ -1,5 +1,4 @@
 #include "ecs/EntityManager.h"
-#include <cassert>
 #include <stdexcept>
 #include <spdlog/spdlog.h>
 
@@ -27,7 +26,7 @@ void magmatic::ecs::EntityManager::removeEntity(magmatic::ecs::EntityManager::En
 	if(!componentMasks.contains(id))
 	{
 		spdlog::error("Magmatic: Cannot destroy entity. Entity does not exist!");
-		throw std::runtime_error("Entity does not exist");
+		throw std::out_of_range("Entity does not exist");
 	}
 	componentMasks.erase(id);
 	free_IDs.push(id);

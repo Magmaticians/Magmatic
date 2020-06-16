@@ -4,4 +4,5 @@ target_sources(
         EntityManager.hpp
         ComponentMapping.hpp
         ComponentManager.hpp
+        System.hpp
 )

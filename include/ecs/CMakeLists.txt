@@ -1,6 +1,7 @@
 target_sources(
         magmatic-ecs
         PUBLIC
-        EntityManager.h
-        ComponentMapping.h
+        EntityManager.hpp
+        ComponentMapping.hpp
+        ComponentManager.hpp
 )

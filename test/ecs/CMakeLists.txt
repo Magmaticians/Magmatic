@@ -3,4 +3,5 @@ target_sources(
         PRIVATE
         EntityManagerTest.cpp
         ComponentMappingTest.cpp
+        ComponentManagerTest.cpp
         )

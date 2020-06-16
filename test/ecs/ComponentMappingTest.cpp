@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include <ecs/ComponentMapping.h>
+#include <ecs/ComponentMapping.hpp>
 
 class ComponentMappingTest : public ::testing::Test
 {
@@ -15,6 +15,14 @@ TEST_F(ComponentMappingTest, storingComponents)
 	ASSERT_EQ(1, mapping.get(0));
 	ASSERT_EQ(4, mapping.get(2));
 }
+
+
+TEST_F(ComponentMappingTest, throwOnStoringMoreThanOnce)
+{
+	mapping.insert(1, 1);
+	ASSERT_THROW(mapping.insert(1, 1), std::runtime_error);
+}
+
 TEST_F(ComponentMappingTest, throwOnGetOnEmpty)
 {
 	ASSERT_THROW(mapping.get(0), std::out_of_range);

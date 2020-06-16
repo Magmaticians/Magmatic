@@ -1,4 +1,4 @@
-#include "ecs/EntityManager.h"
+#include "ecs/EntityManager.hpp"
 #include <stdexcept>
 #include <spdlog/spdlog.h>
 

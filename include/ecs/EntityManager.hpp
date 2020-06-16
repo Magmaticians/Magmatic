@@ -1,5 +1,5 @@
-#ifndef MAGMATIC_ENTITYMANAGER_H
-#define MAGMATIC_ENTITYMANAGER_H
+#ifndef MAGMATIC_ENTITYMANAGER_HPP
+#define MAGMATIC_ENTITYMANAGER_HPP
 
 #include <queue>
 #include <bitset>
@@ -34,4 +34,4 @@ namespace magmatic::ecs
 	};
 }
 
-#endif //MAGMATIC_ENTITYMANAGER_H
+#endif //MAGMATIC_ENTITYMANAGER_HPP

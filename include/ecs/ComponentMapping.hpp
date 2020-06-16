@@ -1,7 +1,7 @@
-#ifndef MAGMATIC_COMPONENTMAPPING_H
-#define MAGMATIC_COMPONENTMAPPING_H
+#ifndef MAGMATIC_COMPONENTMAPPING_HPP
+#define MAGMATIC_COMPONENTMAPPING_HPP
 
-#include "ecs/EntityManager.h"
+#include "ecs/EntityManager.hpp"
 #include <unordered_map>
 #include <map>
 #include <spdlog/spdlog.h>
@@ -9,13 +9,22 @@
 
 namespace magmatic::ecs
 {
-	template<typename T>
-	class ComponentMapping
+	class BaseComponentMapping
 	{
 	public:
-		using EntityID = typename EntityManager::EntityID;
+		using EntityID = EntityManager::EntityID;
+		virtual ~BaseComponentMapping() = default;
+		virtual void remove(EntityID id) = 0;
+
+	};
+
+	template<typename T>
+	class ComponentMapping : public BaseComponentMapping
+	{
+	public:
+
 		void insert(EntityID id, const T& component);
-		void remove(EntityID id);
+		void remove(EntityID id) override ;
 
 		T& get(EntityID id);
 		const T& get(EntityID id) const;
@@ -83,4 +92,4 @@ namespace magmatic::ecs
 	}
 }
 
-#endif //MAGMATIC_COMPONENTMAPPING_H
+#endif //MAGMATIC_COMPONENTMAPPING_HPP

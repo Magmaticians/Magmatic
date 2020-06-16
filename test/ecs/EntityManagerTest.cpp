@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "ecs/EntityManager.h"
+#include "ecs/EntityManager.hpp"
 
 class EntityManagerTest : public ::testing::Test
 {

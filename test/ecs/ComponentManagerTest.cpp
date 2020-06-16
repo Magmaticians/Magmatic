@@ -16,6 +16,7 @@ TEST_F(ComponentManagerTest, registerComponentType)
 
 	ASSERT_EQ(0, manager.getComponentTypeID<int>());
 	ASSERT_EQ(1, manager.getComponentTypeID<double>());
+	ASSERT_DEATH(manager.registerComponent<int>(), "");
 }
 
 

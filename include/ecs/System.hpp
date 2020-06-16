@@ -11,6 +11,8 @@ namespace magmatic::ecs
 	public:
 		using EntityID = EntityManager::EntityID;
 		std::set<EntityID> handled_entities;
+
+		virtual ~System() = default;
 	};
 }
 

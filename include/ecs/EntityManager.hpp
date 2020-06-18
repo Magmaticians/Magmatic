@@ -13,8 +13,10 @@ namespace magmatic::ecs
 	public:
 		constexpr static uint8_t ComponentTypes = 10;
 
-		using EntityID = uint32_t ;
+		using EntityID = std::size_t;
 		using ComponentsMask = std::bitset<ComponentTypes>;
+
+		explicit EntityManager(std::size_t capacity);
 
 		EntityID addEntity();
 		void removeEntity(EntityID id);
@@ -24,13 +26,19 @@ namespace magmatic::ecs
 
 		[[nodiscard]] bool entityExists(EntityID id) const noexcept;
 
-
-
 	private:
+		struct EntityInfo
+		{
+			bool exist = false;
+			ComponentsMask mask;
+		};
+
 		std::queue<EntityID> free_IDs;
-		std::unordered_map<EntityID, ComponentsMask> componentMasks;
+		std::vector<EntityInfo> entities;
 
 		std::size_t last_free_id = 0;
+
+		void check_entity_id(EntityID id) const;
 	};
 }
 

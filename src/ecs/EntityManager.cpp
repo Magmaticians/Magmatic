@@ -2,6 +2,10 @@
 #include <stdexcept>
 #include <spdlog/spdlog.h>
 
+magmatic::ecs::EntityManager::EntityManager(std::size_t capacity)
+{
+	entities.resize(capacity);
+}
 
 magmatic::ecs::EntityManager::EntityID magmatic::ecs::EntityManager::addEntity()
 {
@@ -17,47 +21,43 @@ magmatic::ecs::EntityManager::EntityID magmatic::ecs::EntityManager::addEntity()
 		new_id = last_free_id;
 		++last_free_id;
 	}
-	componentMasks.insert({new_id, {}});
+
+	assert(new_id < entities.size());
+
+	entities[new_id].mask.reset();
+	entities[new_id].exist = true;
 	return new_id;
 }
 
 void magmatic::ecs::EntityManager::removeEntity(magmatic::ecs::EntityManager::EntityID id)
 {
-	if(!componentMasks.contains(id))
-	{
-		spdlog::error("Magmatic: Cannot destroy entity. Entity does not exist!");
-		throw std::out_of_range("Entity does not exist");
-	}
-	componentMasks.erase(id);
+	check_entity_id(id);
+
+	entities[id].exist = false;
 	free_IDs.push(id);
 }
 
 bool magmatic::ecs::EntityManager::entityExists(EntityID id) const noexcept
 {
-	return componentMasks.contains(id);
+	return entities[id].exist;
 }
 
 void magmatic::ecs::EntityManager::setComponentMask(EntityID id, ComponentsMask mask)
 {
-	if(!entityExists(id))
-	{
-		spdlog::error("Magmatic Cannot update mask. Entity does not exist");
-		throw std::runtime_error("Entity does not exist");
-	}
-	componentMasks[id] = mask;
+	check_entity_id(id);
+
+	entities[id].mask = mask;
 }
 
 const magmatic::ecs::EntityManager::ComponentsMask &
 magmatic::ecs::EntityManager::getComponentMask(EntityID id) const
 {
-	try
-	{
-		const ComponentsMask& mask = componentMasks.at(id);
-		return mask;
-	}
-	catch (const std::out_of_range&)
-	{
-		spdlog::error("Magmatic Cannot get mask. Entity does not exist");
-		throw std::runtime_error("Entity does not exist");
-	}
+	check_entity_id(id);
+	return entities.at(id).mask;
+}
+
+inline void magmatic::ecs::EntityManager::check_entity_id(EntityID id) const
+{
+	assert(id < entities.size());
+	assert(entities[id].exist);
 }

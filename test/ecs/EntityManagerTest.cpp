@@ -4,7 +4,7 @@
 class EntityManagerTest : public ::testing::Test
 {
 protected:
-	magmatic::ecs::EntityManager manager;
+	magmatic::ecs::EntityManager manager{30};
 };
 
 TEST_F(EntityManagerTest, addEntity)
@@ -25,6 +25,8 @@ TEST_F(EntityManagerTest, removeEntity)
 	ASSERT_TRUE(manager.entityExists(id_2));
 	manager.removeEntity(id_2);
 	ASSERT_FALSE(manager.entityExists(id_2));
+
+	ASSERT_DEATH(manager.removeEntity(id_2), "");
 }
 
 TEST_F(EntityManagerTest, reuseEntityID)
@@ -64,4 +66,5 @@ TEST_F(EntityManagerTest, componentMaskStoringAndLoading)
 
 	ASSERT_TRUE(manager.getComponentMask(id_1).none());
 	ASSERT_EQ(mask, manager.getComponentMask(id_2));
+	ASSERT_DEATH(auto _ = manager.getComponentMask(8), "");
 }

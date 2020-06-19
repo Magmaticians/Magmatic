@@ -2,9 +2,9 @@
 #include <stdexcept>
 #include <spdlog/spdlog.h>
 
-magmatic::ecs::EntityManager::EntityManager(std::size_t capacity)
+magmatic::ecs::EntityManager::EntityManager()
 {
-	entities.resize(capacity);
+	entities.resize(MAX_ENTITIES_COUNT);
 }
 
 magmatic::ecs::EntityManager::EntityID magmatic::ecs::EntityManager::addEntity()
@@ -39,6 +39,7 @@ void magmatic::ecs::EntityManager::removeEntity(magmatic::ecs::EntityManager::En
 
 bool magmatic::ecs::EntityManager::entityExists(EntityID id) const noexcept
 {
+	assert(id < entities.size());
 	return entities[id].exist;
 }
 
@@ -58,6 +59,11 @@ magmatic::ecs::EntityManager::getComponentMask(EntityID id) const
 
 inline void magmatic::ecs::EntityManager::check_entity_id(EntityID id) const
 {
-	assert(id < entities.size());
-	assert(entities[id].exist);
+	if(id >= entities.size() || !entities[id].exist)
+	{
+		spdlog::error("Magmatic: Access at invalid entityID");
+		throw std::out_of_range("Invalid EntityID");
+	}
 }
+
+

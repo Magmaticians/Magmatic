@@ -14,17 +14,21 @@ namespace magmatic::ecs
 	public:
 		using EntityID = EntityManager::EntityID;
 		virtual ~BaseComponentMapping() = default;
-		virtual void remove(EntityID id) = 0;
 
+		virtual void remove(EntityID id) = 0;
 	};
 
 	template<typename T>
 	class ComponentMapping : public BaseComponentMapping
 	{
 	public:
+		using Type = T;
+		using ComponentID = std::size_t;
+
+		ComponentMapping();
 
 		void insert(EntityID id, const T& component);
-		void remove(EntityID id) override ;
+		void remove(EntityID id) override;
 
 		T& get(EntityID id);
 		const T& get(EntityID id) const;
@@ -32,29 +36,53 @@ namespace magmatic::ecs
 		[[nodiscard]] bool exist(EntityID) const noexcept;
 
 	private:
-		std::unordered_map<EntityID, T> components;
+		std::vector<T> components;
+		std::unordered_map<EntityID, ComponentID> entityToComponent;
+		std::unordered_map<ComponentID, EntityID> componentToEntity;
+		std::size_t size = 0;
 	};
+
+	template<typename T>
+	ComponentMapping<T>::ComponentMapping()
+	{
+		components.resize(MAX_ENTITIES_COUNT);
+	}
 
 	template<typename T>
 	void ComponentMapping<T>::insert(ComponentMapping::EntityID id, const T& component)
 	{
-		if(components.contains(id))
+		assert(size < MAX_ENTITIES_COUNT && "Component limit exceeded");
+		if(entityToComponent.contains(id))
 		{
-			spdlog::error("Magmatic: Cannot add more than one component of type: {}", typeid(T).name());
-			throw std::runtime_error("Failed to add component to entity");
+			spdlog::error("Magmatic: Failed to add Component. Already exists");
+			throw std::runtime_error("Component already exist");
 		}
-		components.insert({id, component});
+
+		components[size] = component;
+		entityToComponent[id] = size;
+		componentToEntity[size] = id;
+		++size;
 	}
 
 	template<typename T>
 	void ComponentMapping<T>::remove(ComponentMapping::EntityID id)
 	{
-
-		auto removed = components.erase(id);
-		if(removed == 0)
+		if(!exist(id))
 		{
-			spdlog::debug("Failed to remove component od entity. Not exist");
+			spdlog::warn("Magmatic: Failed to remove component od entity. Not exist");
+			return;
 		}
+
+		const ComponentID old_index = entityToComponent[id];
+		std::swap(components[old_index], components[size-1]);
+
+		const EntityID end_component_id = componentToEntity[size-1];
+		entityToComponent[end_component_id] = old_index;
+		componentToEntity[old_index] = end_component_id;
+
+		entityToComponent.erase(id);
+		componentToEntity.erase(size-1);
+		components.pop_back();
 	}
 
 	template<typename T>
@@ -62,7 +90,8 @@ namespace magmatic::ecs
 	{
 		try
 		{
-			return components.at(id);
+			const ComponentID componentID =  entityToComponent.at(id);
+			return components[componentID];
 		}
 		catch (const std::out_of_range&)
 		{
@@ -76,7 +105,8 @@ namespace magmatic::ecs
 	{
 		try
 		{
-			return components.at(id);
+			const ComponentID componentID =  entityToComponent.at(id);
+			return components[componentID];
 		}
 		catch (const std::out_of_range&)
 		{
@@ -88,7 +118,7 @@ namespace magmatic::ecs
 	template<typename T>
 	bool ComponentMapping<T>::exist(ComponentMapping::EntityID id) const noexcept
 	{
-		return components.contains(id);
+		return entityToComponent.contains(id);
 	}
 }
 

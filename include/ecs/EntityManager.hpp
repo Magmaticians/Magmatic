@@ -8,15 +8,16 @@
 
 namespace magmatic::ecs
 {
+	constexpr uint8_t COMPONENT_TYPE_COUNT = 10;
+	constexpr std::size_t MAX_ENTITIES_COUNT = 2048;
+
 	class EntityManager
 	{
 	public:
-		constexpr static uint8_t ComponentTypes = 10;
-
 		using EntityID = std::size_t;
-		using ComponentsMask = std::bitset<ComponentTypes>;
+		using ComponentsMask = std::bitset<COMPONENT_TYPE_COUNT>;
 
-		explicit EntityManager(std::size_t capacity);
+		explicit EntityManager();
 
 		EntityID addEntity();
 		void removeEntity(EntityID id);

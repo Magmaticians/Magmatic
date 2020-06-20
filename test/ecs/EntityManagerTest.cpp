@@ -7,11 +7,23 @@ protected:
 	magmatic::ecs::EntityManager manager;
 };
 
+TEST_F(EntityManagerTest, init)
+{
+	ASSERT_EQ(magmatic::ecs::MAX_ENTITIES_COUNT, manager.capacity());
+	ASSERT_EQ(0, manager.size());
+}
+
 TEST_F(EntityManagerTest, addEntity)
 {
 	ASSERT_EQ(0, manager.addEntity());
+	ASSERT_EQ(1, manager.size());
+
 	ASSERT_EQ(1, manager.addEntity());
+	ASSERT_EQ(2, manager.size());
+
 	ASSERT_EQ(2, manager.addEntity());
+	ASSERT_EQ(3, manager.size());
+
 	ASSERT_EQ(3, manager.addEntity());
 }
 
@@ -23,8 +35,10 @@ TEST_F(EntityManagerTest, removeEntity)
 	manager.removeEntity(id_1);
 	ASSERT_FALSE(manager.entityExists(id_1));
 	ASSERT_TRUE(manager.entityExists(id_2));
+	ASSERT_EQ(1, manager.size());
 	manager.removeEntity(id_2);
 	ASSERT_FALSE(manager.entityExists(id_2));
+	ASSERT_EQ(0, manager.size());
 
 	ASSERT_THROW(manager.removeEntity(id_2), std::out_of_range);
 }
@@ -67,4 +81,55 @@ TEST_F(EntityManagerTest, componentMaskStoringAndLoading)
 	ASSERT_TRUE(manager.getComponentMask(id_1).none());
 	ASSERT_EQ(mask, manager.getComponentMask(id_2));
 	ASSERT_THROW(auto _ = manager.getComponentMask(8), std::out_of_range);
+}
+
+TEST_F(EntityManagerTest, iteratorAdvance)
+{
+	const auto id_1 = manager.addEntity();
+	const auto id_2 = manager.addEntity();
+
+	auto iter_1 = manager.begin();
+	auto iter_2 = manager.cbegin();
+
+	ASSERT_EQ(id_1, *iter_1);
+	ASSERT_EQ(id_1, *iter_2);
+
+	ASSERT_EQ(id_2, *++iter_1);
+	ASSERT_EQ(id_2, *++iter_2);
+
+	ASSERT_EQ(id_2, *iter_1++);
+	ASSERT_EQ(id_2, *iter_2++);
+
+	ASSERT_EQ(2, std::distance(manager.begin(), manager.end()));
+	ASSERT_EQ(2, std::distance(manager.cbegin(), manager.cend()));
+
+	ASSERT_EQ(2, std::distance(std::begin(manager), std::end(manager)));
+	ASSERT_EQ(2, std::distance(std::cbegin(manager), std::cend(manager)));
+}
+
+TEST_F(EntityManagerTest, iteratorAdvanceWithRemoved)
+{
+	const auto id_1 = manager.addEntity();
+	const auto id_2 = manager.addEntity();
+	const auto id_3 = manager.addEntity();
+
+	manager.removeEntity(id_2);
+
+	auto iter_1 = manager.begin();
+	auto iter_2 = manager.cbegin();
+
+	ASSERT_EQ(id_1, *iter_1);
+	ASSERT_EQ(id_1, *iter_2);
+
+	ASSERT_EQ(id_3, *++iter_1);
+	ASSERT_EQ(id_3, *++iter_2);
+
+	ASSERT_EQ(id_3, *iter_1++);
+	ASSERT_EQ(id_3, *iter_2++);
+
+	ASSERT_EQ(2, std::distance(manager.begin(), manager.end()));
+	ASSERT_EQ(2, std::distance(manager.cbegin(), manager.cend()));
+
+	ASSERT_EQ(2, std::distance(std::begin(manager), std::end(manager)));
+	ASSERT_EQ(2, std::distance(std::cbegin(manager), std::cend(manager)));
 }

@@ -133,3 +133,69 @@ TEST_F(EntityManagerTest, iteratorAdvanceWithRemoved)
 	ASSERT_EQ(2, std::distance(std::begin(manager), std::end(manager)));
 	ASSERT_EQ(2, std::distance(std::cbegin(manager), std::cend(manager)));
 }
+
+TEST_F(EntityManagerTest, maskedIteratorAdvance)
+{
+	const magmatic::ecs::EntityManager::ComponentsMask mask(1);
+	const magmatic::ecs::EntityManager::MaskedView view(manager, mask);
+
+	const auto id_1 = manager.addEntity();
+	const auto id_2 = manager.addEntity();
+	const auto id_3 = manager.addEntity();
+
+	manager.setComponentMask(id_1, mask);
+	manager.setComponentMask(id_3, mask);
+
+	auto iter_1 = view.begin();
+	auto iter_2 = view.cbegin();
+
+	ASSERT_EQ(id_1, *iter_1);
+	ASSERT_EQ(id_1, *iter_2);
+
+	ASSERT_EQ(id_3, *++iter_1);
+	ASSERT_EQ(id_3, *++iter_2);
+
+	ASSERT_EQ(id_3, *iter_1++);
+	ASSERT_EQ(id_3, *iter_2++);
+
+	ASSERT_EQ(2, std::distance(view.begin(), view.end()));
+	ASSERT_EQ(2, std::distance(view.cbegin(), view.cend()));
+
+	ASSERT_EQ(2, std::distance(std::begin(view), std::end(view)));
+	ASSERT_EQ(2, std::distance(std::cbegin(view), std::cend(view)));
+}
+
+TEST_F(EntityManagerTest, maskedIteratorAdvanceWithRemoved)
+{
+	const magmatic::ecs::EntityManager::ComponentsMask mask(1);
+	const magmatic::ecs::EntityManager::MaskedView view(manager, mask);
+
+	const auto id_1 = manager.addEntity();
+	const auto id_2 = manager.addEntity();
+	const auto id_3 = manager.addEntity();
+	const auto id_4 = manager.addEntity();
+
+	manager.setComponentMask(id_1, mask);
+	manager.setComponentMask(id_3, mask);
+	manager.setComponentMask(id_4, mask);
+
+	manager.removeEntity(id_1);
+
+	auto iter_1 = view.begin();
+	auto iter_2 = view.cbegin();
+
+	ASSERT_EQ(id_3, *iter_1);
+	ASSERT_EQ(id_3, *iter_2);
+
+	ASSERT_EQ(id_4, *++iter_1);
+	ASSERT_EQ(id_4, *++iter_2);
+
+	ASSERT_EQ(id_4, *iter_1++);
+	ASSERT_EQ(id_4, *iter_2++);
+
+	ASSERT_EQ(2, std::distance(view.begin(), view.end()));
+	ASSERT_EQ(2, std::distance(view.cbegin(), view.cend()));
+
+	ASSERT_EQ(2, std::distance(std::begin(view), std::end(view)));
+	ASSERT_EQ(2, std::distance(std::cbegin(view), std::cend(view)));
+}

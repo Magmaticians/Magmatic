@@ -39,7 +39,7 @@ void magmatic::ecs::EntityManager::removeEntity(magmatic::ecs::EntityManager::En
 	--size_;
 }
 
-bool magmatic::ecs::EntityManager::entityExists(EntityID id) const
+bool magmatic::ecs::EntityManager::entityExists(EntityID id) const noexcept
 {
 	if(id >= entities.size())
 	{
@@ -71,33 +71,53 @@ inline void magmatic::ecs::EntityManager::check_entity_id(EntityID id) const
 	}
 }
 
-std::size_t magmatic::ecs::EntityManager::size() const
+std::size_t magmatic::ecs::EntityManager::size() const noexcept
 {
 	return size_;
 }
 
-std::size_t magmatic::ecs::EntityManager::capacity() const
+std::size_t magmatic::ecs::EntityManager::capacity() const noexcept
 {
 	return entities.capacity();
 }
 
-magmatic::ecs::EntityManager::const_iterator magmatic::ecs::EntityManager::begin() const
+magmatic::ecs::EntityManager::const_iterator magmatic::ecs::EntityManager::begin() const noexcept
 {
 	return Iterator(this, 0);
 }
 
-magmatic::ecs::EntityManager::const_iterator magmatic::ecs::EntityManager::cbegin() const
+magmatic::ecs::EntityManager::const_iterator magmatic::ecs::EntityManager::cbegin() const noexcept
 {
 	return Iterator(this, 0);
 }
 
-magmatic::ecs::EntityManager::const_iterator magmatic::ecs::EntityManager::end() const
+magmatic::ecs::EntityManager::const_iterator magmatic::ecs::EntityManager::end() const noexcept
 {
 	return Iterator(this, entities.capacity());
 }
 
-magmatic::ecs::EntityManager::const_iterator magmatic::ecs::EntityManager::cend() const
+magmatic::ecs::EntityManager::const_iterator magmatic::ecs::EntityManager::cend() const noexcept
 {
 	return Iterator(this, entities.capacity());
 }
 
+
+magmatic::ecs::EntityManager::MaskedView::iterator magmatic::ecs::EntityManager::MaskedView::begin() const noexcept
+{
+	return MaskedIterator(&manager, mask, 0);
+}
+
+magmatic::ecs::EntityManager::MaskedView::iterator magmatic::ecs::EntityManager::MaskedView::cbegin() const noexcept
+{
+	return MaskedIterator(&manager, mask, 0);
+}
+
+magmatic::ecs::EntityManager::MaskedView::iterator magmatic::ecs::EntityManager::MaskedView::end() const noexcept
+{
+	return MaskedIterator(&manager, mask, manager.capacity());
+}
+
+magmatic::ecs::EntityManager::MaskedView::iterator magmatic::ecs::EntityManager::MaskedView::cend() const noexcept
+{
+	return MaskedIterator(&manager, mask, manager.capacity());
+}

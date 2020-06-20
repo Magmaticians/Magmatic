@@ -31,16 +31,16 @@ namespace magmatic::ecs
 		void setComponentMask(EntityID id, ComponentsMask mask);
 		[[nodiscard]] const ComponentsMask& getComponentMask(EntityID id) const;
 
-		[[nodiscard]] bool entityExists(EntityID id) const;
+		[[nodiscard]] bool entityExists(EntityID id) const noexcept;
 
-		[[nodiscard]] std::size_t size() const;
-		[[nodiscard]] std::size_t capacity() const;
+		[[nodiscard]] std::size_t size() const noexcept;
+		[[nodiscard]] std::size_t capacity() const noexcept;
 
-		[[nodiscard]] iterator begin() const;
-		[[nodiscard]] iterator cbegin() const;
+		[[nodiscard]] iterator begin() const noexcept;
+		[[nodiscard]] iterator cbegin() const noexcept;
 
-		[[nodiscard]] iterator end() const;
-		[[nodiscard]] iterator cend() const;
+		[[nodiscard]] iterator end() const noexcept;
+		[[nodiscard]] iterator cend() const noexcept;
 
 	private:
 		struct EntityInfo
@@ -100,14 +100,11 @@ namespace magmatic::ecs
 			}
 		protected:
 			BaseIterator(const EntityManager* manager, std::size_t index)
-			: manager_(manager), index_(index)
-			{
-				next();
-			}
+			: manager_(manager), index_(index) {}
 
 			inline bool matching()
 			{
-				return manager_->entityExists(index_) && static_cast<Derived*>(this)->valid();
+				return manager_->entityExists(index_) && static_cast<Derived*>(this)->valid(manager_->entities[index_]);
 			}
 			void next()
 			{
@@ -122,16 +119,69 @@ namespace magmatic::ecs
 		class Iterator : public BaseIterator<Iterator>
 		{
 		public:
-			bool valid() const
+			Iterator()
+			: BaseIterator<Iterator>(nullptr, 0) {}
+
+			[[nodiscard]] bool valid(const EntityInfo& info) const
 			{
 				return true;
 			}
 		protected:
 			Iterator(const EntityManager* manager, std::size_t index)
 			: BaseIterator<Iterator>(manager, index)
-			{}
+			{
+				next();
+			}
 
 			friend class EntityManager;
+		};
+
+		class MaskedView
+		{
+		public:
+			class MaskedIterator;
+
+			using self_type = MaskedView;
+			using iterator = MaskedIterator;
+			using const_iterator = MaskedIterator;
+
+			const EntityManager& manager;
+			ComponentsMask mask;
+
+			explicit MaskedView(const EntityManager& entity_manager) noexcept
+			: manager(entity_manager), mask{} {};
+
+			MaskedView(const EntityManager& entity_manager, const ComponentsMask& components_mask) noexcept
+			: manager(entity_manager), mask(components_mask) {};
+
+			[[nodiscard]] iterator begin() const noexcept;
+			[[nodiscard]] iterator cbegin() const noexcept;
+
+			[[nodiscard]] iterator end() const noexcept;
+			[[nodiscard]] iterator cend() const noexcept;
+
+			class MaskedIterator : public BaseIterator<MaskedIterator>
+			{
+			private:
+				ComponentsMask mask_{};
+
+			public:
+				MaskedIterator()
+						: BaseIterator<MaskedIterator>(nullptr, 0), mask_{} {}
+
+				[[nodiscard]] bool valid(const EntityInfo& info) const
+				{
+					return (info.mask & mask_) == mask_;
+				}
+			protected:
+				MaskedIterator(const EntityManager* manager, const ComponentsMask& mask, std::size_t index)
+				: BaseIterator<MaskedIterator>(manager, index), mask_(mask)
+				{
+					next();
+				}
+
+				friend class EntityManager;
+			};
 		};
 	};
 }

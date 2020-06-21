@@ -26,6 +26,9 @@ namespace magmatic::ecs
 		template<typename T>
 		void addComponent(EntityID id, T&& component);
 
+		template<typename T, typename... Args>
+		void addComponent(EntityID id, Args&& ... args);
+
 		template<typename T>
 		void removeComponent(EntityID id);
 
@@ -34,6 +37,9 @@ namespace magmatic::ecs
 
 		template<typename T>
 		const T& getComponent(EntityID id) const;
+
+		template<typename T>
+		bool hasComponent(EntityID id) const;
 
 		void removeEntityComponents(EntityID id) noexcept;
 
@@ -73,6 +79,12 @@ namespace magmatic::ecs
 		getMapping<T>()->insert(id, std::forward<T>(component));
 	}
 
+	template<typename T, typename... Args>
+	void ComponentManager::addComponent(ComponentManager::EntityID id, Args &&... args)
+	{
+		getMapping<T>()->insert(id, T(std::forward<Args>(args)...));
+	}
+
 	template<typename T>
 	void ComponentManager::removeComponent(ComponentManager::EntityID id)
 	{
@@ -98,6 +110,12 @@ namespace magmatic::ecs
 	T &ComponentManager::getComponent(ComponentManager::EntityID id)
 	{
 		return getMapping<T>()->get(id);
+	}
+
+	template<typename T>
+	bool ComponentManager::hasComponent(EntityID id) const
+	{
+		return getMapping<T>()->exist(id);
 	}
 
 	template<typename T>

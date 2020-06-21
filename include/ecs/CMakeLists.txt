@@ -6,4 +6,5 @@ target_sources(
 		ComponentManager.hpp
 		System.hpp
 		SystemManager.hpp
+		FullEntity.hpp
 )

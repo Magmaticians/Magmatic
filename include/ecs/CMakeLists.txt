@@ -7,4 +7,5 @@ target_sources(
 		System.hpp
 		SystemManager.hpp
 		FullEntity.hpp
+		FullEntityIteratorAdapter.hpp
 )

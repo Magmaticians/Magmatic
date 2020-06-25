@@ -4,6 +4,7 @@
 #include "System.hpp"
 #include <memory>
 #include <cassert>
+#include <chrono>
 
 
 namespace magmatic::ecs
@@ -28,6 +29,11 @@ namespace magmatic::ecs
 		void entityRemoved(EntityID id);
 
 		void updateEntityMask(EntityID id, const ComponentsMask& mask);
+
+		void update(
+				const std::chrono::duration<int64_t, std::micro>& delta,
+				const ComponentManager& component_manager
+				);
 
 	private:
 		struct SystemEntry

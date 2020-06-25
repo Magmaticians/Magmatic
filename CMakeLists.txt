@@ -11,6 +11,7 @@ Enable_language(GLSL)
 
 enable_testing()
 find_package(GTest)
+set(GOOGLETEST_VERSION 1.10.0)
 
 #Required libraries
 find_package(glfw3 REQUIRED)

@@ -37,3 +37,15 @@ std::vector<std::string> magmatic::ecs::SystemManager::getAllSystemsID() const
 	);
 	return ids;
 }
+
+void magmatic::ecs::SystemManager::update(
+		const std::chrono::duration<int64_t, std::micro>& delta,
+		const ComponentManager &component_manager
+		)
+{
+	for(const auto& system_entry: systems)
+	{
+		auto& system = system_entry.second.system;
+		system->update(delta, component_manager);
+	}
+}

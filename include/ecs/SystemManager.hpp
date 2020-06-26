@@ -5,6 +5,8 @@
 #include <memory>
 #include <cassert>
 #include <chrono>
+#include <concepts>
+
 
 
 namespace magmatic::ecs
@@ -46,6 +48,7 @@ namespace magmatic::ecs
 	};
 
 	template<typename T>
+	requires std::is_default_constructible<T>
 	void SystemManager::registerSystem()
 	{
 		const auto name = typeid(T).name();

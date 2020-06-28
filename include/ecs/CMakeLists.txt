@@ -8,4 +8,5 @@ target_sources(
 		SystemManager.hpp
 		FullEntity.hpp
 		FullEntityIteratorAdapter.hpp
+		EventRelay.hpp
 )

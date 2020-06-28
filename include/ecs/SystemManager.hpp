@@ -18,6 +18,7 @@ namespace magmatic::ecs
 		using EntityID = EntityManager::EntityID;
 
 		template<typename T>
+		requires std::default_initializable<T>
 		void registerSystem();
 
 		template<typename T>
@@ -48,7 +49,7 @@ namespace magmatic::ecs
 	};
 
 	template<typename T>
-	requires std::is_default_constructible<T>
+	requires std::default_initializable<T>
 	void SystemManager::registerSystem()
 	{
 		const auto name = typeid(T).name();

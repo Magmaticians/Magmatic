@@ -5,4 +5,5 @@ target_sources(
 		ComponentMappingTest.cpp
 		ComponentManagerTest.cpp
 		SystemManagerTest.cpp
+		EventRelayTest.cpp
 )

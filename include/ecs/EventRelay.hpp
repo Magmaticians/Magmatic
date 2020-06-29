@@ -36,6 +36,7 @@ namespace magmatic::ecs
 		void unsubscribe(typename EventDispatcher<T>::ReceiverID receiver_id);
 
 		template<typename T, typename... Args>
+		requires std::constructible_from<T, Args...>
 		void emit(Args&&... args);
 
 		template<typename T>
@@ -58,6 +59,7 @@ namespace magmatic::ecs
 	}
 
 	template<typename T, typename... Args>
+	requires std::constructible_from<T, Args...>
 	void EventRelay::emit(Args &&... args)
 	{
 		const T event(std::forward<Args>(args)...);

@@ -72,6 +72,35 @@ TEST_F(EventRelayTest, unsubscribe)
 	EXPECT_CALL(one_value_callback2, Call(testing::Ref(test_value)))
 			.Times(0);
 	relay.emit<OneValue>(test_value);
+
+	EXPECT_DEATH(relay.unsubscribe<OneValue>(id), "");
+}
+
+TEST_F(EventRelayTest, subscribers_count)
+{
+	struct OneValue
+	{
+		int val1;
+	};
+
+	struct AnotherOneValue
+	{
+		int value1;
+	};
+
+	testing::MockFunction<void(const OneValue&)> one_value_callback1;
+	testing::MockFunction<void(const OneValue&)> one_value_callback2;
+
+	relay.subscribe<OneValue>(one_value_callback1.AsStdFunction());
+	ASSERT_EQ(1, relay.subscribers_count<OneValue>());
+
+	const auto id = relay.subscribe<OneValue>(one_value_callback2.AsStdFunction());
+	ASSERT_EQ(2, relay.subscribers_count<OneValue>());
+
+	relay.unsubscribe<OneValue>(id);
+	ASSERT_EQ(1, relay.subscribers_count<OneValue>());
+
+	ASSERT_EQ(0, relay.subscribers_count<AnotherOneValue>());
 }
 
 TEST_F(EventRelayTest, sending_receiving_event_by_default_constrcutible)

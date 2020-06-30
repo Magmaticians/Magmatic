@@ -45,9 +45,9 @@ TEST_F(EntityManagerTest, removeEntity)
 
 TEST_F(EntityManagerTest, reuseEntityID)
 {
-	manager.addEntity();
+	static_cast<void>(manager.addEntity());
 	const auto id_2 = manager.addEntity();
-	manager.addEntity();
+	static_cast<void>(manager.addEntity());
 
 	manager.removeEntity(id_2);
 
@@ -80,7 +80,7 @@ TEST_F(EntityManagerTest, componentMaskStoringAndLoading)
 
 	ASSERT_TRUE(manager.getComponentMask(id_1).none());
 	ASSERT_EQ(mask, manager.getComponentMask(id_2));
-	ASSERT_THROW(auto _ = manager.getComponentMask(8), std::out_of_range);
+	ASSERT_THROW(static_cast<void>(manager.getComponentMask(8)), std::out_of_range);
 }
 
 TEST_F(EntityManagerTest, iteratorAdvance)
@@ -140,7 +140,7 @@ TEST_F(EntityManagerTest, maskedIteratorAdvance)
 	const magmatic::ecs::EntityManager::MaskedView view(manager, mask);
 
 	const auto id_1 = manager.addEntity();
-	const auto id_2 = manager.addEntity();
+	static_cast<void>( manager.addEntity());
 	const auto id_3 = manager.addEntity();
 
 	manager.setComponentMask(id_1, mask);
@@ -171,7 +171,7 @@ TEST_F(EntityManagerTest, maskedIteratorAdvanceWithRemoved)
 	const magmatic::ecs::EntityManager::MaskedView view(manager, mask);
 
 	const auto id_1 = manager.addEntity();
-	const auto id_2 = manager.addEntity();
+	static_cast<void>(manager.addEntity());
 	const auto id_3 = manager.addEntity();
 	const auto id_4 = manager.addEntity();
 

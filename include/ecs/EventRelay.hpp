@@ -23,9 +23,11 @@ namespace magmatic::ecs
 			ReceiverID subscribe(const Receiver& receiver);
 			void unsubscribe(ReceiverID receiver_id);
 
+			std::size_t subscribers_count() const noexcept ;
+
 		private:
 			ReceiverID last_id = 0;
-			std::map<ReceiverID, Receiver> receivers;
+			std::map<ReceiverID, Receiver> subscribers;
 		};
 
 	public:
@@ -34,6 +36,9 @@ namespace magmatic::ecs
 
 		template<typename T>
 		void unsubscribe(typename EventDispatcher<T>::ReceiverID receiver_id);
+
+		template<typename T>
+		std::size_t subscribers_count() const;
 
 		template<typename T, typename... Args>
 		requires std::constructible_from<T, Args...>
@@ -115,12 +120,27 @@ namespace magmatic::ecs
 	}
 
 	template<typename T>
+	std::size_t EventRelay::subscribers_count() const
+	{
+		const auto event_name = getEventName<T>();
+		if(!events.contains(event_name))
+		{
+			return 0;
+		}
+		else
+		{
+			const auto dispatcher = std::static_pointer_cast<EventDispatcher<T>>(events.at(event_name));
+			return dispatcher->subscribers_count();
+		}
+	}
+
+	template<typename T>
 	EventRelay::EventDispatcher<T>::ReceiverID
 	EventRelay::EventDispatcher<T>::subscribe(const EventRelay::EventDispatcher<T>::Receiver &receiver)
 	{
 		const auto current_id = last_id;
 
-		receivers[current_id] = receiver;
+		subscribers[current_id] = receiver;
 		++last_id;
 		return current_id;
 	}
@@ -128,18 +148,24 @@ namespace magmatic::ecs
 	template<typename T>
 	void EventRelay::EventDispatcher<T>::unsubscribe(EventRelay::EventDispatcher<T>::ReceiverID receiver_id)
 	{
-		assert(receivers.contains(receiver_id));
-		receivers.erase(receiver_id);
+		assert(subscribers.contains(receiver_id));
+		subscribers.erase(receiver_id);
 	}
 
 	template<typename T>
 	void EventRelay::EventDispatcher<T>::dispatch(const T &event_payload) const
 	{
-		for(const auto& entry : receivers)
+		for(const auto& entry : subscribers)
 		{
 			const auto& handler = entry.second;
 			handler(event_payload);
 		}
+	}
+
+	template<typename T>
+	std::size_t EventRelay::EventDispatcher<T>::subscribers_count() const noexcept
+	{
+		return subscribers.size();
 	}
 }
 

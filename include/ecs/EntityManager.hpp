@@ -25,7 +25,7 @@ namespace magmatic::ecs
 
 		explicit EntityManager();
 
-		EntityID addEntity();
+		[[nodiscard]] EntityID addEntity();
 		void removeEntity(EntityID id);
 
 		void setComponentMask(EntityID id, ComponentsMask mask);
@@ -100,7 +100,7 @@ namespace magmatic::ecs
 			}
 		protected:
 			BaseIterator(const EntityManager* manager, std::size_t index)
-			: manager_(manager), index_(index) {}
+			: index_(index), manager_(manager) {}
 
 			inline bool matching()
 			{
@@ -122,7 +122,7 @@ namespace magmatic::ecs
 			Iterator()
 			: BaseIterator<Iterator>(nullptr, 0) {}
 
-			[[nodiscard]] bool valid(const EntityInfo& info) const
+			[[nodiscard]] bool valid(const EntityInfo&) const
 			{
 				return true;
 			}

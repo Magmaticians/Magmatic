@@ -22,6 +22,7 @@ namespace magmatic::render
 
 		const GLFWcursor* handle() const noexcept;
 
+		friend class Window;
 	private:
 		bool custom_ = false;
 		GLFWcursor* cursor_;

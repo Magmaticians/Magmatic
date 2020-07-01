@@ -76,3 +76,32 @@ magmatic::render::Monitor::MonitorScale magmatic::render::Monitor::scale() const
 	glfwGetMonitorContentScale(monitor_handle_, &x, &y);
 	return MonitorScale{x, y};
 }
+
+const GLFWmonitor *magmatic::render::Monitor::handle() const noexcept
+{
+	return monitor_handle_;
+}
+
+magmatic::render::Monitor::VideoMode magmatic::render::Monitor::active_video_mode() const noexcept
+{
+	const GLFWvidmode* vid_mode = glfwGetVideoMode(monitor_handle_);
+	return VideoMode{vid_mode->width, vid_mode->height, vid_mode->refreshRate};
+}
+
+std::vector<magmatic::render::Monitor::VideoMode> magmatic::render::Monitor::video_modes() const noexcept
+{
+
+	int mode_count = 0;
+	const GLFWvidmode* vid_mode = glfwGetVideoModes(monitor_handle_, &mode_count);
+
+	std::vector<VideoMode> modes;
+	modes.reserve(mode_count);
+
+	std::transform(vid_mode, vid_mode+mode_count, std::back_inserter(modes),
+			[](const GLFWvidmode& mode)
+			{
+				return VideoMode{mode.width, mode.height, mode.refreshRate};
+			}
+			);
+	return modes;
+}

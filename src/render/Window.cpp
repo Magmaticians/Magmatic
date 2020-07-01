@@ -125,6 +125,16 @@ const std::unique_ptr<GLFWwindow, magmatic::render::Window::GLFWWindowDeleter> &
 	return this->window;
 }
 
+void magmatic::render::Window::setCursor(const Cursor &cursor) const noexcept
+{
+	glfwSetCursor(window.get(), cursor.cursor_);
+}
+
+void magmatic::render::Window::setMonitor(const Monitor &monitor, const Monitor::VideoMode& mode) const noexcept
+{
+	glfwSetWindowMonitor(window.get(), monitor.monitor_handle_, 0, 0, mode.width, mode.height, mode.refreshRate);
+}
+
 void magmatic::render::Window::GLFWWindowDeleter::operator()(GLFWwindow* pointer) noexcept
 {
 	glfwDestroyWindow(pointer);

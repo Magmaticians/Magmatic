@@ -1,6 +1,8 @@
 #ifndef MAGMATIC_WINDOW_HPP
 #define MAGMATIC_WINDOW_HPP
 
+#include "render/Cursor.hpp"
+#include "render/Monitor.hpp"
 #include <string>
 #include <memory>
 #include <vector>
@@ -34,6 +36,10 @@ namespace magmatic::render
 
 		void setSize(int width, int height);
 		[[nodiscard]] std::pair<int, int> getSize() const;
+
+		void setCursor(const Cursor& cursor) const noexcept;
+
+		void setMonitor(const Monitor& monitor, const Monitor::VideoMode& mode) const noexcept;
 
 		void hide() noexcept;
 		void minimize() noexcept;

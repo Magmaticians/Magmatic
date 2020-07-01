@@ -37,4 +37,5 @@ target_sources(magmatic-render
 		model/Model.hpp
 		PushConstantObject.h
 		Monitor.hpp
+		Cursor.hpp
 		)

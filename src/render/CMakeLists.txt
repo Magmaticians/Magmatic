@@ -29,4 +29,5 @@ target_sources(
 		model/model_data_loader/formats/ModelDataLoadergltf.cpp
 		model/Model.cpp
 		Monitor.cpp
+		Cursor.cpp
 )

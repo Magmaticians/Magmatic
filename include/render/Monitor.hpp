@@ -26,12 +26,19 @@ namespace magmatic::render
 			int height;
 		};
 
+		struct MonitorScale
+		{
+			float x;
+			float y;
+		};
+
 		using MonitorWorkarea = std::pair<MonitorPosition, MonitorSize>;
 
-		[[nodiscard]] MonitorPosition getPosition() const noexcept;
-		[[nodiscard]] MonitorSize getPhysicalSize() const noexcept;
-		[[nodiscard]] MonitorWorkarea getWorkarea() const noexcept;
-		[[nodiscard]] std::string getName() const noexcept;
+		[[nodiscard]] MonitorPosition position() const noexcept;
+		[[nodiscard]] MonitorSize physicalSize() const noexcept;
+		[[nodiscard]] MonitorWorkarea workarea() const noexcept;
+		[[nodiscard]] MonitorScale scale() const noexcept;
+		[[nodiscard]] std::string name() const noexcept;
 
 	private:
 		GLFWmonitor* monitor_handle_;

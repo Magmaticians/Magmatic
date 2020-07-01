@@ -165,9 +165,9 @@ void printMonitorsSummary()
 	monitors_summary[0].format().corner_color(tabulate::Color::red);
 	for(size_t i = 0; i < monitors.size(); ++i)
 	{
-		const auto name = monitors[i].getName();
-		const auto size = monitors[i].getPhysicalSize();
-		const auto pos = monitors[i].getPosition();
+		const auto name = monitors[i].name();
+		const auto size = monitors[i].physicalSize();
+		const auto pos = monitors[i].position();
 		const auto monitor_description = fmt::format(
 				"{} Size: {}-{} mm Pos: {}-{} px",
 				name,

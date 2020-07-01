@@ -37,7 +37,7 @@ std::vector<magmatic::render::Monitor> magmatic::render::Monitor::getAll()
 	return monitors;
 }
 
-magmatic::render::Monitor::MonitorPosition magmatic::render::Monitor::getPosition() const noexcept
+magmatic::render::Monitor::MonitorPosition magmatic::render::Monitor::position() const noexcept
 {
 	int x = 0;
 	int y = 0;
@@ -45,7 +45,7 @@ magmatic::render::Monitor::MonitorPosition magmatic::render::Monitor::getPositio
 	return MonitorPosition{x, y};
 }
 
-magmatic::render::Monitor::MonitorSize magmatic::render::Monitor::getPhysicalSize() const noexcept
+magmatic::render::Monitor::MonitorSize magmatic::render::Monitor::physicalSize() const noexcept
 {
 	int width = 0;
 	int height = 0;
@@ -53,7 +53,7 @@ magmatic::render::Monitor::MonitorSize magmatic::render::Monitor::getPhysicalSiz
 	return MonitorSize{width, height};
 }
 
-magmatic::render::Monitor::MonitorWorkarea magmatic::render::Monitor::getWorkarea() const noexcept
+magmatic::render::Monitor::MonitorWorkarea magmatic::render::Monitor::workarea() const noexcept
 {
 	int x;
 	int y;
@@ -63,8 +63,16 @@ magmatic::render::Monitor::MonitorWorkarea magmatic::render::Monitor::getWorkare
 	return std::make_pair(MonitorPosition{x, y}, MonitorSize{width, height});
 }
 
-std::string magmatic::render::Monitor::getName() const noexcept
+std::string magmatic::render::Monitor::name() const noexcept
 {
 	const auto window_name = glfwGetMonitorName(monitor_handle_);
 	return std::string(window_name);
+}
+
+magmatic::render::Monitor::MonitorScale magmatic::render::Monitor::scale() const noexcept
+{
+	float x;
+	float y;
+	glfwGetMonitorContentScale(monitor_handle_, &x, &y);
+	return MonitorScale{x, y};
 }

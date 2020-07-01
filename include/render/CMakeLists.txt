@@ -32,8 +32,9 @@ target_sources(magmatic-render
 		Fences.hpp
 		model/ModelData.hpp
 		model/model_data_loader/ModelDataLoader.hpp
-        model/model_data_loader/formats/ModelDataLoaderConcrete.hpp
-        model/model_data_loader/formats/ModelDataLoadergltf.hpp
-        model/Model.hpp
+		model/model_data_loader/formats/ModelDataLoaderConcrete.hpp
+		model/model_data_loader/formats/ModelDataLoadergltf.hpp
+		model/Model.hpp
 		PushConstantObject.h
+		Monitor.hpp
 		)

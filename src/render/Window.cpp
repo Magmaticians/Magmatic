@@ -135,6 +135,22 @@ void magmatic::render::Window::setMonitor(const Monitor &monitor, const Monitor:
 	glfwSetWindowMonitor(window.get(), monitor.monitor_handle_, 0, 0, mode.width, mode.height, mode.refreshRate);
 }
 
+void magmatic::render::Window::setAspectRatio(int numer, int denom) const noexcept
+{
+	glfwSetWindowAspectRatio(window.get(), numer, denom);
+}
+
+void magmatic::render::Window::setSizeConstraints(const std::pair<int, int>& min, const std::pair<int, int>& max) const noexcept
+{
+	const int& min_width = std::get<0>(min);
+	const int& min_height = std::get<1>(min);
+
+	const int& max_width = std::get<0>(max);
+	const int& max_height = std::get<1>(max);
+
+	glfwSetWindowSizeLimits(window.get(), min_width, min_height, max_width, max_height);
+}
+
 void magmatic::render::Window::GLFWWindowDeleter::operator()(GLFWwindow* pointer) noexcept
 {
 	glfwDestroyWindow(pointer);

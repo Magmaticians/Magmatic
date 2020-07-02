@@ -37,6 +37,10 @@ namespace magmatic::render
 		void setSize(int width, int height);
 		[[nodiscard]] std::pair<int, int> getSize() const;
 
+		void setSizeConstraints(const std::pair<int, int>& min, const std::pair<int, int>& max) const noexcept;
+
+		void setAspectRatio( int numer, int denom) const noexcept;
+
 		void setCursor(const Cursor& cursor) const noexcept;
 
 		void setMonitor(const Monitor& monitor, const Monitor::VideoMode& mode) const noexcept;

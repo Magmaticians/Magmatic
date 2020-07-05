@@ -20,7 +20,11 @@ namespace magmatic::ecs
 		const ComponentType& get() const;
 
 		template<typename ComponentType, typename... Args>
+		requires std::constructible_from<ComponentManager, Args...>
 		void set(Args&&... args);
+
+		template<typename ComponentType>
+		void set(ComponentType&& component);
 
 		template<typename ComponentType>
 		[[nodiscard]] bool has() const;
@@ -47,9 +51,16 @@ namespace magmatic::ecs
 	}
 
 	template<typename ComponentType, typename... Args>
+	requires std::constructible_from<ComponentManager, Args...>
 	void FullEntity::set(Args &&... args)
 	{
 		manager_.addComponent<ComponentType>(std::forward<Args>(args)...);
+	}
+
+	template<typename ComponentType>
+	void FullEntity::set(ComponentType&& component)
+	{
+		manager_.addComponent<ComponentType>(std::forward(component));
 	}
 
 	template<typename ComponentType>

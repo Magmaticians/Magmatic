@@ -17,9 +17,9 @@ namespace magmatic::ecs
 		using ComponentsMask = EntityManager::ComponentsMask;
 		using EntityID = EntityManager::EntityID;
 
-		template<typename T>
-		requires std::default_initializable<T>
-		void registerSystem();
+		template<typename T, typename... Args>
+		requires std::constructible_from<T, Args...>
+		void registerSystem(Args&&... args);
 
 		template<typename T>
 		std::shared_ptr<T> getSystem();
@@ -49,19 +49,6 @@ namespace magmatic::ecs
 	};
 
 	template<typename T>
-	requires std::default_initializable<T>
-	void SystemManager::registerSystem()
-	{
-		const auto name = typeid(T).name();
-		assert(!systems.contains(name));
-
-		SystemEntry entry = {};
-		entry.system = std::make_shared<T>();
-
-		systems.insert({name, entry});
-	}
-
-	template<typename T>
 	std::shared_ptr<T> SystemManager::getSystem()
 	{
 		const auto name = typeid(T).name();
@@ -80,6 +67,19 @@ namespace magmatic::ecs
 
 		return old_mask;
  	}
+
+	template<typename T, typename... Args>
+	requires std::constructible_from<T, Args...>
+	void SystemManager::registerSystem(Args &&... args)
+	{
+		const auto name = typeid(T).name();
+		assert(!systems.contains(name));
+
+		SystemEntry entry = {};
+		entry.system = std::make_shared<T>(std::forward<Args>(args)...);
+
+		systems.insert({name, entry});
+	}
 }
 
 #endif //MAGMATIC_SYSTEMMANAGER_HPP

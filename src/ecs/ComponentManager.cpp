@@ -2,8 +2,8 @@
 
 void magmatic::ecs::ComponentManager::removeEntityComponents(ComponentManager::EntityID id) noexcept
 {
-	for(auto& [name, mapping] : mappings)
+	for(auto& [mapping_id, mapping_entry] : mappings)
 	{
-		mapping->remove(id);
+		mapping_entry.mapping->remove(id);
 	}
 }

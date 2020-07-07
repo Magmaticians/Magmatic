@@ -9,4 +9,5 @@ target_sources(
 		FullEntity.hpp
 		FullEntityIteratorAdapter.hpp
 		EventRelay.hpp
+		ECS.hpp
 )

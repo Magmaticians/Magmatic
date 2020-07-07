@@ -4,4 +4,5 @@ target_sources(
 		EntityManager.cpp
 		ComponentManager.cpp
 		SystemManager.cpp
+		ECS.cpp
 )

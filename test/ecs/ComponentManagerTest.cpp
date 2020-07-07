@@ -12,8 +12,12 @@ TEST_F(ComponentManagerTest, registerComponentType)
 {
 
 	manager.registerComponent<int>();
+
 	manager.registerComponent<double>();
 
+	ASSERT_TRUE(manager.componentRegistered<int>());
+	ASSERT_TRUE(manager.componentRegistered<const int&>());
+	ASSERT_FALSE(manager.componentRegistered<float>());
 	ASSERT_EQ(0, manager.getComponentTypeID<int>());
 	ASSERT_EQ(1, manager.getComponentTypeID<double>());
 	ASSERT_DEATH(manager.registerComponent<int>(), "");

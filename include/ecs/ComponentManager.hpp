@@ -5,6 +5,7 @@
 #include <unordered_map>
 #include <string>
 #include <memory>
+#include <typeindex>
 
 namespace magmatic::ecs
 {
@@ -19,6 +20,9 @@ namespace magmatic::ecs
 
 		template<typename T>
 		bool registerComponent();
+
+		template<typename T>
+		bool componentRegistered() const noexcept;
 
 		template<typename T>
 		ComponentTypeID getComponentTypeID() const;
@@ -45,21 +49,35 @@ namespace magmatic::ecs
 
 	private:
 		ComponentTypeID lastID = 0;
-		std::unordered_map<ComponentTypeName, ComponentTypeID> registered_components;
-		std::unordered_map<ComponentTypeName, std::shared_ptr<BaseComponentMapping>> mappings;
+		struct MappingEntry
+		{
+			ComponentTypeID id;
+			std::shared_ptr<BaseComponentMapping> mapping;
+		};
+
+		std::unordered_map<std::type_index, MappingEntry> mappings;
 
 		template<typename T>
 		ComponentMappingPtr<T> getMapping() const;
+
+		template<typename T>
+		static std::type_index mappingID();
 	};
 
 	template<typename T>
 	bool ComponentManager::registerComponent()
 	{
-		const auto name = typeid(T).name();
-		assert(!registered_components.contains(name));
+		const std::type_index mapping_id = mappingID<T>();
+		assert(!mappings.contains(mapping_id));
 
-		registered_components.insert({name, lastID});
-		mappings.insert(std::make_pair(name, std::make_shared<ComponentMapping<T>>()));
+		mappings.insert(
+				{
+					mapping_id,
+					{
+						lastID,
+						std::make_shared<ComponentMapping<T>>()
+					}
+				});
 
 		++lastID;
 		return true;
@@ -68,9 +86,8 @@ namespace magmatic::ecs
 	template<typename T>
 	ComponentManager::ComponentTypeID ComponentManager::getComponentTypeID() const
 	{
-		const auto name = typeid(T).name();
-
-		return registered_components.at(name);
+		const std::type_index mapping_id = typeid(T);
+		return mappings.at(mapping_id).id;
 	}
 
 	template<typename T>
@@ -94,10 +111,11 @@ namespace magmatic::ecs
 	template<typename T>
 	ComponentManager::ComponentMappingPtr<T> ComponentManager::getMapping() const
 	{
-		const auto name = typeid(T).name();
+		const std::type_index mapping_id = typeid(T);
 		try
 		{
-			return std::static_pointer_cast<ComponentMapping<T>>(mappings.at(name));
+			const auto& mapping = mappings.at(mapping_id).mapping;
+			return std::static_pointer_cast<ComponentMapping<T>>(mapping);
 		}
 		catch (const std::out_of_range&)
 		{
@@ -122,6 +140,21 @@ namespace magmatic::ecs
 	const T &ComponentManager::getComponent(ComponentManager::EntityID id) const
 	{
 		return getMapping<T>()->get(id);
+	}
+
+	template<typename T>
+	bool ComponentManager::componentRegistered() const noexcept
+	{
+		const std::type_index mapping_id = typeid(T);
+		return mappings.contains(mapping_id);
+	}
+
+	template<typename T>
+	std::type_index ComponentManager::mappingID()
+	{
+		//todo: compile time?
+		const std::type_info& type = typeid(T);
+		return std::type_index(type);
 	}
 }
 

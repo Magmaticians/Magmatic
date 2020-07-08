@@ -75,4 +75,20 @@ glm::vec3 magmatic::core::Camera::rightDir() const
 	return static_cast<glm::vec3>(matrix_.invView()[0]);
 }
 
+bool magmatic::core::operator==(const magmatic::core::Camera &lhs, const magmatic::core::Camera &rhs) noexcept
+{
+	return lhs.eye_pos_ == rhs.eye_pos_
+		&& lhs.target_dir_ == rhs.target_dir_
+		&& lhs.up_dir_ == rhs.up_dir_
+		&& lhs.fov_y_ == rhs.fov_y_
+		&& lhs.aspect_ == rhs.aspect_
+		&& lhs.z_near_ == rhs.z_near_
+		&& lhs.z_far_ == rhs.z_far_;
+}
+
+bool magmatic::core::operator!=(const magmatic::core::Camera &lhs, const magmatic::core::Camera &rhs) noexcept
+{
+	return !(lhs == rhs);
+}
+
 

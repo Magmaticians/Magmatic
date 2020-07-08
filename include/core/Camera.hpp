@@ -39,6 +39,9 @@ namespace magmatic::core
 		glm::vec3 realUpDir() const;
 		glm::vec3 rightDir() const;
 
+		friend bool operator==(const Camera& lhs, const Camera& rhs) noexcept;
+		friend bool operator!=(const Camera& lhs, const Camera& rhs) noexcept;
+
 	private:
 		glm::vec3 eye_pos_;
 		glm::vec3 target_dir_;
@@ -52,6 +55,9 @@ namespace magmatic::core
 		mutable CameraMatrix matrix_;
 		mutable bool valid_ = false;
 	};
+
+	bool operator==(const Camera& lhs, const Camera& rhs) noexcept;
+	bool operator!=(const Camera& lhs, const Camera& rhs) noexcept;
 }
 
 #endif //MAGMATIC_CAMERA_HPP

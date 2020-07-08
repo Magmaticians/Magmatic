@@ -28,6 +28,9 @@ namespace magmatic::core
 
 		const glm::mat4 &invViewProjection() const;
 
+		friend bool operator==(const CameraMatrix& lhs, const CameraMatrix& rhs) noexcept;
+		friend bool operator!=(const CameraMatrix& lhs, const CameraMatrix& rhs) noexcept;
+
 	private:
 		glm::mat4 view_;
 		glm::mat4 projection_;
@@ -44,6 +47,9 @@ namespace magmatic::core
 		mutable glm::mat4 inv_view_projection_;
 		mutable bool inv_view_projection_valid_ = false;
 	};
+
+	bool operator==(const CameraMatrix& lhs, const CameraMatrix& rhs) noexcept;
+	bool operator!=(const CameraMatrix& lhs, const CameraMatrix& rhs) noexcept;
 }
 
 #endif //MAGMATIC_CAMERAMATRIX_HPP

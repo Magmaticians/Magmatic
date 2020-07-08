@@ -66,3 +66,23 @@ TEST(CameraMatrixTest, derived_matrices)
 	ASSERT_EQ(mat1mat2, cam.viewProjection());
 	ASSERT_EQ(invmat1mat2, cam.invViewProjection());
 }
+
+TEST(CameraMatrixTest, equality)
+{
+	CameraMatrix cam1(mat1, mat2);
+	CameraMatrix cam2(mat1, mat2);
+	CameraMatrix cam3(mat2, mat2);
+	CameraMatrix cam4(mat2, mat2);
+
+	ASSERT_TRUE(cam1 == cam2);
+	ASSERT_TRUE(cam3 == cam4);
+
+	ASSERT_FALSE(cam1 == cam3);
+	ASSERT_FALSE(cam2 == cam4);
+
+	ASSERT_TRUE(cam1 != cam3);
+	ASSERT_TRUE(cam2 != cam4);
+
+	ASSERT_FALSE(cam1 != cam2);
+	ASSERT_FALSE(cam3 != cam4);
+}

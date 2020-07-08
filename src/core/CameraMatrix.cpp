@@ -71,3 +71,13 @@ void magmatic::core::CameraMatrix::setProjection(glm::mat4 projection) noexcept
 	view_projection_valid_ = false;
 	inv_view_projection_valid_ = false;
 }
+
+bool magmatic::core::operator==(const magmatic::core::CameraMatrix &lhs, const magmatic::core::CameraMatrix &rhs) noexcept
+{
+	return lhs.view_ == rhs.view_ && lhs.projection_ == rhs.projection_;
+}
+
+bool magmatic::core::operator!=(const magmatic::core::CameraMatrix &lhs, const magmatic::core::CameraMatrix &rhs) noexcept
+{
+	return !(rhs == lhs);
+}

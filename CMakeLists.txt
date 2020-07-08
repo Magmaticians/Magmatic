@@ -76,9 +76,15 @@ target_link_libraries(magmatic-ecs PUBLIC spdlog::spdlog_header_only)
 target_compile_definitions(magmatic-ecs PUBLIC SPDLOG_FMT_EXTERNAL=1)
 set_target_properties(magmatic-ecs PROPERTIES FOLDER modules)
 
+#magmatic-ecs
+add_library(magmatic-core SHARED "")
+target_link_libraries(magmatic-core PUBLIC spdlog::spdlog_header_only)
+target_compile_definitions(magmatic-core PUBLIC SPDLOG_FMT_EXTERNAL=1)
+set_target_properties(magmatic-core PROPERTIES FOLDER modules)
+
 #tests
 add_executable(magmatic-tests "")
-target_link_libraries(magmatic-tests magmatic-ecs)
+target_link_libraries(magmatic-tests magmatic-ecs magmatic-core)
 target_link_libraries(magmatic-tests GTest::GTest gmock gtest_main)
 
 add_test( test magmatic-tests )

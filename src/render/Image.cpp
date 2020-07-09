@@ -9,9 +9,10 @@ magmatic::render::Image::Image(
 		vk::Format format,
 		vk::ImageTiling tiling,
 		const vk::ImageUsageFlags& usage,
-		const vk::MemoryPropertyFlags& memProps
+		const vk::MemoryPropertyFlags& memory_properties,
+		uint32_t mip_levels
 )
-		: image_format(format)
+		: image_format_(format), mip_levels_(mip_levels)
 {
 	const auto& handle = l_device.getHandle();
 
@@ -20,7 +21,7 @@ magmatic::render::Image::Image(
 			vk::ImageType::e2D,
 			format,
 			{extent.width, extent.height, 1},
-			1,
+			mip_levels_,
 			1,
 			vk::SampleCountFlagBits::e1,
 			tiling,
@@ -28,20 +29,20 @@ magmatic::render::Image::Image(
 			vk::SharingMode::eExclusive
 	};
 
-	image = handle->createImageUnique(image_info);
+	image_ = handle->createImageUnique(image_info);
 
-	auto memory_requirements = handle->getImageMemoryRequirements(image.get());
+	auto memory_requirements = handle->getImageMemoryRequirements(image_.get());
 	vk::MemoryAllocateInfo allocate_info{
 			memory_requirements.size,
 			utils::findMemoryType(
 					memory_requirements.memoryTypeBits,
-					memProps,
+					memory_properties,
 					l_device.getPhysicalDevice()
 			)
 	};
 
-	memory = handle->allocateMemoryUnique(allocate_info);
-	handle->bindImageMemory(image.get(), memory.get(), 0);
+	device_memory_ = handle->allocateMemoryUnique(allocate_info);
+	handle->bindImageMemory(image_.get(), device_memory_.get(), 0);
 }
 
 void magmatic::render::Image::transitionImageLayout(
@@ -57,11 +58,11 @@ void magmatic::render::Image::transitionImageLayout(
 	barrier.newLayout = new_layout;
 	barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 	barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-	barrier.image = image.get();
+	barrier.image = image_.get();
 	barrier.subresourceRange = {
 			vk::ImageAspectFlagBits::eColor,
 			0,
-			1,
+			mip_levels_,
 			0,
 			1
 	};
@@ -72,7 +73,7 @@ void magmatic::render::Image::transitionImageLayout(
 	if (new_layout == vk::ImageLayout::eDepthStencilAttachmentOptimal) {
 		barrier.subresourceRange.aspectMask = vk::ImageAspectFlagBits::eDepth;
 
-		if (utils::hasStencilComponent(image_format)) {
+		if (utils::hasStencilComponent(image_format_)) {
 			barrier.subresourceRange.aspectMask |= vk::ImageAspectFlagBits::eStencil;
 		}
 	} else {
@@ -117,18 +118,18 @@ void magmatic::render::Image::transitionImageLayout(
 vk::UniqueImageView magmatic::render::Image::createImageView(const vk::ImageAspectFlags& aspect_flags,
                                                              const vk::ComponentMapping& component_mapping)
 {
-	const auto& l_device = image.getOwner();
+	const auto& l_device = image_.getOwner();
 
 	vk::ImageViewCreateInfo image_view_info = {
 			vk::ImageViewCreateFlags(),
-			image.get(),
+			image_.get(),
 			vk::ImageViewType::e2D,
-			image_format,
+			image_format_,
 			component_mapping,
 			vk::ImageSubresourceRange {
 					aspect_flags,
 					0,
-					1,
+					mip_levels_,
 					0,
 					1
 			}
@@ -159,10 +160,10 @@ vk::UniqueImageView magmatic::render::Image::createImageView(const LogicalDevice
 
 const vk::UniqueImage &magmatic::render::Image::getImage()
 {
-	return image;
+	return image_;
 }
 
 const vk::UniqueDeviceMemory &magmatic::render::Image::getMemory()
 {
-	return memory;
+	return device_memory_;
 }

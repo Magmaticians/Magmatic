@@ -130,6 +130,7 @@ void Application::run() {
 	}
 
 	logicalDevice->waitIdle();
+	glfwTerminate();
 }
 
 void Application::updateUniformBuffer() {

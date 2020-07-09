@@ -17,22 +17,22 @@ namespace magmatic::render
 	public:
 		Texture(const LogicalDevice& l_device, const Bitmap& bitmap, const CommandPool& pool);
 
-		[[nodiscard]] DescriptorWriteUpdate getWriteInfo(size_t dst_binding, size_t dst_array_elem) const;
+		[[nodiscard]] DescriptorWriteUpdate getWriteInfo(size_t dst_binding, size_t dst_array_elem) const noexcept;
 
-		[[nodiscard]] const Image &getImage() const;
+		[[nodiscard]] const Image &getImage() const noexcept;
 
-		[[nodiscard]] const vk::UniqueImageView &getImageView() const;
+		[[nodiscard]] const vk::UniqueImageView &getImageView() const noexcept;
 
 	private:
-		Image image;
-		vk::UniqueImageView image_view;
+		Image image_;
+		vk::UniqueImageView image_view_;
 
-		[[nodiscard]] static Image createImage(const LogicalDevice& l_device, const Bitmap& bitmap);
+		[[nodiscard]] static Image createImage(const LogicalDevice& l_device, const Bitmap& bitmap,
+				const CommandPool& pool
+				);
 		[[nodiscard]] static vk::UniqueImageView createImageView(
 				const LogicalDevice& l_device,
-				Image& new_image,
-				const Bitmap& bitmap,
-				const CommandPool& pool
+				Image& image
 				);
 
 	};

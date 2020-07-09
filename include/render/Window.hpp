@@ -29,7 +29,7 @@ namespace magmatic::render
 		Window(Window&& rhs) = default;
 		Window& operator=(Window&& rhs) = default;
 
-		~Window();
+		~Window() = default;
 
 		void setName(const std::string& new_name) noexcept;
 		[[nodiscard]] std::string getName() const noexcept;

@@ -101,11 +101,6 @@ vk::Extent2D magmatic::render::Window::getFramebufferSize() const {
 	return res;
 }
 
-magmatic::render::Window::~Window()
-{
-	glfwTerminate();
-}
-
 std::vector<std::string> magmatic::render::Window::getRequiredExtensions() const
 {
 	uint32_t glfw_extension_count = 0;

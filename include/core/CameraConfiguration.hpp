@@ -1,5 +1,5 @@
-#ifndef MAGMATIC_CAMERA_HPP
-#define MAGMATIC_CAMERA_HPP
+#ifndef MAGMATIC_CAMERACONFIGURATION_HPP
+#define MAGMATIC_CAMERACONFIGURATION_HPP
 
 #include "CameraMatrix.hpp"
 #include <glm/vec3.hpp>
@@ -7,12 +7,12 @@
 
 namespace magmatic::core
 {
-	class Camera
+	class CameraConfiguration
 	{
 	public:
-		Camera() = default;
+		CameraConfiguration() = default;
 
-		Camera(
+		CameraConfiguration(
 				glm::vec3 eye_pos, glm::vec3 target_dir, glm::vec3 up_dir, float fov_y, float aspect,
 				float z_near, float z_far
 		) noexcept;
@@ -39,8 +39,8 @@ namespace magmatic::core
 		glm::vec3 realUpDir() const;
 		glm::vec3 rightDir() const;
 
-		friend bool operator==(const Camera& lhs, const Camera& rhs) noexcept;
-		friend bool operator!=(const Camera& lhs, const Camera& rhs) noexcept;
+		friend bool operator==(const CameraConfiguration& lhs, const CameraConfiguration& rhs) noexcept;
+		friend bool operator!=(const CameraConfiguration& lhs, const CameraConfiguration& rhs) noexcept;
 
 	private:
 		glm::vec3 eye_pos_;
@@ -56,8 +56,8 @@ namespace magmatic::core
 		mutable bool valid_ = false;
 	};
 
-	bool operator==(const Camera& lhs, const Camera& rhs) noexcept;
-	bool operator!=(const Camera& lhs, const Camera& rhs) noexcept;
+	bool operator==(const CameraConfiguration& lhs, const CameraConfiguration& rhs) noexcept;
+	bool operator!=(const CameraConfiguration& lhs, const CameraConfiguration& rhs) noexcept;
 }
 
-#endif //MAGMATIC_CAMERA_HPP
+#endif //MAGMATIC_CAMERACONFIGURATION_HPP

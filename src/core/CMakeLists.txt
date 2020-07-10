@@ -5,4 +5,5 @@ target_sources(
 		camera/CameraMatrix.cpp
 		camera/QuaternionCamera.cpp
 		camera/PlayerCamera.cpp
+		Ray.cpp
 )

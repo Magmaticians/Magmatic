@@ -6,4 +6,5 @@ target_sources(
 		camera/BaseCamera.hpp
 		camera/QuaternionCamera.hpp
 		camera/PlayerCamera.hpp
+		Ray.hpp
 )

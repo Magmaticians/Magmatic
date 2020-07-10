@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "core/CameraMatrix.hpp"
+#include "core/camera/CameraMatrix.hpp"
 
 using namespace magmatic::core;
 

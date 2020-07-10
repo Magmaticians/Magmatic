@@ -13,7 +13,7 @@ namespace magmatic::core
 		CameraConfiguration() = default;
 
 		CameraConfiguration(
-				glm::vec3 eye_pos, glm::vec3 target_dir, glm::vec3 up_dir, float fov_y, float aspect,
+				const glm::vec3& eye_pos, const glm::vec3& target_dir, const glm::vec3& up_dir, float fov_y, float aspect,
 				float z_near, float z_far
 		) noexcept;
 
@@ -26,9 +26,9 @@ namespace magmatic::core
 		[[nodiscard]] const float& zNear() const noexcept { return z_near_; };
 		[[nodiscard]] const float& zFar() const noexcept { return z_far_; };
 
-		void setEyePos(glm::vec3 eye_pos) noexcept;
-		void setTargetDir(glm::vec3 target_dir) noexcept;
-		void setUpDir(glm::vec3 up_dir) noexcept;
+		void setEyePos(const glm::vec3& eye_pos) noexcept;
+		void setTargetDir(const glm::vec3& target_dir) noexcept;
+		void setUpDir(const glm::vec3& up_dir) noexcept;
 
 		void setFovY(float fov_y) noexcept;
 		void setAspect(float aspect) noexcept;

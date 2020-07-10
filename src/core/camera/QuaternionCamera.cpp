@@ -1,20 +1,26 @@
-#include "core/QuaternionCamera.hpp"
+#include "core/camera/QuaternionCamera.hpp"
 #include <glm/mat4x4.hpp>
 #include <glm/gtx/quaternion.hpp>
 
-void magmatic::core::QuaternionCamera::setOrientation(glm::quat orientation) noexcept
+magmatic::core::QuaternionCamera::QuaternionCamera(
+		glm::quat orientation, glm::vec3 eye_pos, float fov_y, float aspect, float z_near, float z_far
+) noexcept
+: orientation_(orientation)
 {
-	orientation_ = orientation;
-	const auto rotation = glm::toMat3(orientation_);
-
-	const auto forward = glm::normalize(rotation * glm::vec3{0.0f, 0.0f, 1.0f});
-	const auto up = glm::normalize(rotation * glm::vec3{0.0f, 1.0f, 0.0f});
-
-	camera_configuration_.setTargetDir(forward);
-	camera_configuration_.setUpDir(up);
+	camera_configuration_.setEyePos(eye_pos);
+	camera_configuration_.setFovY(fov_y);
+	camera_configuration_.setAspect(aspect);
+	camera_configuration_.setZNear(z_near);
+	camera_configuration_.setZFar(z_far);
 }
 
-void magmatic::core::QuaternionCamera::setEyePos(glm::vec3 eye_pos) noexcept
+void magmatic::core::QuaternionCamera::setOrientation(const glm::quat& orientation) noexcept
+{
+	orientation_ = std::move(orientation);
+	orientation_changed_ = true;
+}
+
+void magmatic::core::QuaternionCamera::setEyePos(const glm::vec3& eye_pos) noexcept
 {
 	camera_configuration_.setEyePos(eye_pos);
 }
@@ -71,5 +77,21 @@ float magmatic::core::QuaternionCamera::zFar() const noexcept
 
 const magmatic::core::CameraConfiguration &magmatic::core::QuaternionCamera::cameraConfiguration() const noexcept
 {
+	if(orientation_changed_)
+	{
+		updateFromOrientation();
+	}
 	return camera_configuration_;
+}
+
+void magmatic::core::QuaternionCamera::updateFromOrientation() const noexcept
+{
+	const auto rotation = glm::toMat3(orientation_);
+
+	const auto forward = glm::normalize(rotation * glm::vec3{0.0f, 0.0f, 1.0f});
+	const auto up = glm::normalize(rotation * glm::vec3{0.0f, 1.0f, 0.0f});
+
+	camera_configuration_.setTargetDir(forward);
+	camera_configuration_.setUpDir(up);
+	orientation_changed_ = false;
 }

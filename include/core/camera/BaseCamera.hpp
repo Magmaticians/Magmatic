@@ -10,9 +10,6 @@ namespace magmatic::core
 	{
 	public:
 		virtual const CameraConfiguration& cameraConfiguration() const noexcept = 0;
-
-	protected:
-		CameraConfiguration camera_configuration_;
 	};
 }
 

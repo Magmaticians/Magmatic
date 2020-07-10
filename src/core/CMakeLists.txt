@@ -1,7 +1,8 @@
 target_sources(
 		magmatic-core
 		PRIVATE
-		CameraConfiguration.cpp
-		CameraMatrix.cpp
-		QuaternionCamera.cpp
+		camera/CameraConfiguration.cpp
+		camera/CameraMatrix.cpp
+		camera/QuaternionCamera.cpp
+		camera/PlayerCamera.cpp
 )

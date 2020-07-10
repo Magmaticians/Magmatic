@@ -1,9 +1,9 @@
-#include "core/CameraConfiguration.hpp"
+#include "core/camera/CameraConfiguration.hpp"
 #include <glm/mat4x4.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
 magmatic::core::CameraConfiguration::CameraConfiguration(
-		glm::vec3 eye_pos, glm::vec3 target_dir, glm::vec3 up_dir, float fov_y, float aspect, float z_near, float z_far
+		const glm::vec3 &eye_pos, const glm::vec3 &target_dir, const glm::vec3 &up_dir, float fov_y, float aspect, float z_near, float z_far
 ) noexcept
 		: eye_pos_(eye_pos), target_dir_(target_dir), up_dir_(up_dir), fov_y_(fov_y), aspect_(aspect), z_near_(z_near), z_far_(z_far)
 {
@@ -23,21 +23,21 @@ const magmatic::core::CameraMatrix &magmatic::core::CameraConfiguration::getCame
 	return matrix_;
 }
 
-void magmatic::core::CameraConfiguration::setEyePos(glm::vec3 eye_pos) noexcept
+void magmatic::core::CameraConfiguration::setEyePos(const glm::vec3& eye_pos) noexcept
 {
-	eye_pos_ = std::move(eye_pos);
+	eye_pos_ = eye_pos;
 	valid_ = false;
 }
 
-void magmatic::core::CameraConfiguration::setTargetDir(glm::vec3 target_dir) noexcept
+void magmatic::core::CameraConfiguration::setTargetDir(const glm::vec3& target_dir) noexcept
 {
-	target_dir_ = std::move(target_dir);
+	target_dir_ = target_dir;
 	valid_ = false;
 }
 
-void magmatic::core::CameraConfiguration::setUpDir(glm::vec3 up_dir) noexcept
+void magmatic::core::CameraConfiguration::setUpDir(const glm::vec3& up_dir) noexcept
 {
-	up_dir_ = std::move(up_dir);
+	up_dir_ = up_dir;
 	valid_ = false;
 }
 

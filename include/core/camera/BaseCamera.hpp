@@ -2,6 +2,7 @@
 #define MAGMATIC_BASECAMERA_HPP
 
 #include "CameraConfiguration.hpp"
+#include "core/Ray.hpp"
 
 
 namespace magmatic::core
@@ -10,6 +11,8 @@ namespace magmatic::core
 	{
 	public:
 		virtual const CameraConfiguration& cameraConfiguration() const noexcept = 0;
+		virtual const Ray viewRay() const noexcept = 0;
+		virtual const Ray screenPointRay(float x, float y) const noexcept = 0;
 	};
 }
 

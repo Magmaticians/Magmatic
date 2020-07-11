@@ -32,6 +32,9 @@ class QuaternionCamera : public BaseCamera
 		[[nodiscard]] float zNear() const noexcept;
 		[[nodiscard]] float zFar() const noexcept;
 
+		virtual const Ray viewRay() const noexcept override;
+		virtual const Ray screenPointRay(float x, float y) const noexcept override;
+
 	private:
 		mutable CameraConfiguration camera_configuration_;
 

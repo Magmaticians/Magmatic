@@ -3,6 +3,7 @@
 
 #include "BaseCamera.hpp"
 #include "CameraConfiguration.hpp"
+#include "core/Ray.hpp"
 #include <glm/vec3.hpp>
 
 namespace magmatic::core
@@ -36,6 +37,10 @@ namespace magmatic::core
 		[[nodiscard]] float aspect() const noexcept;
 		[[nodiscard]] float zNear() const noexcept;
 		[[nodiscard]] float zFar() const noexcept;
+
+		virtual const Ray viewRay() const noexcept override;
+		virtual const Ray screenPointRay(float x, float y) const noexcept override;
+
 
 		virtual const CameraConfiguration &cameraConfiguration() const noexcept override;
 

@@ -1,27 +1,21 @@
 #include "core/camera/PlayerCamera.hpp"
 #include <cmath>
 
-const magmatic::core::CameraConfiguration& magmatic::core::PlayerCamera::cameraConfiguration() const noexcept
+void magmatic::core::PlayerCamera::updateConfiguration() const noexcept
 {
-	if(!valid_)
+	const auto forward_dir = glm::vec3(
+			std::cos(angle_x_) * std::sin(angle_y_),
+			std::sin(angle_x_),
+			std::cos(angle_x_) * std::cos(angle_y_)
+			);
+
+	glm::vec3 eye_pos = pos_;
+	if(camera_distance_ != 0.0f)
 	{
-		const auto forward_dir = glm::vec3(
-				std::cos(angle_x_) * std::sin(angle_y_),
-				std::sin(angle_x_),
-				std::cos(angle_x_) * std::cos(angle_y_)
-				);
-
-		glm::vec3 eye_pos = pos_;
-		if(camera_distance_ != 0.0f)
-		{
-			eye_pos -= forward_dir * camera_distance_;
-		}
-		camera_configuration_.setTargetDir(forward_dir);
-		camera_configuration_.setEyePos(eye_pos);
-
-		valid_ = true;
+		eye_pos -= forward_dir * camera_distance_;
 	}
-	return camera_configuration_;
+	camera_configuration_.setTargetDir(forward_dir);
+	camera_configuration_.setEyePos(eye_pos);
 }
 
 void magmatic::core::PlayerCamera::setAngleY(float angle_y) noexcept
@@ -125,26 +119,4 @@ magmatic::core::PlayerCamera::PlayerCamera(
 	camera_configuration_.setAspect(aspect);
 	camera_configuration_.setZNear(z_near);
 	camera_configuration_.setZFar(z_far);
-}
-
-const magmatic::core::Ray magmatic::core::PlayerCamera::viewRay() const noexcept
-{
-	return Ray(camera_configuration_.eyePos(), camera_configuration_.targetDir());
-}
-
-const magmatic::core::Ray magmatic::core::PlayerCamera::screenPointRay(float x, float y) const noexcept
-{
-	const float shifted_x = x * 2.0f - 1.0f;
-	const float shifted_y = y * 2.0f - 1.0f;
-
-	const glm::vec4 screen_near{shifted_x, shifted_y, 0.0f, 1.0f};
-	const glm::vec4 screen_far{shifted_x, shifted_y, 1.0f, 1.0f};
-
-	const auto& camera_config = cameraConfiguration();
-	const auto& camera_matrix = camera_config.getCameraMatrix();
-
-	const auto world_near = glm::vec3(screen_near * camera_matrix.invViewProjection());
-	const auto world_far = glm::normalize(glm::vec3(screen_far * camera_matrix.invViewProjection()));
-
-	return Ray(world_near, world_far - world_near);
 }

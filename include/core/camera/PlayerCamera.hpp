@@ -8,7 +8,7 @@
 
 namespace magmatic::core
 {
-	class PlayerCamera : public BaseCamera
+	class PlayerCamera : public BaseCamera<PlayerCamera>
 	{
 	public:
 		PlayerCamera() noexcept;
@@ -38,22 +38,15 @@ namespace magmatic::core
 		[[nodiscard]] float zNear() const noexcept;
 		[[nodiscard]] float zFar() const noexcept;
 
-		virtual const Ray viewRay() const noexcept override;
-		virtual const Ray screenPointRay(float x, float y) const noexcept override;
-
-
-		virtual const CameraConfiguration &cameraConfiguration() const noexcept override;
-
 	private:
-		constexpr static glm::vec3 up_dir_{0.0f, 1.0f, 0.0f};
+		void updateConfiguration() const noexcept;
 
+		constexpr static glm::vec3 up_dir_{0.0f, 1.0f, 0.0f};
 		float angle_y_;
 		float angle_x_;
 		float camera_distance_;
-		glm::vec3 pos_;
 
-		mutable bool valid_ = false;
-		mutable CameraConfiguration camera_configuration_;
+		glm::vec3 pos_;
 
 	};
 }

@@ -8,15 +8,13 @@
 
 namespace magmatic::core
 {
-class QuaternionCamera : public BaseCamera
+class QuaternionCamera : public BaseCamera<QuaternionCamera>
 	{
 	public:
 		QuaternionCamera(glm::quat orientation, glm::vec3 eye_pos,
 				float fov_y, float aspect,
 				float z_near, float z_far
 				) noexcept;
-
-		virtual const CameraConfiguration& cameraConfiguration() const noexcept override;
 
 		void setOrientation(const glm::quat& orientation) noexcept;
 		void setEyePos(const glm::vec3& eye_pos) noexcept;
@@ -32,16 +30,10 @@ class QuaternionCamera : public BaseCamera
 		[[nodiscard]] float zNear() const noexcept;
 		[[nodiscard]] float zFar() const noexcept;
 
-		virtual const Ray viewRay() const noexcept override;
-		virtual const Ray screenPointRay(float x, float y) const noexcept override;
-
 	private:
-		mutable CameraConfiguration camera_configuration_;
+		void updateConfiguration() const noexcept;
 
 		glm::quat orientation_;
-		mutable bool orientation_changed_ = true;
-
-		void updateFromOrientation() const noexcept;
 	};
 }
 

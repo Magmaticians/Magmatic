@@ -17,7 +17,7 @@ magmatic::core::QuaternionCamera::QuaternionCamera(
 void magmatic::core::QuaternionCamera::setOrientation(const glm::quat& orientation) noexcept
 {
 	orientation_ = std::move(orientation);
-	orientation_changed_ = true;
+	valid_ = false;
 }
 
 void magmatic::core::QuaternionCamera::setEyePos(const glm::vec3& eye_pos) noexcept
@@ -75,16 +75,7 @@ float magmatic::core::QuaternionCamera::zFar() const noexcept
 	return camera_configuration_.zFar();
 }
 
-const magmatic::core::CameraConfiguration &magmatic::core::QuaternionCamera::cameraConfiguration() const noexcept
-{
-	if(orientation_changed_)
-	{
-		updateFromOrientation();
-	}
-	return camera_configuration_;
-}
-
-void magmatic::core::QuaternionCamera::updateFromOrientation() const noexcept
+void magmatic::core::QuaternionCamera::updateConfiguration() const noexcept
 {
 	const auto rotation = glm::toMat3(orientation_);
 
@@ -93,27 +84,4 @@ void magmatic::core::QuaternionCamera::updateFromOrientation() const noexcept
 
 	camera_configuration_.setTargetDir(forward);
 	camera_configuration_.setUpDir(up);
-	orientation_changed_ = false;
-}
-
-const magmatic::core::Ray magmatic::core::QuaternionCamera::viewRay() const noexcept
-{
-	return Ray(camera_configuration_.eyePos(), camera_configuration_.targetDir());
-}
-
-const magmatic::core::Ray magmatic::core::QuaternionCamera::screenPointRay(float x, float y) const noexcept
-{
-	const float shifted_x = x * 2.0f - 1.0f;
-	const float shifted_y = y * 2.0f - 1.0f;
-
-	const glm::vec4 screen_near{shifted_x, shifted_y, 0.0f, 1.0f};
-	const glm::vec4 screen_far{shifted_x, shifted_y, 1.0f, 1.0f};
-
-	const auto& camera_config = cameraConfiguration();
-	const auto& camera_matrix = camera_config.getCameraMatrix();
-
-	const auto world_near = glm::vec3(screen_near * camera_matrix.invViewProjection());
-	const auto world_far = glm::normalize(glm::vec3(screen_far * camera_matrix.invViewProjection()));
-
-	return Ray(world_near, world_far);
 }

@@ -6,4 +6,5 @@ target_sources(
 		camera/QuaternionCamera.cpp
 		camera/PlayerCamera.cpp
 		Ray.cpp
+		Frustum.cpp
 )

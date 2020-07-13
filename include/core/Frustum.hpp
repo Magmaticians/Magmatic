@@ -15,7 +15,8 @@ namespace magmatic::core
 				float z_near, float z_far
 				) noexcept;
 
-		bool pointIn(const glm::vec3& point) const noexcept;
+		[[nodiscard]] bool pointIn(const glm::vec3& point) const noexcept;
+		[[nodiscard]] bool sphereIn(const glm::vec3& center, float radius) const noexcept;
 	private:
 		glm::vec3 eye_pos_;
 
@@ -28,6 +29,9 @@ namespace magmatic::core
 
 		float aspect_;
 		float y_factor_;
+
+		float sphere_y_factor_;
+		float sphere_x_factor_;
 
 	};
 }

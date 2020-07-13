@@ -15,7 +15,7 @@ namespace magmatic::render
 		vk::Queue queue;
 
 	public:
-		explicit CommandPool(const LogicalDevice& l_device, QueueType type);
+		CommandPool(const LogicalDevice& l_device, QueueType type);
 
 		CommandPool(const CommandPool&) = delete;
 		CommandPool& operator=(const CommandPool&) = delete;

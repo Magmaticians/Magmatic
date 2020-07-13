@@ -38,4 +38,5 @@ target_sources(magmatic-render
 		PushConstantObject.h
 		Monitor.hpp
 		Cursor.hpp
+		QueryPool.hpp
 		)

@@ -30,4 +30,5 @@ target_sources(
 		model/Model.cpp
 		Monitor.cpp
 		Cursor.cpp
+		QueryPool.cpp
 )

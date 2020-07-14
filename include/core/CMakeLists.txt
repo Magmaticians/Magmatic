@@ -8,4 +8,5 @@ target_sources(
 		camera/PlayerCamera.hpp
 		Ray.hpp
 		Frustum.hpp
+		Box.hpp
 )

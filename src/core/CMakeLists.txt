@@ -7,4 +7,5 @@ target_sources(
 		camera/PlayerCamera.cpp
 		Ray.cpp
 		Frustum.cpp
+		Box.cpp
 )

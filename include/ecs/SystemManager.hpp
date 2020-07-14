@@ -2,11 +2,11 @@
 #define MAGMATIC_SYSTEMMANAGER_HPP
 
 #include "System.hpp"
+#include "EventRelay.hpp"
 #include <memory>
 #include <cassert>
 #include <chrono>
 #include <concepts>
-
 
 
 namespace magmatic::ecs
@@ -16,6 +16,8 @@ namespace magmatic::ecs
 	public:
 		using ComponentsMask = EntityManager::ComponentsMask;
 		using EntityID = EntityManager::EntityID;
+
+		SystemManager(ComponentManager& component_manager, EventRelay& event_relay);
 
 		template<typename T, typename... Args>
 		requires std::constructible_from<T, Args...>
@@ -33,10 +35,7 @@ namespace magmatic::ecs
 
 		void updateEntityMask(EntityID id, const ComponentsMask& mask);
 
-		void update(
-				const std::chrono::duration<int64_t, std::micro>& delta,
-				const ComponentManager& component_manager
-				);
+		void update(const std::chrono::duration<int64_t, std::micro>& delta);
 
 	private:
 		struct SystemEntry
@@ -45,7 +44,10 @@ namespace magmatic::ecs
 			ComponentsMask mask;
 		};
 
-		std::unordered_map<std::string, SystemEntry> systems;
+		ComponentManager& component_manager_;
+		EventRelay& event_relay_;
+
+		std::unordered_map<std::string, SystemEntry> systems_;
 	};
 
 	template<typename T>
@@ -53,14 +55,14 @@ namespace magmatic::ecs
 	{
 		const auto name = typeid(T).name();
 
-		return std::dynamic_pointer_cast<T>(systems.at(name).system);
+		return std::dynamic_pointer_cast<T>(systems_.at(name).system);
 	}
 
 	template<typename T>
 	SystemManager::ComponentsMask SystemManager::setSystemMask(const SystemManager::ComponentsMask &mask)
 	{
 		const auto name = typeid(T).name();
-		auto& system_entry = systems.at(name);
+		auto& system_entry = systems_.at(name);
 
 		const auto old_mask = system_entry.mask;
 		system_entry.mask = mask;
@@ -73,12 +75,14 @@ namespace magmatic::ecs
 	void SystemManager::registerSystem(Args &&... args)
 	{
 		const auto name = typeid(T).name();
-		assert(!systems.contains(name));
+		assert(!systems_.contains(name));
 
 		SystemEntry entry = {};
 		entry.system = std::make_shared<T>(std::forward<Args>(args)...);
 
-		systems.insert({name, entry});
+		entry.system->configure(event_relay_);
+
+		systems_.insert({name, entry});
 	}
 }
 

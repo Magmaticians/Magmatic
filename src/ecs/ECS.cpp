@@ -1,6 +1,7 @@
 #include "ecs/ECS.hpp"
 
 magmatic::ecs::ECS::ECS()
+:system_manager_(component_manager_, event_relay_)
 {
 }
 

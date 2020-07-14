@@ -2,6 +2,7 @@
 #include <gtest/gtest-spi.h>
 #include <gmock/gmock.h>
 #include "ecs/ComponentManager.hpp"
+#include "ecs/EventRelay.hpp"
 #include "ecs/SystemManager.hpp"
 
 using magmatic::ecs::System;
@@ -10,13 +11,16 @@ using ComponentMask = magmatic::ecs::EntityManager::ComponentsMask;
 class EmptySystem : public magmatic::ecs::System
 {
 public:
-	MOCK_METHOD2(update, void(const std::chrono::duration<int64_t, std::micro>& delta, const magmatic::ecs::ComponentManager& component_manager));
+	void configure(magmatic::ecs::EventRelay& event_relay){};
+	MOCK_METHOD2(update, void(const std::chrono::duration<int64_t, std::micro>& delta, magmatic::ecs::ComponentManager& component_manager));
 };
 
 class SystemManagerTest : public ::testing::Test
 {
 protected:
-	magmatic::ecs::SystemManager manager;
+	magmatic::ecs::ComponentManager component_manager;
+	magmatic::ecs::EventRelay event_relay;
+	magmatic::ecs::SystemManager manager {component_manager, event_relay};
 
 	class EmptySystem2: public EmptySystem {};
 
@@ -26,6 +30,7 @@ protected:
 
 TEST_F(SystemManagerTest, registeringSystem)
 {
+
 	manager.registerSystem<EmptySystem>();
 	const auto registered = manager.getAllSystemsID();
 
@@ -33,6 +38,7 @@ TEST_F(SystemManagerTest, registeringSystem)
 
 	manager.registerSystem<EmptySystem2>();
 	const auto new_registered = manager.getAllSystemsID();
+
 
 	EXPECT_THAT(new_registered, ::testing::UnorderedElementsAre(system_name, system2_name));
 }
@@ -135,8 +141,6 @@ TEST_F(SystemManagerTest, removeEntity)
 
 TEST_F(SystemManagerTest, updateSystem)
 {
-	using magmatic::ecs::ComponentManager;
-	ComponentManager component_manager;
 	manager.registerSystem<EmptySystem>();
 	manager.registerSystem<EmptySystem2>();
 
@@ -151,7 +155,7 @@ TEST_F(SystemManagerTest, updateSystem)
 	EXPECT_CALL(*system2, update(zero_delta, ::testing::Ref(component_manager)))
 		.Times(1);
 
-	manager.update(zero_delta, component_manager);
+	manager.update(zero_delta);
 
 	std::chrono::duration<int64_t, std::micro> two_delta{2};
 	EXPECT_CALL(*system, update(two_delta, ::testing::Ref(component_manager)))
@@ -159,5 +163,5 @@ TEST_F(SystemManagerTest, updateSystem)
 	EXPECT_CALL(*system2, update(two_delta, ::testing::Ref(component_manager)))
 			.Times(1);
 
-	manager.update(two_delta, component_manager);
+	manager.update(two_delta);
 }

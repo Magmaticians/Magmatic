@@ -1,4 +1,4 @@
-#include "core/CameraMatrix.hpp"
+#include "core/camera/CameraMatrix.hpp"
 
 magmatic::core::CameraMatrix::CameraMatrix(glm::mat4 view, glm::mat4 projection) noexcept
 : view_(std::move(view)), projection_(std::move(projection))

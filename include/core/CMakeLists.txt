@@ -1,6 +1,11 @@
 target_sources(
 		magmatic-core
 		PUBLIC
-		Camera.hpp
-		CameraMatrix.hpp
+		camera/CameraConfiguration.hpp
+		camera/CameraMatrix.hpp
+		camera/BaseCamera.hpp
+		camera/QuaternionCamera.hpp
+		camera/PlayerCamera.hpp
+		Ray.hpp
+		Frustum.hpp
 )

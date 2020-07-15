@@ -11,7 +11,10 @@ namespace magmatic::ecs
 	public:
 		using EntityID = EntityManager::EntityID;
 
-		FullEntity(EntityID id, EntityManager& entity_manager, ComponentManager& component_manager);
+		FullEntity(
+				EntityID id, EntityManager& entity_manager, ComponentManager& component_manager
+				, SystemManager& system_manager
+		);
 
 		template<typename ComponentType>
 		ComponentType& get();
@@ -27,6 +30,9 @@ namespace magmatic::ecs
 		void set(ComponentType&& component);
 
 		template<typename ComponentType>
+		void remove();
+
+		template<typename ComponentType>
 		[[nodiscard]] bool has() const;
 
 		[[nodiscard]] bool valid() const noexcept;
@@ -35,10 +41,15 @@ namespace magmatic::ecs
 		EntityID id_;
 		EntityManager& entity_manager_;
 		ComponentManager& component_manager_;
+		SystemManager& system_manager_;
 	};
 
-	FullEntity::FullEntity(EntityID id, EntityManager& entity_manager, ComponentManager& component_manager)
-	: id_(id), entity_manager_(entity_manager), component_manager_(component_manager) {}
+	FullEntity::FullEntity(
+			EntityID id, EntityManager& entity_manager, ComponentManager& component_manager
+			, SystemManager& system_manager
+	)
+	: id_(id), entity_manager_(entity_manager), component_manager_(component_manager), system_manager_(system_manager)
+	{}
 
 	template<typename ComponentType>
 	ComponentType& FullEntity::get()
@@ -79,6 +90,19 @@ namespace magmatic::ecs
 	bool FullEntity::valid() const noexcept
 	{
 		return entity_manager_.entityExists(id_);
+	}
+
+	template<typename ComponentType>
+	void FullEntity::remove()
+	{
+		component_manager_.removeComponent<ComponentType>(id_);
+
+		const auto component_type_ID = component_manager_.getComponentTypeID<ComponentType>();
+
+		auto mask = entity_manager_.getComponentMask(id_);
+		mask.set(component_type_ID, false);
+		entity_manager_.setComponentMask(id_, mask);
+		system_manager_.updateEntityMask(id_, entity_manager_.getComponentMask(id_));
 	}
 }
 

@@ -30,7 +30,7 @@ namespace magmatic::ecs
 
 		value_type operator*() const
 		{
-			return FullEntity(*internal_iter_, <#initializer#>, component_manager_);
+			return FullEntity(*internal_iter_, <#initializer#>, component_manager_, <#initializer#>);
 		}
 		bool operator==(const FullEntityIteratorAdapter& other) const
 		{

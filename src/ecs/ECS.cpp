@@ -10,7 +10,7 @@ magmatic::ecs::FullEntity magmatic::ecs::ECS::createEntity()
 	const auto entity_id = entity_manager_.addEntity();
 	system_manager_.updateEntityMask(entity_id, {});
 
-	return FullEntity(entity_id, entity_manager_, component_manager_);
+	return FullEntity(entity_id, entity_manager_, component_manager_, system_manager_);
 }
 
 void magmatic::ecs::ECS::removeEntity(magmatic::ecs::ECS::EntityID id)

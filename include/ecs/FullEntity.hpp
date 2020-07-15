@@ -11,7 +11,7 @@ namespace magmatic::ecs
 	public:
 		using EntityID = EntityManager::EntityID;
 
-		FullEntity(EntityID id, ComponentManager& manager);
+		FullEntity(EntityID id, EntityManager& entity_manager, ComponentManager& component_manager);
 
 		template<typename ComponentType>
 		ComponentType& get();
@@ -29,44 +29,56 @@ namespace magmatic::ecs
 		template<typename ComponentType>
 		[[nodiscard]] bool has() const;
 
+		[[nodiscard]] bool valid() const noexcept;
+
 	private:
 		EntityID id_;
-
-		ComponentManager& manager_;
+		EntityManager& entity_manager_;
+		ComponentManager& component_manager_;
 	};
 
-	FullEntity::FullEntity(FullEntity::EntityID id, ComponentManager& manager)
-	:id_(id), manager_(manager) {}
+	FullEntity::FullEntity(EntityID id, EntityManager& entity_manager, ComponentManager& component_manager)
+	: id_(id), entity_manager_(entity_manager), component_manager_(component_manager) {}
 
 	template<typename ComponentType>
 	ComponentType& FullEntity::get()
 	{
-		return manager_.getComponent<ComponentType>(id_);
+		assert(valid());
+		assert(component_manager_.hasComponent<ComponentType>(id_));
+		return component_manager_.getComponent<ComponentType>(id_);
 	}
 
 	template<typename ComponentType>
 	const ComponentType &FullEntity::get() const
 	{
-		return manager_.getComponent<ComponentType>(id_);
+		assert(valid());
+		assert(component_manager_.hasComponent<ComponentType>(id_));
+		return component_manager_.getComponent<ComponentType>(id_);
 	}
 
 	template<typename ComponentType, typename... Args>
 	requires std::constructible_from<ComponentManager, Args...>
 	void FullEntity::set(Args &&... args)
 	{
-		manager_.addComponent<ComponentType>(std::forward<Args>(args)...);
+		component_manager_.addComponent<ComponentType>(std::forward<Args>(args)...);
 	}
 
 	template<typename ComponentType>
 	void FullEntity::set(ComponentType&& component)
 	{
-		manager_.addComponent<ComponentType>(std::forward(component));
+		component_manager_.addComponent<ComponentType>(std::forward(component));
 	}
 
 	template<typename ComponentType>
 	bool FullEntity::has() const
 	{
-		return manager_.hasComponent<ComponentType>(id_);
+		assert(valid());
+		return component_manager_.hasComponent<ComponentType>(id_);
+	}
+
+	bool FullEntity::valid() const noexcept
+	{
+		return entity_manager_.entityExists(id_);
 	}
 }
 

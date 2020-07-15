@@ -24,17 +24,17 @@ namespace magmatic::ecs
 		using difference_type = std::ptrdiff_t;
 		using iterator_category = std::input_iterator_tag;
 
-		FullEntityIteratorAdapter(): internal_iter{} {};
-		FullEntityIteratorAdapter(T iter, ComponentManager& component_manager)
-		:internal_iter(iter), manager(component_manager) {};
+		FullEntityIteratorAdapter(): internal_iter_{} {};
+		FullEntityIteratorAdapter(T iter, EntityManager& entity_manager, ComponentManager& component_manager)
+		: internal_iter_(iter), entity_manager_(entity_manager), component_manager_(component_manager) {};
 
 		value_type operator*() const
 		{
-			return FullEntity(*internal_iter, manager);
+			return FullEntity(*internal_iter_, <#initializer#>, component_manager_);
 		}
 		bool operator==(const FullEntityIteratorAdapter& other) const
 		{
-			return &manager == &other.manager && internal_iter == other.internal_iter;
+			return &component_manager_ == &other.component_manager_ && internal_iter_ == other.internal_iter_;
 		}
 		bool operator!=(const FullEntityIteratorAdapter& other) const
 		{
@@ -42,18 +42,20 @@ namespace magmatic::ecs
 		}
 		self_type& operator++()
 		{
-			++internal_iter;
+			++internal_iter_;
 			return *this;
 		}
 		self_type operator++(int)
 		{
 			auto ret = *this;
-			++internal_iter;
+			++internal_iter_;
 			return ret;
 		}
 	private:
-		T internal_iter;
-		ComponentManager& manager;
+		T internal_iter_;
+
+		EntityManager& entity_manager_;
+		ComponentManager& component_manager_;
 	};
 }
 

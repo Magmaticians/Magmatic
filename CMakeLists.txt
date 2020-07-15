@@ -40,7 +40,8 @@ add_executable(main-test "")
 add_executable(device_enumeration "")
 add_executable(sound_test "")
 add_executable(model_info "")
-add_dependencies(examples main-test device_enumeration sound_test model_info)
+add_executable(simple_example "")
+add_dependencies(examples main-test device_enumeration sound_test model_info simple_example)
 
 #magmatic-utils
 add_library(magmatic-utils SHARED "")

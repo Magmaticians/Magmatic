@@ -27,10 +27,7 @@ namespace magmatic::ecs
 		void set(Args&&... args);
 
 		template<typename ComponentType>
-		void set(ComponentType&& component);
-
-		template<typename ComponentType>
-		void remove();
+		void remove() noexcept;
 
 		template<typename ComponentType>
 		[[nodiscard]] bool has() const;
@@ -71,13 +68,18 @@ namespace magmatic::ecs
 	requires std::constructible_from<ComponentManager, Args...>
 	void FullEntity::set(Args &&... args)
 	{
-		component_manager_.addComponent<ComponentType>(std::forward<Args>(args)...);
-	}
+		assert(valid());
+		assert(component_manager_.componentRegistered<ComponentType>());
+		component_manager_.addComponent<ComponentType>(id_, std::forward<Args>(args)...);
 
-	template<typename ComponentType>
-	void FullEntity::set(ComponentType&& component)
-	{
-		component_manager_.addComponent<ComponentType>(std::forward(component));
+		const auto component_type_id = component_manager_.getComponentTypeID<ComponentType>();
+		auto mask = entity_manager_.getComponentMask(id_);
+		if(!mask.test(component_type_id))
+		{
+			mask.set(component_type_id, true);
+			entity_manager_.setComponentMask(id_, mask);
+			system_manager_.updateEntityMask(id_, mask);
+		}
 	}
 
 	template<typename ComponentType>
@@ -93,7 +95,7 @@ namespace magmatic::ecs
 	}
 
 	template<typename ComponentType>
-	void FullEntity::remove()
+	void FullEntity::remove() noexcept
 	{
 		component_manager_.removeComponent<ComponentType>(id_);
 

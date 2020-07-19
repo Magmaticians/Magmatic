@@ -2,6 +2,7 @@
 #define MAGMATIC_FULLENTITYITERATORADAPTER_HPP
 
 #include "FullEntity.hpp"
+#include "ECS.hpp"
 #include <iterator>
 #include <concepts>
 
@@ -24,17 +25,17 @@ namespace magmatic::ecs
 		using difference_type = std::ptrdiff_t;
 		using iterator_category = std::input_iterator_tag;
 
-		FullEntityIteratorAdapter(): internal_iter_{} {};
-		FullEntityIteratorAdapter(T iter, EntityManager& entity_manager, ComponentManager& component_manager)
-		: internal_iter_(iter), entity_manager_(entity_manager), component_manager_(component_manager) {};
+		FullEntityIteratorAdapter(): internal_iter_{} {} noexcept;
+		FullEntityIteratorAdapter(T iter, ECS& ecs_handle) noexcept
+		: internal_iter_(iter), ecs_handle_(ecs_handle) {};
 
 		value_type operator*() const
 		{
-			return FullEntity(*internal_iter_, <#initializer#>, component_manager_, <#initializer#>);
+			return FullEntity(*internal_iter_, ecs_handle_);
 		}
 		bool operator==(const FullEntityIteratorAdapter& other) const
 		{
-			return &component_manager_ == &other.component_manager_ && internal_iter_ == other.internal_iter_;
+			return &ecs_handle_ == &other.ecs_handle_ && internal_iter_ == other.internal_iter_;
 		}
 		bool operator!=(const FullEntityIteratorAdapter& other) const
 		{
@@ -54,8 +55,7 @@ namespace magmatic::ecs
 	private:
 		T internal_iter_;
 
-		EntityManager& entity_manager_;
-		ComponentManager& component_manager_;
+		ECS& ecs_handle_;
 	};
 }
 

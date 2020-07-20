@@ -18,6 +18,8 @@ namespace magmatic::ecs
 
 		ECS();
 
+		void update(const std::chrono::duration<int64_t, std::micro>& delta);
+		EventRelay& eventRelay() noexcept;
 		//Entity management
 
 		[[nodiscard]] FullEntity createEntity();
@@ -40,6 +42,11 @@ namespace magmatic::ecs
 
 		template<typename ComponentType>
 		bool hasComponent(EntityID id) const;
+
+		//system management
+		template<typename T, typename... Args>
+		requires std::constructible_from<T, Args...>
+		void registerSystem(Args&&... args);
 	private:
 		EventRelay event_relay_;
 
@@ -88,11 +95,6 @@ namespace magmatic::ecs
 		system_manager_.updateEntityMask(id, mask);
 	}
 
-	bool ECS::entityExists(ECS::EntityID id) const noexcept
-	{
-		return entity_manager_.entityExists(id);
-	}
-
 	template<typename ComponentType>
 	bool ECS::hasComponent(EntityID id) const
 	{
@@ -111,6 +113,13 @@ namespace magmatic::ecs
 	{
 		assert(component_manager_.hasComponent<ComponentType>(id));
 		return component_manager_.getComponent<ComponentType>(id);
+	}
+
+	template<typename T, typename... Args>
+	requires std::constructible_from<T, Args...>
+	void ECS::registerSystem(Args&& ... args)
+	{
+		system_manager_.registerSystem<T>(std::forward<Args>(args)...);
 	}
 }
 

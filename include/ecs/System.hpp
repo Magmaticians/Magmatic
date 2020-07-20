@@ -1,5 +1,5 @@
-#ifndef MAGMATIC_SYSTEM_H
-#define MAGMATIC_SYSTEM_H
+#ifndef MAGMATIC_SYSTEM_HPP
+#define MAGMATIC_SYSTEM_HPP
 
 #include "EntityManager.hpp"
 #include "EventRelay.hpp"
@@ -27,4 +27,4 @@ namespace magmatic::ecs
 	};
 }
 
-#endif //MAGMATIC_SYSTEM_H
+#endif //MAGMATIC_SYSTEM_HPP

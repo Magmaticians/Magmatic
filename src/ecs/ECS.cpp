@@ -20,3 +20,18 @@ void magmatic::ecs::ECS::removeEntity(magmatic::ecs::ECS::EntityID id)
 	component_manager_.removeEntityComponents(id);
 	entity_manager_.removeEntity(id);
 }
+
+void magmatic::ecs::ECS::update(const std::chrono::duration<int64_t, std::micro>& delta)
+{
+	system_manager_.update(delta);
+}
+
+bool magmatic::ecs::ECS::entityExists(magmatic::ecs::ECS::EntityID id) const noexcept
+{
+	return entity_manager_.entityExists(id);
+}
+
+magmatic::ecs::EventRelay& magmatic::ecs::ECS::eventRelay() noexcept
+{
+	return event_relay_;
+}

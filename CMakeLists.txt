@@ -84,7 +84,7 @@ set_target_properties(magmatic-core PROPERTIES FOLDER modules)
 
 #tests
 add_executable(magmatic-tests "")
-target_link_libraries(magmatic-tests magmatic-ecs magmatic-core)
+target_link_libraries(magmatic-tests magmatic-ecs magmatic-core magmatic-utils)
 target_link_libraries(magmatic-tests GTest::GTest gmock gtest_main)
 
 add_test( test magmatic-tests )

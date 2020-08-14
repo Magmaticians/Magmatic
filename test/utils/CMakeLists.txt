@@ -1,5 +1,6 @@
 target_sources(
 		magmatic-tests
 		PRIVATE
-		ThreadPoolTest.cpp
+		thread_pool/ThreadPoolTest.cpp
+		dgraph/DGraphTest.cpp
 )

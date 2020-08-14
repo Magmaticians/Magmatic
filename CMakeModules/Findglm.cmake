@@ -1,6 +1,6 @@
-#  GLM_FOUND - System has glm
-#  GLM_INCLUDE_DIRS - The glm include directories
-#  GLM_LIBRARIES - The libraries needed to use glm
+#  glm_FOUND - System has glm
+#  glm_INCLUDE_DIRS - The glm include directories
+#  glm_LIBRARIES - The libraries needed to use glm
 
 find_package(PkgConfig)
 pkg_check_modules(PC_glm QUIET glm)

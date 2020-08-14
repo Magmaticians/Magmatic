@@ -1,7 +1,10 @@
 #include "utils/thread_pool/ThreadPool.hpp"
+#include <cassert>
 
 magmatic::utils::ThreadPool::ThreadPool(std::size_t thread_count)
 {
+	assert(thread_count != 0);
+
 	for(std::size_t i = 0; i < thread_count; ++i)
 	{
 		workers_.emplace_back(std::thread(

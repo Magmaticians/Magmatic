@@ -16,7 +16,7 @@ set(GOOGLETEST_VERSION 1.10.0)
 #Required libraries
 find_package(glfw3 REQUIRED)
 find_package(Vulkan REQUIRED)
-find_package(GLM REQUIRED)
+find_package(glm REQUIRED)
 find_package(stb REQUIRED)
 
 #Logger
@@ -90,7 +90,7 @@ target_link_libraries(magmatic-tests GTest::GTest gmock gtest_main)
 add_test( test magmatic-tests )
 
 
-target_link_libraries(main-test PRIVATE magmatic-render magmatic-sound)
+target_link_libraries(main-test PRIVATE magmatic-render magmatic-sound magmatic-utils)
 
 add_subdirectory(src)
 add_subdirectory(include)

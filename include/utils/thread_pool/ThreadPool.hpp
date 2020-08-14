@@ -19,13 +19,18 @@ namespace magmatic::utils
 		template<typename F, typename... Args>
 		requires std::invocable<F, Args...>
 		auto enqueue(F fun, Args&&... args) -> std::future<std::invoke_result_t<F, Args...>>;
+
+		[[nodiscard]] std::size_t thread_count() const
+		{
+			return workers_.size();
+		}
 	private:
 		std::vector<std::thread> workers_;
 
 		std::mutex queue_mutex_;
 		std::condition_variable tasks_cv_;
 
-		std::queue<std::function<void()>> tasks_;
+		std::queue<std::function<void(void)>> tasks_; // todo: change to non-copyable function container to prevent usage of shared ptr
 
 		bool quit_ = false;
 	};

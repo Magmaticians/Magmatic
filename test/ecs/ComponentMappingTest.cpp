@@ -34,7 +34,7 @@ TEST_F(ComponentMappingTest, throwOnGetOnEmpty)
 TEST_F(ComponentMappingTest, constGet)
 {
 	mapping.insert(0, 2);
-	const auto const_mapping = mapping;
+	const auto& const_mapping = mapping;
 	ASSERT_EQ(2, const_mapping.get(0));
 }
 

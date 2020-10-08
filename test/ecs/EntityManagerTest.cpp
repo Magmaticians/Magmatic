@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include "ecs/EntityManager.hpp"
+#include "ecs/ECSTypes.hpp"
 
 class EntityManagerTest : public ::testing::Test
 {
@@ -73,7 +74,7 @@ TEST_F(EntityManagerTest, componentMaskStoringAndLoading)
 	const auto id_1 = manager.addEntity();
 	const auto id_2 = manager.addEntity();
 
-	magmatic::ecs::EntityManager::ComponentsMask mask;
+	magmatic::ecs::components_mask_t mask;
 	mask.set(3);
 
 	manager.setComponentMask(id_2, mask);
@@ -136,7 +137,7 @@ TEST_F(EntityManagerTest, iteratorAdvanceWithRemoved)
 
 TEST_F(EntityManagerTest, maskedIteratorAdvance)
 {
-	const magmatic::ecs::EntityManager::ComponentsMask mask(1);
+	const magmatic::ecs::components_mask_t mask(1);
 	const magmatic::ecs::EntityManager::MaskedView view(manager, mask);
 
 	const auto id_1 = manager.addEntity();
@@ -167,7 +168,7 @@ TEST_F(EntityManagerTest, maskedIteratorAdvance)
 
 TEST_F(EntityManagerTest, maskedIteratorAdvanceWithRemoved)
 {
-	const magmatic::ecs::EntityManager::ComponentsMask mask(1);
+	const magmatic::ecs::components_mask_t mask(1);
 	const magmatic::ecs::EntityManager::MaskedView view(manager, mask);
 
 	const auto id_1 = manager.addEntity();

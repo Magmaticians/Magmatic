@@ -10,4 +10,7 @@ target_sources(
 		FullEntityIteratorAdapter.hpp
 		EventRelay.hpp
 		ECS.hpp
+		ECSConfig.hpp
+		ECSTypes.hpp
+		executor/ParallelExecutor.hpp
 )

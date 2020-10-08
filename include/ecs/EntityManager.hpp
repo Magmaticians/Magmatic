@@ -5,19 +5,17 @@
 #include <bitset>
 #include <vector>
 #include <unordered_map>
+#include "ECSConfig.hpp"
+#include "ECSTypes.hpp"
 
 namespace magmatic::ecs
 {
-	constexpr uint8_t COMPONENT_TYPE_COUNT = 10;
-	constexpr std::size_t MAX_ENTITIES_COUNT = 2048;
 
 	class EntityManager
 	{
 	public:
 		class Iterator;
 
-		using EntityID = std::size_t;
-		using ComponentsMask = std::bitset<COMPONENT_TYPE_COUNT>;
 
 		using self_type = EntityManager;
 		using iterator = Iterator;
@@ -25,13 +23,13 @@ namespace magmatic::ecs
 
 		explicit EntityManager();
 
-		[[nodiscard]] EntityID addEntity();
-		void removeEntity(EntityID id);
+		[[nodiscard]] entity_id_t addEntity();
+		void removeEntity(entity_id_t id);
 
-		void setComponentMask(EntityID id, ComponentsMask mask);
-		[[nodiscard]] const ComponentsMask& getComponentMask(EntityID id) const;
+		void setComponentMask(entity_id_t id, components_mask_t mask);
+		[[nodiscard]] const components_mask_t& getComponentMask(entity_id_t id) const;
 
-		[[nodiscard]] bool entityExists(EntityID id) const noexcept;
+		[[nodiscard]] bool entityExists(entity_id_t id) const noexcept;
 
 		[[nodiscard]] std::size_t size() const noexcept;
 		[[nodiscard]] std::size_t capacity() const noexcept;
@@ -46,16 +44,16 @@ namespace magmatic::ecs
 		struct EntityInfo
 		{
 			bool exist = false;
-			ComponentsMask mask;
+			components_mask_t mask;
 		};
 
-		std::queue<EntityID> free_IDs;
+		std::queue<entity_id_t> free_IDs;
 		std::vector<EntityInfo> entities;
 
 		std::size_t last_free_id = 0;
 		std::size_t size_ = 0;
 
-		void check_entity_id(EntityID id) const;
+		void checkEntityId(entity_id_t id) const;
 
 		template<typename Derived>
 		class BaseIterator
@@ -65,8 +63,8 @@ namespace magmatic::ecs
 
 		public:
 			using self_type = BaseIterator;
-			using value_type = EntityID;
-			using reference = EntityID;
+			using value_type = entity_id_t;
+			using reference = entity_id_t;
 			using pointer = void;
 			using difference_type = std::ptrdiff_t;
 			using iterator_category = std::input_iterator_tag;
@@ -141,17 +139,16 @@ namespace magmatic::ecs
 		public:
 			class MaskedIterator;
 
-			using self_type = MaskedView;
 			using iterator = MaskedIterator;
 			using const_iterator = MaskedIterator;
 
 			const EntityManager& manager;
-			ComponentsMask mask;
+			components_mask_t mask;
 
 			explicit MaskedView(const EntityManager& entity_manager) noexcept
 			: manager(entity_manager), mask{} {};
 
-			MaskedView(const EntityManager& entity_manager, const ComponentsMask& components_mask) noexcept
+			MaskedView(const EntityManager& entity_manager, const components_mask_t& components_mask) noexcept
 			: manager(entity_manager), mask(components_mask) {};
 
 			[[nodiscard]] iterator begin() const noexcept;
@@ -163,7 +160,7 @@ namespace magmatic::ecs
 			class MaskedIterator : public BaseIterator<MaskedIterator>
 			{
 			private:
-				ComponentsMask mask_{};
+				components_mask_t mask_{};
 
 			public:
 				MaskedIterator()
@@ -174,7 +171,7 @@ namespace magmatic::ecs
 					return (info.mask & mask_) == mask_;
 				}
 			protected:
-				MaskedIterator(const EntityManager* manager, const ComponentsMask& mask, std::size_t index)
+				MaskedIterator(const EntityManager* manager, const components_mask_t & mask, std::size_t index)
 				: BaseIterator<MaskedIterator>(manager, index), mask_(mask)
 				{
 					next();

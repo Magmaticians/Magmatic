@@ -7,9 +7,9 @@ magmatic::ecs::EntityManager::EntityManager()
 	entities.resize(MAX_ENTITIES_COUNT);
 }
 
-magmatic::ecs::EntityManager::EntityID magmatic::ecs::EntityManager::addEntity()
+magmatic::ecs::entity_id_t magmatic::ecs::EntityManager::addEntity()
 {
-	EntityID new_id;
+	entity_id_t new_id;
 
 	if(!free_IDs.empty())
 	{
@@ -30,16 +30,16 @@ magmatic::ecs::EntityManager::EntityID magmatic::ecs::EntityManager::addEntity()
 	return new_id;
 }
 
-void magmatic::ecs::EntityManager::removeEntity(magmatic::ecs::EntityManager::EntityID id)
+void magmatic::ecs::EntityManager::removeEntity(entity_id_t id)
 {
-	check_entity_id(id);
+	checkEntityId(id);
 
 	entities[id].exist = false;
 	free_IDs.push(id);
 	--size_;
 }
 
-bool magmatic::ecs::EntityManager::entityExists(EntityID id) const noexcept
+bool magmatic::ecs::EntityManager::entityExists(entity_id_t id) const noexcept
 {
 	if(id >= entities.size())
 	{
@@ -48,26 +48,26 @@ bool magmatic::ecs::EntityManager::entityExists(EntityID id) const noexcept
 	return entities[id].exist;
 }
 
-void magmatic::ecs::EntityManager::setComponentMask(EntityID id, ComponentsMask mask)
+void magmatic::ecs::EntityManager::setComponentMask(entity_id_t id, components_mask_t mask)
 {
-	check_entity_id(id);
+	checkEntityId(id);
 
 	entities[id].mask = mask;
 }
 
-const magmatic::ecs::EntityManager::ComponentsMask &
-magmatic::ecs::EntityManager::getComponentMask(EntityID id) const
+const magmatic::ecs::components_mask_t&
+magmatic::ecs::EntityManager::getComponentMask(entity_id_t id) const
 {
-	check_entity_id(id);
+	checkEntityId(id);
 	return entities.at(id).mask;
 }
 
-inline void magmatic::ecs::EntityManager::check_entity_id(EntityID id) const
+inline void magmatic::ecs::EntityManager::checkEntityId(entity_id_t id) const
 {
 	if(id >= entities.size() || !entities[id].exist)
 	{
 		spdlog::error("Magmatic: Access at invalid entityID");
-		throw std::out_of_range("Invalid EntityID");
+		throw std::out_of_range("Invalid entity_id_t");
 	}
 }
 

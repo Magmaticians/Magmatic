@@ -4,6 +4,6 @@ target_sources(
 		EntityManagerTest.cpp
 		ComponentMappingTest.cpp
 		ComponentManagerTest.cpp
-		SystemManagerTest.cpp
 		EventRelayTest.cpp
+		ECSTest.cpp
 )

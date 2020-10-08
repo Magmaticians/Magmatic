@@ -2,15 +2,14 @@
 #define MAGMATIC_FULLENTITY_HPP
 
 #include "ECS.hpp"
+#include "ECSTypes.hpp"
 
 namespace magmatic::ecs
 {
 	class FullEntity
 	{
 	public:
-		using EntityID = EntityManager::EntityID;
-
-		FullEntity(EntityID id, ECS& ecs_handle) noexcept;
+		FullEntity(entity_id_t id, ECS& ecs_handle) noexcept;
 
 		template<typename ComponentType>
 		ComponentType& get();
@@ -19,7 +18,7 @@ namespace magmatic::ecs
 		const ComponentType& get() const;
 
 		template<typename ComponentType, typename... Args>
-		void set(Args&&... args);
+		void add(Args&&... args);
 
 		template<typename ComponentType>
 		void remove() noexcept;
@@ -30,11 +29,11 @@ namespace magmatic::ecs
 		[[nodiscard]] bool valid() const noexcept;
 
 	private:
-		EntityID id_;
+		entity_id_t id_;
 		ECS& ecs_handle_;
 	};
 
-	FullEntity::FullEntity(EntityID id, ECS& ecs_handle) noexcept
+	FullEntity::FullEntity(entity_id_t id, ECS& ecs_handle) noexcept
 	: id_(id), ecs_handle_(ecs_handle)
 	{}
 
@@ -53,10 +52,10 @@ namespace magmatic::ecs
 	}
 
 	template<typename ComponentType, typename... Args>
-	void FullEntity::set(Args &&... args)
+	void FullEntity::add(Args &&... args)
 	{
 		assert(valid());
-		ecs_handle_.setComponent<ComponentType>(id_, std::forward<Args>(args)...);
+		ecs_handle_.addComponent<ComponentType>(id_, std::forward<Args>(args)...);
 	}
 
 	template<typename ComponentType>

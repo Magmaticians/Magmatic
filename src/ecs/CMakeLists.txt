@@ -5,4 +5,5 @@ target_sources(
 		ComponentManager.cpp
 		SystemManager.cpp
 		ECS.cpp
+		executor/ParallelExecutor.cpp
 )

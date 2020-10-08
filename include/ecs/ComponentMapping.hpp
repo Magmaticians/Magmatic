@@ -1,7 +1,7 @@
 #ifndef MAGMATIC_COMPONENTMAPPING_HPP
 #define MAGMATIC_COMPONENTMAPPING_HPP
 
-#include "ecs/EntityManager.hpp"
+#include "ECSTypes.hpp"
 #include <unordered_map>
 #include <map>
 #include <spdlog/spdlog.h>
@@ -12,60 +12,54 @@ namespace magmatic::ecs
 	class BaseComponentMapping
 	{
 	public:
-		using EntityID = EntityManager::EntityID;
 		virtual ~BaseComponentMapping() = default;
 
-		virtual void remove(EntityID id) = 0;
+		virtual void remove(entity_id_t id) = 0;
 	};
 
 	template<typename T>
 	class ComponentMapping : public BaseComponentMapping
 	{
 	public:
-		using Type = T;
-		using ComponentID = std::size_t;
+		using component_id_t = std::size_t;
 
-		ComponentMapping();
+		ComponentMapping()
+		{
+			components_.reserve(MAX_ENTITIES_COUNT);
+		};
 
-		void insert(EntityID id, const T& component);
-		void remove(EntityID id) override;
+		void insert(entity_id_t id, T&& component);
+		void remove(entity_id_t id) override;
 
-		T& get(EntityID id);
-		const T& get(EntityID id) const;
+		T& get(entity_id_t id);
+		const T& get(entity_id_t id) const;
 
-		[[nodiscard]] bool exist(EntityID) const noexcept;
+		[[nodiscard]] bool exist(entity_id_t) const noexcept;
 
 	private:
-		std::vector<T> components;
-		std::unordered_map<EntityID, ComponentID> entityToComponent;
-		std::unordered_map<ComponentID, EntityID> componentToEntity;
-		std::size_t size = 0;
+		std::vector<T> components_;
+		std::unordered_map<entity_id_t, component_id_t> entity_to_component_;
+		std::unordered_map<component_id_t, entity_id_t> component_to_entity_;
 	};
 
 	template<typename T>
-	ComponentMapping<T>::ComponentMapping()
+	void ComponentMapping<T>::insert(entity_id_t id, T&& component)
 	{
-		components.resize(MAX_ENTITIES_COUNT);
-	}
-
-	template<typename T>
-	void ComponentMapping<T>::insert(ComponentMapping::EntityID id, const T& component)
-	{
+		const auto size = components_.size();
 		assert(size < MAX_ENTITIES_COUNT && "Component limit exceeded");
-		if(entityToComponent.contains(id))
+		if(entity_to_component_.contains(id))
 		{
 			spdlog::error("Magmatic: Failed to add Component. Already exists");
 			throw std::runtime_error("Component already exist");
 		}
 
-		components[size] = component;
-		entityToComponent[id] = size;
-		componentToEntity[size] = id;
-		++size;
+		components_.emplace_back(std::forward<T>(component));
+		entity_to_component_[id] = size;
+		component_to_entity_[size] = id;
 	}
 
 	template<typename T>
-	void ComponentMapping<T>::remove(ComponentMapping::EntityID id)
+	void ComponentMapping<T>::remove(entity_id_t id)
 	{
 		if(!exist(id))
 		{
@@ -73,25 +67,29 @@ namespace magmatic::ecs
 			return;
 		}
 
-		const ComponentID old_index = entityToComponent[id];
-		std::swap(components[old_index], components[size-1]);
+		const auto size = components_.size();
 
-		const EntityID end_component_id = componentToEntity[size-1];
-		entityToComponent[end_component_id] = old_index;
-		componentToEntity[old_index] = end_component_id;
+		// todo: check if drop on last index
+		const component_id_t old_index = entity_to_component_[id];
+		std::swap(components_[old_index], components_[size - 1]);
 
-		entityToComponent.erase(id);
-		componentToEntity.erase(size-1);
-		components.pop_back();
+		const entity_id_t end_component_id = component_to_entity_[size - 1];
+		entity_to_component_[end_component_id] = old_index;
+		component_to_entity_[old_index] = end_component_id;
+
+		entity_to_component_.erase(id);
+		component_to_entity_.erase(size - 1);
+
+		components_.pop_back();
 	}
 
 	template<typename T>
-	T &ComponentMapping<T>::get(ComponentMapping::EntityID id)
+	T &ComponentMapping<T>::get(entity_id_t id)
 	{
 		try
 		{
-			const ComponentID componentID =  entityToComponent.at(id);
-			return components[componentID];
+			const component_id_t component_id =  entity_to_component_.at(id);
+			return components_[component_id];
 		}
 		catch (const std::out_of_range&)
 		{
@@ -101,12 +99,12 @@ namespace magmatic::ecs
 	}
 
 	template<typename T>
-	const T &ComponentMapping<T>::get(ComponentMapping::EntityID id) const
+	const T& ComponentMapping<T>::get(entity_id_t id) const
 	{
 		try
 		{
-			const ComponentID componentID =  entityToComponent.at(id);
-			return components[componentID];
+			const component_id_t component_id =  entity_to_component_.at(id);
+			return components_[component_id];
 		}
 		catch (const std::out_of_range&)
 		{
@@ -116,9 +114,9 @@ namespace magmatic::ecs
 	}
 
 	template<typename T>
-	bool ComponentMapping<T>::exist(ComponentMapping::EntityID id) const noexcept
+	bool ComponentMapping<T>::exist(entity_id_t id) const noexcept
 	{
-		return entityToComponent.contains(id);
+		return entity_to_component_.contains(id);
 	}
 }
 

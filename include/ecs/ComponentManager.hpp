@@ -1,7 +1,8 @@
 #ifndef MAGMATIC_COMPONENTMANAGER_HPP
 #define MAGMATIC_COMPONENTMANAGER_HPP
 
-#include "ecs/ComponentMapping.hpp"
+#include "ComponentMapping.hpp"
+#include "ECSTypes.hpp"
 #include <unordered_map>
 #include <string>
 #include <memory>
@@ -12,11 +13,10 @@ namespace magmatic::ecs
 	class ComponentManager
 	{
 	public:
-		using ComponentTypeID = std::size_t;
-		using ComponentTypeName = std::string;
+		using component_type_id_t = std::size_t;
+
 		template<typename T>
-		using ComponentMappingPtr = std::shared_ptr<ComponentMapping<T>>;
-		using EntityID = EntityManager::EntityID;
+		using component_mapping_ptr = std::shared_ptr<ComponentMapping<T>>;
 
 		template<typename T>
 		bool registerComponent();
@@ -25,96 +25,89 @@ namespace magmatic::ecs
 		bool componentRegistered() const noexcept;
 
 		template<typename T>
-		ComponentTypeID getComponentTypeID() const;
-
-		template<typename T>
-		void addComponent(EntityID id, T&& component);
+		component_type_id_t getComponentTypeId() const;
 
 		template<typename T, typename... Args>
-		void addComponent(EntityID id, Args&& ... args);
+		requires std::constructible_from<T, Args...>
+		void addComponent(entity_id_t id, Args&& ... args);
 
 		template<typename T>
-		void removeComponent(EntityID id);
+		void removeComponent(entity_id_t id);
 
 		template<typename T>
-		T& getComponent(EntityID id);
+		T& getComponent(entity_id_t id);
 
 		template<typename T>
-		const T& getComponent(EntityID id) const;
+		const T& getComponent(entity_id_t id) const;
 
 		template<typename T>
-		bool hasComponent(EntityID id) const;
+		bool hasComponent(entity_id_t id) const;
 
-		void removeEntityComponents(EntityID id) noexcept;
+		void removeEntityComponents(entity_id_t id) noexcept;
 
 	private:
-		ComponentTypeID lastID = 0;
+		component_type_id_t last_id_ = 0;
 		struct MappingEntry
 		{
-			ComponentTypeID id;
+			component_type_id_t id;
 			std::shared_ptr<BaseComponentMapping> mapping;
 		};
 
-		std::unordered_map<std::type_index, MappingEntry> mappings;
+		std::unordered_map<std::type_index, MappingEntry> mappings_;
 
 		template<typename T>
-		ComponentMappingPtr<T> getMapping() const;
+		component_mapping_ptr<T> getMapping() const;
 
 		template<typename T>
-		static std::type_index mappingID();
+		static std::type_index mappingId();
 	};
 
 	template<typename T>
 	bool ComponentManager::registerComponent()
 	{
-		const std::type_index mapping_id = mappingID<T>();
-		assert(!mappings.contains(mapping_id));
+		const std::type_index mapping_id = mappingId<T>();
+		assert(!mappings_.contains(mapping_id));
 
-		mappings.insert(
+		mappings_.insert(
 				{
 					mapping_id,
 					{
-						lastID,
-						std::make_shared<ComponentMapping<T>>()
+							last_id_,
+							std::make_shared<ComponentMapping<T>>()
 					}
 				});
 
-		++lastID;
+		++last_id_;
 		return true;
 	}
 
 	template<typename T>
-	ComponentManager::ComponentTypeID ComponentManager::getComponentTypeID() const
+	ComponentManager::component_type_id_t ComponentManager::getComponentTypeId() const
 	{
 		const std::type_index mapping_id = typeid(T);
-		return mappings.at(mapping_id).id;
-	}
-
-	template<typename T>
-	void ComponentManager::addComponent(ComponentManager::EntityID id, T&& component)
-	{
-		getMapping<T>()->insert(id, std::forward<T>(component));
+		return mappings_.at(mapping_id).id;
 	}
 
 	template<typename T, typename... Args>
-	void ComponentManager::addComponent(ComponentManager::EntityID id, Args &&... args)
+	requires std::constructible_from<T, Args...>
+	void ComponentManager::addComponent(entity_id_t id, Args &&... args)
 	{
 		getMapping<T>()->insert(id, T(std::forward<Args>(args)...));
 	}
 
 	template<typename T>
-	void ComponentManager::removeComponent(ComponentManager::EntityID id)
+	void ComponentManager::removeComponent(entity_id_t id)
 	{
 		getMapping<T>()->remove(id);
 	}
 
 	template<typename T>
-	ComponentManager::ComponentMappingPtr<T> ComponentManager::getMapping() const
+	ComponentManager::component_mapping_ptr<T> ComponentManager::getMapping() const
 	{
 		const std::type_index mapping_id = typeid(T);
 		try
 		{
-			const auto& mapping = mappings.at(mapping_id).mapping;
+			const auto& mapping = mappings_.at(mapping_id).mapping;
 			return std::static_pointer_cast<ComponentMapping<T>>(mapping);
 		}
 		catch (const std::out_of_range&)
@@ -125,19 +118,19 @@ namespace magmatic::ecs
 	}
 
 	template<typename T>
-	T &ComponentManager::getComponent(ComponentManager::EntityID id)
+	T &ComponentManager::getComponent(entity_id_t id)
 	{
 		return getMapping<T>()->get(id);
 	}
 
 	template<typename T>
-	bool ComponentManager::hasComponent(EntityID id) const
+	bool ComponentManager::hasComponent(entity_id_t id) const
 	{
 		return getMapping<T>()->exist(id);
 	}
 
 	template<typename T>
-	const T &ComponentManager::getComponent(ComponentManager::EntityID id) const
+	const T &ComponentManager::getComponent(entity_id_t id) const
 	{
 		return getMapping<T>()->get(id);
 	}
@@ -146,11 +139,11 @@ namespace magmatic::ecs
 	bool ComponentManager::componentRegistered() const noexcept
 	{
 		const std::type_index mapping_id = typeid(T);
-		return mappings.contains(mapping_id);
+		return mappings_.contains(mapping_id);
 	}
 
 	template<typename T>
-	std::type_index ComponentManager::mappingID()
+	std::type_index ComponentManager::mappingId()
 	{
 		//todo: compile time?
 		const std::type_info& type = typeid(T);

@@ -12,7 +12,7 @@ namespace magmatic::ecs
 	concept EntityIterator =
 			std::input_iterator<T>
 			&& std::equality_comparable<T>
-			&& std::same_as<typename T::self_type, typename FullEntity::EntityID>;
+			&& std::same_as<typename T::self_type, typename FullEntity::entity_id_t>;
 
 	template<EntityIterator T>
 	class FullEntityIteratorAdapter
@@ -25,7 +25,7 @@ namespace magmatic::ecs
 		using difference_type = std::ptrdiff_t;
 		using iterator_category = std::input_iterator_tag;
 
-		FullEntityIteratorAdapter(): internal_iter_{} {} noexcept;
+		FullEntityIteratorAdapter() noexcept: internal_iter_{} {};
 		FullEntityIteratorAdapter(T iter, ECS& ecs_handle) noexcept
 		: internal_iter_(iter), ecs_handle_(ecs_handle) {};
 
